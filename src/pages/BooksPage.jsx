@@ -4,12 +4,43 @@ import { portfolioData } from '../data/portfolioData';
 
 const BooksPage = () => {
   const [activeTab, setActiveTab] = useState('books');
+  const [selectedCategory, setSelectedCategory] = useState('All');
 
   const formatDate = (dateString) => {
     if (!dateString) return '';
     const [year, month] = dateString.split('-');
     const date = new Date(year, month - 1);
     return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  };
+
+  // Get unique categories from books and papers based on active tab
+  const getCategories = () => {
+    const items = activeTab === 'books' ? portfolioData.books : portfolioData.researchPapers;
+    const field = activeTab === 'books' ? 'categories' : 'tags';
+    const allCategories = items.flatMap(item => item[field] || []);
+    return ['All', ...new Set(allCategories)];
+  };
+
+  // Filter items by category
+  const getFilteredItems = () => {
+    const items = activeTab === 'books' ? portfolioData.books : portfolioData.researchPapers;
+    const field = activeTab === 'books' ? 'categories' : 'tags';
+
+    if (selectedCategory === 'All') return items;
+
+    return items.filter(item => {
+      const itemCategories = item[field] || [];
+      return itemCategories.includes(selectedCategory);
+    });
+  };
+
+  const categories = getCategories();
+  const filteredItems = getFilteredItems();
+
+  // Reset category filter when switching tabs
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    setSelectedCategory('All');
   };
 
   return (
@@ -22,9 +53,9 @@ const BooksPage = () => {
           <div className="w-20 h-1 bg-dark-border mb-12"></div>
 
           {/* Tab Navigation */}
-          <div className="flex gap-4 mb-12">
+          <div className="flex gap-4 mb-8">
             <button
-              onClick={() => setActiveTab('books')}
+              onClick={() => handleTabChange('books')}
               className={`flex items-center px-6 py-3 rounded-lg text-sm font-medium transition-all ${
                 activeTab === 'books'
                   ? 'bg-dark-text-primary text-dark-bg'
@@ -35,7 +66,7 @@ const BooksPage = () => {
               Books
             </button>
             <button
-              onClick={() => setActiveTab('papers')}
+              onClick={() => handleTabChange('papers')}
               className={`flex items-center px-6 py-3 rounded-lg text-sm font-medium transition-all ${
                 activeTab === 'papers'
                   ? 'bg-dark-text-primary text-dark-bg'
@@ -47,10 +78,27 @@ const BooksPage = () => {
             </button>
           </div>
 
+          {/* Category Filter */}
+          <div className="flex flex-wrap gap-3 mb-12">
+            {categories.map((category) => (
+              <button
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  selectedCategory === category
+                    ? 'bg-dark-text-primary text-dark-bg'
+                    : 'bg-dark-bg text-dark-text-secondary border border-dark-border hover:border-dark-text-muted'
+                }`}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+
           {/* Books Section */}
           {activeTab === 'books' && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {portfolioData.books && portfolioData.books.map((book, index) => (
+              {filteredItems && filteredItems.map((book, index) => (
                 <div
                   key={index}
                   className="bg-dark-surface border border-dark-border rounded-lg p-6 hover:border-dark-text-muted transition-all hover:-translate-y-1"
@@ -125,9 +173,9 @@ const BooksPage = () => {
                 </div>
               ))}
 
-              {(!portfolioData.books || portfolioData.books.length === 0) && (
+              {(!filteredItems || filteredItems.length === 0) && (
                 <div className="col-span-full text-center text-dark-text-muted py-12">
-                  No books added yet.
+                  {selectedCategory === 'All' ? 'No books added yet.' : `No books found in "${selectedCategory}" category.`}
                 </div>
               )}
             </div>
@@ -136,7 +184,7 @@ const BooksPage = () => {
           {/* Research Papers Section */}
           {activeTab === 'papers' && (
             <div className="space-y-6">
-              {portfolioData.researchPapers && portfolioData.researchPapers.map((paper, index) => (
+              {filteredItems && filteredItems.map((paper, index) => (
                 <div
                   key={index}
                   className="bg-dark-surface border border-dark-border rounded-lg p-6 hover:border-dark-text-muted transition-colors"
@@ -211,9 +259,9 @@ const BooksPage = () => {
                 </div>
               ))}
 
-              {(!portfolioData.researchPapers || portfolioData.researchPapers.length === 0) && (
+              {(!filteredItems || filteredItems.length === 0) && (
                 <div className="text-center text-dark-text-muted py-12">
-                  No research papers added yet.
+                  {selectedCategory === 'All' ? 'No research papers added yet.' : `No papers found in "${selectedCategory}" category.`}
                 </div>
               )}
             </div>

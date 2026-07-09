@@ -46,7 +46,13 @@ const Projects = ({ projects }) => {
                 {project.title}
               </h3>
 
-              <p className="text-dark-text-secondary mb-4 leading-relaxed flex-grow">
+              {project.date && (
+                <p className="text-sm text-dark-text-muted mb-3">
+                  {project.date}
+                </p>
+              )}
+
+              <p className="text-dark-text-secondary mb-4 leading-relaxed">
                 {project.description}
               </p>
 

@@ -5,11 +5,17 @@ import { BookOpen, Calendar, Clock, Tag } from 'lucide-react';
 const Blog = ({ blogPosts }) => {
   const [selectedCategory, setSelectedCategory] = useState('All');
 
-  const categories = ['All', ...new Set(blogPosts.map(post => post.category))];
+  // Extract unique categories from all blog posts (now using categories array)
+  const allCategories = blogPosts.flatMap(post => post.categories || [post.category || []]);
+  const categories = ['All', ...new Set(allCategories)];
 
+  // Filter posts by category (OR logic - show post if it has any selected category)
   const filteredPosts = selectedCategory === 'All'
     ? blogPosts
-    : blogPosts.filter(post => post.category === selectedCategory);
+    : blogPosts.filter(post => {
+        const postCategories = post.categories || [post.category];
+        return postCategories.includes(selectedCategory);
+      });
 
   const formatDate = (dateString) => {
     const [year, month] = dateString.split('-');
@@ -44,62 +50,76 @@ const Blog = ({ blogPosts }) => {
 
         {/* Blog Posts */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {filteredPosts.map((post, index) => (
-            <Link
-              key={index}
-              to={`/blog/${post.slug}`}
-              className="block bg-dark-bg border border-dark-border rounded-lg p-6 hover:border-dark-text-muted transition-all hover:-translate-y-1"
-            >
-              {post.image && (
-                <img
-                  src={post.image}
-                  alt={post.title}
-                  className="w-full h-48 object-cover rounded-lg mb-4 border border-dark-border"
-                />
-              )}
+          {filteredPosts.map((post, index) => {
+            const CardWrapper = post.externalUrl ? 'a' : Link;
+            const linkProps = post.externalUrl
+              ? { href: post.externalUrl, target: '_blank', rel: 'noopener noreferrer' }
+              : { to: `/blog/${post.slug}` };
 
-              <div className="flex items-start justify-between mb-3">
-                <span className="text-xs text-dark-text-primary bg-dark-surface px-3 py-1 rounded-full border border-dark-border">
-                  {post.category}
-                </span>
-                <BookOpen className="text-dark-text-muted" size={20} />
-              </div>
+            return (
+              <CardWrapper
+                key={index}
+                {...linkProps}
+                className="block bg-dark-bg border border-dark-border rounded-lg p-6 hover:border-dark-text-muted transition-all hover:-translate-y-1"
+              >
+                {post.image && (
+                  <img
+                    src={post.image}
+                    alt={post.title}
+                    className="w-full h-48 object-cover rounded-lg mb-4 border border-dark-border"
+                  />
+                )}
 
-              <h3 className="text-xl font-bold text-dark-text-primary mb-3">
-                {post.title}
-              </h3>
-
-              <p className="text-dark-text-secondary mb-4 leading-relaxed">
-                {post.summary}
-              </p>
-
-              <div className="flex items-center gap-4 mb-4 text-sm text-dark-text-muted">
-                <div className="flex items-center">
-                  <Calendar size={14} className="mr-1.5" />
-                  {formatDate(post.date)}
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex flex-wrap gap-2">
+                    {(post.categories || [post.category]).slice(0, 2).map((cat, idx) => (
+                      <span
+                        key={idx}
+                        className="text-xs text-dark-text-primary bg-dark-surface px-3 py-1 rounded-full border border-dark-border"
+                      >
+                        {cat}
+                      </span>
+                    ))}
+                  </div>
+                  <BookOpen className="text-dark-text-muted" size={20} />
                 </div>
-                <div className="flex items-center">
-                  <Clock size={14} className="mr-1.5" />
-                  {post.readTime}
-                </div>
-              </div>
 
-              {/* Keywords */}
-              <div className="flex items-start gap-2 pt-4 border-t border-dark-border">
-                <Tag size={14} className="text-dark-text-muted mt-1 flex-shrink-0" />
-                <div className="flex flex-wrap gap-2">
-                  {post.keywords.map((keyword, idx) => (
-                    <span
-                      key={idx}
-                      className="text-xs text-dark-text-muted bg-dark-surface px-2 py-1 rounded"
-                    >
-                      {keyword}
-                    </span>
-                  ))}
+                <h3 className="text-xl font-bold text-dark-text-primary mb-3">
+                  {post.title}
+                </h3>
+
+                <p className="text-dark-text-secondary mb-4 leading-relaxed">
+                  {post.summary}
+                </p>
+
+                <div className="flex items-center gap-4 mb-4 text-sm text-dark-text-muted">
+                  <div className="flex items-center">
+                    <Calendar size={14} className="mr-1.5" />
+                    {formatDate(post.date)}
+                  </div>
+                  <div className="flex items-center">
+                    <Clock size={14} className="mr-1.5" />
+                    {post.readTime}
+                  </div>
                 </div>
-              </div>
-            </Link>
-          ))}
+
+                {/* Keywords */}
+                <div className="flex items-start gap-2 pt-4 border-t border-dark-border">
+                  <Tag size={14} className="text-dark-text-muted mt-1 flex-shrink-0" />
+                  <div className="flex flex-wrap gap-2">
+                    {post.keywords.map((keyword, idx) => (
+                      <span
+                        key={idx}
+                        className="text-xs text-dark-text-muted bg-dark-surface px-2 py-1 rounded"
+                      >
+                        {keyword}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </CardWrapper>
+            );
+          })}
         </div>
 
         {filteredPosts.length === 0 && (

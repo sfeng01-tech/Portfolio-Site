@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Calendar, Clock, Tag, User, MessageCircle } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
-import rehypeRaw from 'rehype-raw';
 import { portfolioData } from '../data/portfolioData';
 import 'highlight.js/styles/atom-one-dark.css';
 
@@ -16,6 +15,12 @@ const BlogDetailPage = () => {
   // Find the blog post by slug
   const post = portfolioData.blogPosts.find(p => p.slug === slug);
 
+  useEffect(() => {
+    if (post?.externalUrl) {
+      window.location.replace(post.externalUrl);
+    }
+  }, [post]);
+
   if (!post) {
     return (
       <div className="pt-20 min-h-screen flex items-center justify-center">
@@ -24,6 +29,22 @@ const BlogDetailPage = () => {
           <Link to="/blog" className="text-dark-text-secondary hover:text-dark-text-primary">
             ← Back to Blog
           </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (post.externalUrl) {
+    return (
+      <div className="pt-20 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-dark-text-primary mb-4">Redirecting...</h1>
+          <a
+            href={post.externalUrl}
+            className="text-dark-text-secondary hover:text-dark-text-primary"
+          >
+            Open article on Substack
+          </a>
         </div>
       </div>
     );
@@ -65,9 +86,16 @@ const BlogDetailPage = () => {
 
           {/* Post Header */}
           <div className="mb-8">
-            <span className="inline-block text-sm text-dark-text-primary bg-dark-surface px-4 py-1.5 rounded-full border border-dark-border mb-4">
-              {post.category}
-            </span>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {(post.categories || [post.category]).filter(Boolean).map((category) => (
+                <span
+                  key={category}
+                  className="inline-block text-sm text-dark-text-primary bg-dark-surface px-4 py-1.5 rounded-full border border-dark-border"
+                >
+                  {category}
+                </span>
+              ))}
+            </div>
             <h1 className="text-4xl md:text-5xl font-bold text-dark-text-primary mb-6 leading-tight">
               {post.title}
             </h1>
@@ -110,7 +138,7 @@ const BlogDetailPage = () => {
           <div className="prose prose-invert prose-lg max-w-none mb-16">
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
-              rehypePlugins={[rehypeHighlight, rehypeRaw]}
+              rehypePlugins={[rehypeHighlight]}
               components={{
                 h1: ({ node, ...props }) => <h1 className="text-3xl font-bold text-dark-text-primary mt-8 mb-4" {...props} />,
                 h2: ({ node, ...props }) => <h2 className="text-2xl font-bold text-dark-text-primary mt-6 mb-3" {...props} />,

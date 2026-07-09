@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Linkedin, Github, Twitter, Send } from 'lucide-react';
+import { Linkedin, Github, Twitter, Send } from 'lucide-react';
 
 const Contact = ({ profile }) => {
   const [formData, setFormData] = useState({
@@ -36,18 +36,6 @@ const Contact = ({ profile }) => {
             <p className="text-lg text-dark-text-secondary mb-8 leading-relaxed">
               I'm always open to discussing new opportunities, collaborations, or just having a chat about technology and AI. Feel free to reach out!
             </p>
-
-            <div className="space-y-4 mb-8">
-              <a
-                href={`mailto:${profile.email}`}
-                className="flex items-center text-dark-text-secondary hover:text-dark-text-primary transition-colors group"
-              >
-                <div className="w-12 h-12 bg-dark-bg border border-dark-border rounded-lg flex items-center justify-center mr-4 group-hover:border-dark-text-muted transition-colors">
-                  <Mail size={20} />
-                </div>
-                <span>{profile.email}</span>
-              </a>
-            </div>
 
             <div className="pt-8 border-t border-dark-border">
               <p className="text-dark-text-muted mb-4">Connect with me:</p>

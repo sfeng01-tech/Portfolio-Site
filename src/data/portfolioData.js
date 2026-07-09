@@ -1,8 +1,8 @@
 export const portfolioData = {
   profile: {
     name: "Sahil Faizal",
-    title: "AI Technical Program Manager",
-    tagline: "Building scalable AI systems and leading technical teams",
+    title: "Software Engineer",
+    tagline: "Building scalable AI systems for training and inference",
     email: "sahilfaiz2025@gmail.com",
     linkedin: "https://linkedin.com/in/sahil-faizal",
     github: "https://github.com/sahilfaizal01",
@@ -11,96 +11,142 @@ export const portfolioData = {
 
   skills: [
     {
-      category: "AI/ML",
-      items: [
-        "Post-Training Pipelines",
-        "Fine-Tuning & Adaptation",
-        "Computer Vision",
-        "RAG Systems & Evaluation",
-        "Reinforcement Learning",
-        "LLM Optimization",
-      ],
-    },
-    {
-      category: "Leadership",
-      items: [
-        "Team Leadership",
-        "AI Product Strategy",
-        "Architecture Reviews",
-        "Cross-Functional Execution",
-        "Stakeholder Management",
-        "Roadmap Planning",
-      ],
-    },
-    {
-      category: "Engineering",
+      category: "Programming Languages",
       items: [
         "Python",
         "C++",
-        "Data Science",
-        "Big Data",
-        "Distributed Systems",
-        "Cloud Architecture",
-        "GPU Programming",
-        "DevOps",
-        "Backend Dev",
+        "SQL",
+        "Java",
+        "R",
       ],
     },
     {
-      category: "Specializations",
+      category: "Deep Learning Frameworks",
       items: [
-        "AI Inference",
-        "Model Training at Scale",
-        "MLOps",
-        "Agentic Systems",
-        "Performance Optimization",
-        "GPU Kernel Tuning",
-        "AI Infrastructure and Platforms",
+        "PyTorch",
+        "TensorFlow",
+        "JAX",
+        "MLX",
+      ],
+    },
+    {
+      category: "LLM & AI Systems",
+      items: [
+        "LLM Inference",
+        "RAG",
+        "Pre-Training",
+        "Post-Training",
+        "Reinforcement Learning",
+        "Harness Engineering",
+        "Context Engineering",
+        "Evaluation & Benchmarking",
+      ],
+    },
+    {
+      category: "Agentic AI Frameworks",
+      items: [
+        "LangChain",
+        "LangGraph",
+        "CrewAI",
+        "PydanticAI",
+        "AutoGen",
+        "A2A",
+        "MCP",
+      ],
+    },
+    {
+      category: "Performance Engineering",
+      items: [
+        "CUDA",
+        "HIP",
+        "Triton",
+        "MLIR",
+        "GPU Kernel Optimization",
+        "Quantization",
+        "Speculative Decoding",
+        "Dynamic Batching",
+        "KV Caching",
+        "Chunked Prefill",
+        "FlashAttention",
+        "PagedAttention",
+        "Parallelism Strategies",
+        "Profiling",
+      ],
+    },
+    {
+      category: "Software Engineering",
+      items: [
+        "CMake",
+        "Bash Scripting",
+        "Git & GitHub",
+        "Concurrent Programming",
+        "Distributed Systems",
+        "Cloud Computing",
+        "System Design",
+      ],
+    },
+    {
+      category: "AI Infrastructure",
+      items: [
+        "Kubernetes",
+        "Docker",
+        "vLLM/SGLang",
+        "Ray",
+        "MLflow",
+        "GitHub Actions",
+        "Grafana + Prometheus",
+        "Kubeflow",
+        "DVC",
+        "AWS",
       ],
     },
   ],
 
   achievements: [
-    "Led the development of 8 critical LLM optimization features in 10 weeks, achieving a 60% reduction in model execution time",
+    "Owned end-to-end development of 8 critical LLM optimization features in 10 weeks, reducing model execution time by 60%",
     "Defined and streamlined the technical execution plan to deliver a custom LLM serving backend in a 3× shorter timeline",
-    "Orchestrated MLPerf Inference v5.0 submission for SDXL, achieving 97% of the target performance.",
+    "Contributed to MLPerf Inference v5.0 submission for SDXL, achieving 97% of the target performance.",
     "Published 6+ papers in reputed AI journals and conferences",
     "Recipient of the Graduate Scholarship – New York University, USA",
     "Excellence Award – Samsung R&D Institute, India",
-    "Raman Research Award – Vellore Institute of Technology, India",
     "MITACS Globalink Research Award – Dalhousie University, Canada",
-    "Winner, New Age Entrepreneurs Ideathon – organized by PALS, IIT Madras, India",
-    "Most Nominated Winner, Arch-a-thon – School of Computer Science, VIT, India",
   ],
 
   experiences: [
     {
       company: "Advanced Micro Devices (AMD)",
-      position: "AI Technical Program Manager - AI Platforms",
+      position: "Software Engineer - AI Platforms",
       location: "San Jose, CA",
       startDate: "2025-06",
       endDate: "Present",
       description:
-        "Led end-to-end development, optimization, and delivery of AI inference software and infrastructure on high-performance GPU accelerators, driving low-latency, scalable solutions for LLMs, vision models, and ROCm platforms.",
+        "Built AI agents, inference serving capabilities, and ROCm infrastructure across framework, security, and release engineering layers to improve reliability for AI workloads.",
       highlights: [
-        "Enabled support for custom Python backends on AMD GPUs and implemented transformer-based models with dynamic batching as representative workloads.",
-        "Designed and developed the inference engine, profiling workloads, analyzing bottlenecks, and coordinating across 4+ teams to deliver efficient, scalable LLM/VLM inference, including MLPerf targets",
-        "Extended ROCm capabilities on Radeon/Navi GPUs and Ryzen APUs, improving test coverage, infrastructure deployment, and CI validation to ensure robust, secure, and high-performance GPU software delivery.",
+        "Enabled Triton Inference Server support for custom Python backend on AMD GPUs and implemented representative transformer models with dynamic batching for E2E testing.",
+        "Designed the inference engine, profiling workloads, analyzing bottlenecks, and coordinating across 4+ teams to deliver efficient, scalable LLM/VLM inference, including MLPerf targets",
+        "Developed a Fleet Intelligence Agent to process infrastructure telemetry and support 100+ users across the company, leading 1 intern through implementation and rollout.",
+        "Productionized ROCm PR bot to evaluate pull request quality through LLM-based analysis after multi-stage filtering and guardrails, reducing regressions by 47% in 30 days.",
+        "Built an AI security scan harness for ROCm and audited GitHub project security posture, identifying and resolving vulnerabilities across open-source software components.",
+        "Validated ROCm capabilities across 16 consumer GPU/APU configurations and 2 OSes, improved CI test coverage, and enabled nightly CI validation for stable software delivery.",
+        "Fixed PyTorch test failures across software versions, reducing the failure tally by 90% and improving release confidence for ROCm-enabled workloads.",
+        "Debugged and resolved a critical Linux kernel and GPU driver race condition within 1.5 weeks, improving system stability for AI workloads on AMD platforms.",
+        "Enhanced compute sanitizer implementation and enabled CI health gates to automatically capture memory errors, race conditions, and correctness regressions before release.",
+        "Owned release engineering for 5+ open-source releases across SHARK-AI and IREE, handling release branching, validation, release qualification, and post-release verification.",
       ],
     },
     {
       company: "Advanced Micro Devices (AMD)",
-      position: "AI Technical Program Manager Intern - AI Infrastructure",
+      position: "Software Engineer Intern - AI Infrastructure",
       location: "Santa Clara, CA",
       startDate: "2025-01",
       endDate: "2025-05",
       description:
-        "Led QA, infrastructure improvements, and release management for AMD’s SHARK-AI inference engine and open-source ML CI/CD programs, enhancing scalability, efficiency, and cross-functional collaboration.",
+        "Built inference validation, benchmarking, and capacity planning infrastructure for AMD’s SHARK-AI and ML CI/CD workloads to improve release reliability and scalability.",
       highlights: [
-        "Conducted QA testing as the primary user of SHARK-AI, running inference on models like SDXL, Flux, Mistral, and Llama on AMD GPUs.",
-        "Orchestrated customer onboarding to clusters and improved infrastructure efficiency through capacity planning, Kubernetes configuration, and scalability support.",
+        "Built automated inference validation and benchmarking pipelines for SDXL, Llama, and Flux on AMD GPUs using SHARK-AI, detecting performance regressions and improving release reliability to achieve 95–97% of target performance for MLPerf Inference v5.0 and v5.1.",
+        "Enhanced ML infrastructure scalability and efficiency by developing a real-time capacity planning dashboard with hourly updates, enabling 10x growth for AI workloads.",
         "Prepared release documentation, facilitated cross-functional collaboration, and delivered executive updates to communicate project status, risks, and wins.",
-        "Led status meetings to identify and resolve technical bottlenecks, improving project velocity and supporting large-scale AI workloads.",
+        "Identified and resolved infrastructure and execution bottlenecks, improving project velocity.",
       ],
     },
     {
@@ -213,45 +259,170 @@ export const portfolioData = {
 
   projects: [
     {
-      title: "LLM Inference Optimizer",
+      title: "tLM: A Tiny LLM from Scratch",
+      date: "2025-03",
       description:
-        "Open-source toolkit for optimizing large language model inference performance",
-      technologies: ["Python", "PyTorch", "CUDA", "Docker"],
-      github: "https://github.com/yourprofile/llm-optimizer",
-      demo: "https://demo.example.com",
+        "LLM implementation project for building a compact language model from first principles.",
+      technologies: ["Python", "PyTorch", "Transformers", "LLMs"],
+      github: "https://github.com/sfeng01-tech/tLM---A-tiny-LLM-from-Scratch",
       highlights: [
-        "Achieved 3x speedup in inference latency",
-        "Support for multiple model architectures",
-        "1000+ GitHub stars",
+        "Implemented core transformer language-modeling components from scratch.",
+        "Built training and inference flows for a compact LLM.",
+        "Explored tokenizer, architecture, and generation fundamentals.",
       ],
     },
     {
-      title: "AI Training Pipeline",
+      title: "RagHub",
+      date: "2025-03",
       description:
-        "Distributed training framework for computer vision models at scale",
-      technologies: ["Python", "TensorFlow", "Kubernetes", "Ray"],
-      github: "https://github.com/yourprofile/training-pipeline",
+        "Retrieval-augmented generation project for building document-grounded LLM applications.",
+      technologies: ["Python", "RAG", "LLMs", "Vector Search"],
+      github: "https://github.com/sfeng01-tech/RagHub",
       highlights: [
-        "Scaled training to 100+ GPUs",
-        "Automated hyperparameter tuning",
-        "Reduced training time by 50%",
+        "Built retrieval workflows for grounding LLM responses in external documents.",
+        "Integrated embedding, indexing, and generation components into an AI system.",
+        "Explored prompt and context design for reliable answer generation.",
       ],
     },
     {
-      title: "MLOps Dashboard",
+      title: "Episodic Transformer Memory PPO Evaluation",
+      date: "2024-12",
       description:
-        "Real-time monitoring and observability platform for ML models in production",
-      technologies: ["React", "Python", "PostgreSQL", "Grafana"],
-      demo: "https://mlops-demo.example.com",
+        "Research-style reinforcement learning project comparing Episodic Transformer Memory PPO against traditional Transformer PPO.",
+      technologies: ["Python", "Reinforcement Learning", "PPO", "Transformers"],
+      github:
+        "https://github.com/sfeng01-tech/Evaluating-the-Performance-of-Episodic-Transformer-Memory-PPO-vs.-Traditional-Transformer-PPO",
       highlights: [
-        "Tracks 100+ models in production",
-        "Real-time performance metrics",
-        "Automated alerting system",
+        "Compared memory-augmented transformer policies with baseline PPO approaches.",
+        "Designed experiments to evaluate policy performance and learning stability.",
+        "Analyzed tradeoffs between episodic memory and traditional transformer-based RL.",
+      ],
+    },
+    {
+      title: "Large-Scale Vector DB",
+      date: "2024-12",
+      description:
+        "Vector database project exploring scalable similarity search and embedding-backed retrieval.",
+      technologies: ["Python", "Vector Databases", "Embeddings", "Search"],
+      github: "https://github.com/sfeng01-tech/Large-Scale-Vector-DB",
+      highlights: [
+        "Implemented vector storage and similarity search workflows.",
+        "Evaluated retrieval behavior over embedding-indexed datasets.",
+        "Explored infrastructure patterns for scalable AI retrieval systems.",
+      ],
+    },
+    {
+      title: "Fine-Tuning Llama 3.1 LLM",
+      date: "2024-11",
+      description:
+        "Kaggle competition project for adapting Llama 3.1 through fine-tuning and task-specific evaluation.",
+      technologies: ["Python", "Llama 3.1", "PyTorch", "Fine-Tuning"],
+      github:
+        "https://github.com/sfeng01-tech/Kaggle-Contest---Fine-tuning-Llama-3.1-LLM-",
+      highlights: [
+        "Prepared model fine-tuning workflows for competition-style datasets.",
+        "Evaluated model behavior across task-specific prompts and outputs.",
+        "Experimented with LLM adaptation techniques and training configurations.",
+      ],
+    },
+    {
+      title: "Sales and Customer Analytics Engine",
+      date: "2024-08",
+      description:
+        "Analytics engine for customer segmentation, sales intelligence, and business reporting.",
+      technologies: ["Python", "SQL", "Analytics", "Machine Learning"],
+      github:
+        "https://github.com/sfeng01-tech/Sales-and-Customer-Analytics-Engine",
+      highlights: [
+        "Built analytical workflows for sales and customer behavior data.",
+        "Generated metrics and insights for business decision-making.",
+        "Designed reusable data processing components for reporting.",
+      ],
+    },
+    {
+      title: "Shark Tank",
+      date: "2024-04",
+      description:
+        "AI virtual VC platform that helps founders get structured fundraising, product, and go-to-market advice.",
+      technologies: ["MongoDB", "AI", "JavaScript", "Full-Stack"],
+      github: "https://github.com/sugamxp/mongodb-hack",
+      highlights: [
+        "Built an AI-guided advisory experience for startup founders.",
+        "Used MongoDB-backed workflows to store founder context and application state.",
+        "Designed product flows for personalized venture-style feedback.",
+      ],
+    },
+    {
+      title: "Smooth - Task Management Software",
+      date: "2023-09",
+      description:
+        "Interactive application built to streamline curriculum planning at NYU.",
+      technologies: ["Python", "Django", "JavaScript", "Web Development"],
+      github:
+        "https://github.com/gcivil-nyu-org/INET-Monday-Fall2023-Team-3",
+      highlights: [
+        "Built a smoother planning workflow for students navigating courses and requirements.",
+        "Implemented backend features, frontend interfaces, and integration logic.",
+        "Collaborated in a team environment using version control and iterative delivery.",
+      ],
+    },
+    {
+      title: "KeralaEats ChatBot",
+      date: "2023-09",
+      description:
+        "Conversational chatbot project for food discovery and restaurant-style user interactions.",
+      technologies: ["Python", "Chatbot", "NLP", "Conversational AI"],
+      github: "https://github.com/sfeng01-tech/KeralaEats-ChatBot",
+      highlights: [
+        "Built conversational flows for food-related recommendations and queries.",
+        "Applied NLP techniques to improve user interaction quality.",
+        "Structured chatbot responses around domain-specific user intents.",
+      ],
+    },
+    {
+      title: "Multi-Vehicle Tracking, Counting, and Velocity Calculation",
+      date: "2023-05",
+      description:
+        "Computer vision project for detecting, tracking, counting, and estimating vehicle velocity from video.",
+      technologies: ["Python", "Computer Vision", "Object Tracking", "OpenCV"],
+      github:
+        "https://github.com/sfeng01-tech/Multi-Vehicle-Tracking-Counting-and-Velocity-Calculation",
+      highlights: [
+        "Implemented video-based vehicle detection and tracking workflows.",
+        "Calculated vehicle counts and estimated motion-based velocity.",
+        "Applied computer vision techniques to traffic analytics use cases.",
       ],
     },
   ],
 
   publications: [
+    {
+      title:
+        "Wave: A Symbolic Python DSL and Compiler for High-Performance Machine Learning",
+      authors: [
+        "Harsh Menon",
+        "Oleksandr Zinenko",
+        "Gaurav Verma",
+        "Stanley Winata",
+        "Ivan Butygin",
+        "Nithin Meganathan",
+        "Sanket Pandit",
+        "William Gallard Hatch",
+        "Surya Jasper",
+        "Megan Kuo",
+        "Sahil Faizal",
+        "Ashay Rane",
+        "Aurore De Spirlet",
+        "Martin P. Lücke",
+      ],
+      venue: "MLSys 2026",
+      year: "2026",
+      type: "Conference",
+      location: "Seattle, USA",
+      pdf: "https://openreview.net/forum?id=gcXV1E8HRH",
+      abstract:
+        "Modern ML models demand ever-greater compute, prompting hardware vendors to add specialized matrix cores to their GPUs. While these units unlock high throughput, they impose intricate programming models and addressing schemes that are difficult to manage by hand. This paper introduces Wave, a Python-embedded DSL for kernel authoring that automates these complex address computations and lets authors focus on core computation. In experiments, it matches or surpasses the performance of state-of-the-art kernel DSLs and libraries.",
+    },
     {
       title:
         "Training Indoor and Scene-Specific Semantic Segmentation Models to Assist Blind and Low Vision Users in Activities of Daily Living",
@@ -364,7 +535,7 @@ export const portfolioData = {
         "Presented a technical session on large language model workloads, exploring training strategies, parallelism approaches, and inference optimization, with insights from a MLPerf case study.",
     },
     {
-      title: "SHARK-AI: AMD's Open-Source Inference Engine for LLMs",
+      title: "SHARK-AI: AMD's Inference Engine for LLMs",
       event: "AMD Brown Bag Session",
       location: "San Jose, CA",
       date: "2025-06",
@@ -387,315 +558,85 @@ export const portfolioData = {
 
   blogPosts: [
     {
-      title: "Optimizing LLM Inference: A Practical Guide",
-      slug: "optimizing-llm-inference",
-      date: "2024-11",
-      category: "AI Inference",
-      keywords: ["LLM", "Optimization", "Performance", "Inference"],
-      summary:
-        "Deep dive into techniques for optimizing large language model inference, including quantization, batching, and caching strategies.",
-      readTime: "12 min",
-      image: "https://images.unsplash.com/photo-1677442136019-21780ecad995",
-      content: `
-# Optimizing LLM Inference: A Practical Guide
-
-Large Language Models (LLMs) have revolutionized natural language processing, but their inference can be computationally expensive. In this guide, we'll explore **practical techniques** to optimize LLM inference while maintaining quality.
-
-## Introduction
-
-Running large language models in production presents unique challenges:
-- High computational costs
-- Latency requirements
-- Memory constraints
-- Scalability demands
-
-> "The key to successful LLM deployment is finding the right balance between performance, cost, and quality." - Industry Expert
-
-## Key Optimization Techniques
-
-### 1. Quantization
-
-**Quantization** reduces model precision from FP32 to INT8 or even INT4, significantly reducing memory footprint and improving throughput.
-
-\`\`\`python
-# Example: Quantizing a model with PyTorch
-import torch
-
-model = torch.quantization.quantize_dynamic(
-    model, {torch.nn.Linear}, dtype=torch.qint8
-)
-\`\`\`
-
-Benefits:
-- 4x memory reduction
-- 2-3x speedup
-- Minimal accuracy loss (<1%)
-
-### 2. Batching Strategies
-
-Efficient batching can dramatically improve throughput:
-
-1. **Dynamic batching**: Group requests with similar lengths
-2. **Continuous batching**: Add new requests to existing batches
-3. **Priority queuing**: Handle urgent requests first
-
-### 3. Caching Mechanisms
-
-Implement multi-level caching:
-- **KV cache**: Store key-value pairs from previous tokens
-- **Response cache**: Cache common queries
-- **Prefix cache**: Reuse system prompts
-
-## Implementation Example
-
-Here's a complete example of implementing these optimizations:
-
-\`\`\`python
-class OptimizedLLMInference:
-    def __init__(self, model_path):
-        self.model = self.load_quantized_model(model_path)
-        self.kv_cache = {}
-        self.response_cache = LRUCache(maxsize=1000)
-
-    def generate(self, prompt, max_tokens=100):
-        # Check response cache
-        cache_key = hash(prompt)
-        if cache_key in self.response_cache:
-            return self.response_cache[cache_key]
-
-        # Generate with KV caching
-        output = self.model.generate(
-            prompt,
-            max_tokens=max_tokens,
-            use_cache=True
-        )
-
-        # Store in cache
-        self.response_cache[cache_key] = output
-        return output
-\`\`\`
-
-## Benchmarks
-
-Our optimizations achieved:
-- **60% latency reduction**
-- **75% cost savings**
-- **3x throughput improvement**
-
-![Performance Chart](https://via.placeholder.com/800x400)
-
-## Best Practices
-
-1. **Profile first**: Measure before optimizing
-2. **Test thoroughly**: Ensure accuracy is maintained
-3. **Monitor continuously**: Track performance in production
-4. **Iterate**: Optimization is an ongoing process
-
-## Conclusion
-
-Optimizing LLM inference requires a multi-faceted approach. By combining quantization, batching, and caching, you can achieve significant performance improvements while maintaining model quality.
-
----
-
-*Have questions or want to share your optimization experiences? Leave a comment below!*
-      `,
-      references: [
-        {
-          title: "Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only Inference",
-          url: "https://arxiv.org/abs/1712.05877"
-        },
-        {
-          title: "FlashAttention: Fast and Memory-Efficient Exact Attention",
-          url: "https://arxiv.org/abs/2205.14135"
-        }
-      ]
-    },
-    {
-      title: "Distributed Training at Scale: Lessons Learned",
-      slug: "distributed-training-scale",
-      date: "2024-09",
-      category: "Training",
+      title: "ONNX & ONNX Runtime: Practitioner's Guide",
+      slug: "onnx-and-onnx-runtime-practitioners-guide",
+      date: "2026-04",
+      categories: ["Inference", "Tools"],
       keywords: [
-        "Distributed Training",
-        "Deep Learning",
-        "Scalability",
-        "Infrastructure",
+        "ONNX",
+        "ONNX Runtime",
+        "Model Export",
+        "Inference",
+        "Execution Providers",
       ],
       summary:
-        "Sharing our experience scaling distributed training from single-node to multi-datacenter deployments.",
-      readTime: "10 min",
-      image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31",
+        "A practical guide to ONNX and ONNX Runtime: model IR, export workflows, execution providers, graph optimization, quantization, and deployment validation.",
+      readTime: "11 min",
+      externalUrl:
+        "https://sahilfaizal.substack.com/p/onnx-and-onnx-runtime-practitioners",
+      image:
+        "https://substackcdn.com/image/fetch/$s_!zMvJ!,w_1200,h_675,c_fill,f_jpg,q_auto:good,fl_progressive:steep,g_auto/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F6a3d1aaa-7df8-4873-a800-95cdf22c9188_1408x768.png",
       content: `
-# Distributed Training at Scale: Lessons Learned
+# ONNX & ONNX Runtime: Practitioner's Guide
 
-Scaling deep learning training across multiple GPUs and machines is challenging. Here's what we learned building a **distributed training system** that handles hundreds of GPUs.
+This article lives on Substack, where the original formatting, diagrams, code blocks, and embedded visuals are preserved properly.
 
-## The Challenge
+I cover ONNX as an intermediate representation for ML inference, ONNX Runtime execution providers, export best practices, graph optimization, numerical optimization, runtime configuration, and validation workflows for production deployment.
 
-Training large models requires:
-- Efficient data parallelism
-- Model parallelism for large architectures
-- Fault tolerance
-- Network optimization
-
-## Architecture Overview
-
-Our distributed training setup consists of:
-
-1. **Parameter servers** for gradient aggregation
-2. **Worker nodes** with 8 A100 GPUs each
-3. **Shared storage** for datasets and checkpoints
-4. **Monitoring** for performance tracking
-
-### Data Parallelism Implementation
-
-\`\`\`python
-import torch.distributed as dist
-from torch.nn.parallel import DistributedDataParallel
-
-# Initialize process group
-dist.init_process_group(backend='nccl')
-
-# Wrap model
-model = DistributedDataParallel(
-    model.cuda(),
-    device_ids=[local_rank]
-)
-
-# Training loop with gradient synchronization
-for batch in dataloader:
-    outputs = model(batch)
-    loss = criterion(outputs, labels)
-    loss.backward()  # Gradients automatically synchronized
-    optimizer.step()
-\`\`\`
-
-## Key Lessons
-
-### 1. Network is the Bottleneck
-
-We reduced communication overhead by:
-- Using **gradient compression** (50% bandwidth reduction)
-- Implementing **gradient accumulation**
-- Optimizing **all-reduce operations**
-
-### 2. Fault Tolerance Matters
-
-*Things will fail at scale.* Our solutions:
-
-- Automatic checkpoint recovery
-- Redundant parameter servers
-- Health monitoring and auto-restart
-
-### 3. Load Balancing
-
-Ensure even work distribution:
-
-| Strategy | Speedup | Complexity |
-|----------|---------|------------|
-| Static partitioning | 1.0x | Low |
-| Dynamic batching | 1.3x | Medium |
-| Work stealing | 1.6x | High |
-
-## Performance Results
-
-Scaling efficiency across nodes:
-
-- **2 nodes**: 1.95x speedup (97.5% efficiency)
-- **4 nodes**: 3.8x speedup (95% efficiency)
-- **8 nodes**: 7.2x speedup (90% efficiency)
-
-## Code Example: Fault Tolerance
-
-\`\`\`python
-class FaultTolerantTrainer:
-    def __init__(self, checkpoint_dir):
-        self.checkpoint_dir = checkpoint_dir
-        self.last_checkpoint = None
-
-    def save_checkpoint(self, epoch, model, optimizer):
-        checkpoint = {
-            'epoch': epoch,
-            'model_state': model.state_dict(),
-            'optimizer_state': optimizer.state_dict()
-        }
-        path = f"{self.checkpoint_dir}/checkpoint_{epoch}.pt"
-        torch.save(checkpoint, path)
-        self.last_checkpoint = path
-
-    def recover(self, model, optimizer):
-        if self.last_checkpoint:
-            checkpoint = torch.load(self.last_checkpoint)
-            model.load_state_dict(checkpoint['model_state'])
-            optimizer.load_state_dict(checkpoint['optimizer_state'])
-            return checkpoint['epoch']
-        return 0
-\`\`\`
-
-## Recommendations
-
-For teams starting with distributed training:
-
-1. Start with **data parallelism** (easier to implement)
-2. Use **proven frameworks** (PyTorch DDP, Horovod)
-3. **Monitor everything** (GPU utilization, network, I/O)
-4. Plan for **failure** from day one
-
-## Conclusion
-
-Distributed training at scale requires careful engineering, but the performance gains are worth it. Focus on network optimization, fault tolerance, and monitoring for success.
+[Read the full article on Substack](https://sahilfaizal.substack.com/p/onnx-and-onnx-runtime-practitioners)
       `,
       references: [
         {
-          title: "PyTorch Distributed Overview",
-          url: "https://pytorch.org/tutorials/beginner/dist_overview.html"
-        }
-      ]
+          title: "Original Substack article",
+          url: "https://sahilfaizal.substack.com/p/onnx-and-onnx-runtime-practitioners",
+        },
+        {
+          title: "ONNX Runtime Documentation",
+          url: "https://onnxruntime.ai/docs/",
+        },
+      ],
     },
     {
-      title: "Building a Modern MLOps Pipeline",
-      slug: "modern-mlops-pipeline",
-      date: "2024-07",
-      category: "DevOps",
-      keywords: ["MLOps", "CI/CD", "Automation", "Kubernetes"],
+      title:
+        "Building Efficient Networks for LLM Training: From Rail-Optimized to Rail-Only Designs",
+      slug: "building-efficient-networks-for-llm-training",
+      date: "2026-01",
+      categories: ["Training", "AI Infrastructure"],
+      keywords: [
+        "LLM Training",
+        "Distributed Training",
+        "GPU Networking",
+        "Rail-Only Networks",
+        "AI Infrastructure",
+      ],
       summary:
-        "Step-by-step guide to building an end-to-end MLOps pipeline with modern tools and best practices.",
-      readTime: "15 min",
-      image: "https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9",
+        "A systems look at rail-optimized and rail-only network designs for large-scale LLM training, and how topology choices can cut infrastructure cost while preserving training performance.",
+      readTime: "10 min",
+      externalUrl:
+        "https://sahilfaizal.substack.com/p/building-efficient-networks-for-llm",
+      image:
+        "https://substackcdn.com/image/fetch/$s_!qB6X!,w_1200,h_675,c_fill,f_jpg,q_auto:good,fl_progressive:steep,g_auto/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F8bd16ee8-a483-4a88-b060-1f61bd587a6b_1024x559.jpeg",
       content: `
-# Building a Modern MLOps Pipeline
+# Building Efficient Networks for LLM Training
 
-Learn how to build a production-ready MLOps pipeline that automates model training, deployment, and monitoring.
+This article lives on Substack, where the original formatting, diagrams, and network topology visuals are preserved properly.
 
-## Pipeline Overview
+I walk through rail-optimized and rail-only network designs for large-scale LLM training, explaining how workload-aware topology choices can reduce network cost and power while preserving training performance.
 
-Our MLOps pipeline handles:
-- Automated training on new data
-- Model versioning and registry
-- Continuous deployment
-- Real-time monitoring
-
-\`\`\`yaml
-# Example Kubernetes deployment
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: ml-model-serving
-spec:
-  replicas: 3
-  template:
-    spec:
-      containers:
-      - name: model-server
-        image: ml-model:v1.2.0
-        resources:
-          limits:
-            nvidia.com/gpu: 1
-\`\`\`
-
-More content here...
-      `
-    }
+[Read the full article on Substack](https://sahilfaizal.substack.com/p/building-efficient-networks-for-llm)
+      `,
+      references: [
+        {
+          title: "Original Substack article",
+          url: "https://sahilfaizal.substack.com/p/building-efficient-networks-for-llm",
+        },
+        {
+          title:
+            "Rail-only: A Low-Cost High-Performance Network for Training LLMs with Trillion Parameters",
+          url: "https://arxiv.org/pdf/2307.12169",
+        },
+      ],
+    },
   ],
 
   photography: [
@@ -901,63 +842,74 @@ More content here...
         {
           image: "https://images.unsplash.com/photo-1589802829985-817e51171b92",
           title: "Glowworm Caves",
-          description: "Magical bioluminescent ceiling in the caves"
-        }
-      ]
-    }
+          description: "Magical bioluminescent ceiling in the caves",
+        },
+      ],
+    },
   ],
 
   books: [
     {
       title: "Designing Data-Intensive Applications",
       author: "Martin Kleppmann",
-      cover: "https://images-na.ssl-images-amazon.com/images/I/51ZSpMl1-2L._SX379_BO1,204,203,200_.jpg",
+      cover:
+        "https://images-na.ssl-images-amazon.com/images/I/51ZSpMl1-2L._SX379_BO1,204,203,200_.jpg",
       rating: 5,
       dateRead: "2024-08",
-      review: "An excellent deep dive into the fundamentals of distributed systems and data storage. Essential reading for anyone building scalable applications.",
-      categories: ["Software Engineering", "Distributed Systems", "Databases"],
-      link: "https://dataintensive.net/"
+      review:
+        "An excellent deep dive into the fundamentals of distributed systems and data storage. Essential reading for anyone building scalable applications.",
+      categories: ["Distributed Systems", "Architecture"],
+      link: "https://dataintensive.net/",
     },
     {
       title: "The Hundred-Page Machine Learning Book",
       author: "Andriy Burkov",
-      cover: "https://images-na.ssl-images-amazon.com/images/I/41vS04GVdCL._SX384_BO1,204,203,200_.jpg",
+      cover:
+        "https://images-na.ssl-images-amazon.com/images/I/41vS04GVdCL._SX384_BO1,204,203,200_.jpg",
       rating: 4,
       dateRead: "2024-06",
-      review: "Concise and well-written introduction to machine learning concepts. Perfect for getting up to speed quickly on ML fundamentals.",
-      categories: ["Machine Learning", "AI"],
-      link: "http://themlbook.com/"
+      review:
+        "Concise and well-written introduction to machine learning concepts. Perfect for getting up to speed quickly on ML fundamentals.",
+      categories: ["Training"],
+      link: "http://themlbook.com/",
     },
     {
       title: "Building Machine Learning Powered Applications",
       author: "Emmanuel Ameisen",
-      cover: "https://images-na.ssl-images-amazon.com/images/I/51U4C3eqHSL._SX379_BO1,204,203,200_.jpg",
+      cover:
+        "https://images-na.ssl-images-amazon.com/images/I/51U4C3eqHSL._SX379_BO1,204,203,200_.jpg",
       rating: 5,
       dateRead: "2024-04",
-      review: "Practical guide to taking ML models from notebooks to production. Covers the full lifecycle including monitoring and iteration.",
-      categories: ["MLOps", "Software Engineering", "AI"],
-      link: "https://www.oreilly.com/library/view/building-machine-learning/9781492045106/"
+      review:
+        "Practical guide to taking ML models from notebooks to production. Covers the full lifecycle including monitoring and iteration.",
+      categories: ["Tools", "Inference"],
+      link: "https://www.oreilly.com/library/view/building-machine-learning/9781492045106/",
     },
     {
-      title: "Accelerate: Building and Scaling High Performing Technology Organizations",
+      title:
+        "Accelerate: Building and Scaling High Performing Technology Organizations",
       author: "Nicole Forsgren, Jez Humble, Gene Kim",
-      cover: "https://images-na.ssl-images-amazon.com/images/I/41juS4n+tPL._SX329_BO1,204,203,200_.jpg",
+      cover:
+        "https://images-na.ssl-images-amazon.com/images/I/41juS4n+tPL._SX329_BO1,204,203,200_.jpg",
       rating: 5,
       dateRead: "2024-02",
-      review: "Data-driven insights into what makes high-performing tech teams. Changed how I think about DevOps and organizational efficiency.",
-      categories: ["Leadership", "DevOps", "Management"],
-      link: "https://itrevolution.com/product/accelerate/"
+      review:
+        "Data-driven insights into what makes high-performing tech teams. Changed how I think about DevOps and organizational efficiency.",
+      categories: ["Tools", "Architecture"],
+      link: "https://itrevolution.com/product/accelerate/",
     },
     {
       title: "Deep Learning",
       author: "Ian Goodfellow, Yoshua Bengio, Aaron Courville",
-      cover: "https://images-na.ssl-images-amazon.com/images/I/61fim5QqaqL._SX373_BO1,204,203,200_.jpg",
+      cover:
+        "https://images-na.ssl-images-amazon.com/images/I/61fim5QqaqL._SX373_BO1,204,203,200_.jpg",
       rating: 5,
       dateRead: "2023-11",
-      review: "The definitive textbook on deep learning. Comprehensive coverage of neural networks, optimization, and modern architectures.",
-      categories: ["Deep Learning", "AI", "Mathematics"],
-      link: "https://www.deeplearningbook.org/"
-    }
+      review:
+        "The definitive textbook on deep learning. Comprehensive coverage of neural networks, optimization, and modern architectures.",
+      categories: ["Training", "Architecture"],
+      link: "https://www.deeplearningbook.org/",
+    },
   ],
 
   researchPapers: [
@@ -967,29 +919,32 @@ More content here...
       venue: "NeurIPS 2017",
       year: "2017",
       pdf: "https://arxiv.org/abs/1706.03762",
-      summary: "Introduced the Transformer architecture that revolutionized natural language processing and became the foundation for modern LLMs like GPT and BERT.",
+      summary:
+        "Introduced the Transformer architecture that revolutionized natural language processing and became the foundation for modern LLMs like GPT and BERT.",
       keyTakeaways: [
         "Self-attention mechanism eliminates need for recurrence",
         "Parallel processing enables faster training",
         "Positional encoding preserves sequence information",
-        "Multi-head attention captures different representation subspaces"
+        "Multi-head attention captures different representation subspaces",
       ],
-      tags: ["Transformers", "NLP", "Deep Learning", "Attention Mechanisms"]
+      tags: ["Architecture", "Training"],
     },
     {
-      title: "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding",
+      title:
+        "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding",
       authors: "Devlin et al.",
       venue: "NAACL 2019",
       year: "2019",
       pdf: "https://arxiv.org/abs/1810.04805",
-      summary: "Introduced bidirectional pre-training for language models, achieving state-of-the-art results across multiple NLP tasks through masked language modeling.",
+      summary:
+        "Introduced bidirectional pre-training for language models, achieving state-of-the-art results across multiple NLP tasks through masked language modeling.",
       keyTakeaways: [
         "Bidirectional context improves language understanding",
         "Masked language modeling as effective pre-training objective",
         "Transfer learning through fine-tuning on downstream tasks",
-        "WordPiece tokenization handles vocabulary efficiently"
+        "WordPiece tokenization handles vocabulary efficiently",
       ],
-      tags: ["BERT", "NLP", "Transfer Learning", "Pre-training"]
+      tags: ["Training", "Post-Training"],
     },
     {
       title: "GPT-3: Language Models are Few-Shot Learners",
@@ -997,14 +952,15 @@ More content here...
       venue: "NeurIPS 2020",
       year: "2020",
       pdf: "https://arxiv.org/abs/2005.14165",
-      summary: "Demonstrated that scaling language models to 175B parameters enables few-shot learning without fine-tuning, fundamentally changing how we approach NLP tasks.",
+      summary:
+        "Demonstrated that scaling language models to 175B parameters enables few-shot learning without fine-tuning, fundamentally changing how we approach NLP tasks.",
       keyTakeaways: [
         "Scale enables emergent capabilities and in-context learning",
         "Few-shot performance improves dramatically with model size",
         "Prompting as a new paradigm for task specification",
-        "Challenges around bias, safety, and energy consumption"
+        "Challenges around bias, safety, and energy consumption",
       ],
-      tags: ["GPT", "Large Language Models", "Few-Shot Learning", "Scale"]
+      tags: ["Inference", "Training"],
     },
     {
       title: "LoRA: Low-Rank Adaptation of Large Language Models",
@@ -1012,29 +968,32 @@ More content here...
       journal: "ICLR 2022",
       year: "2022",
       pdf: "https://arxiv.org/abs/2106.09685",
-      summary: "Efficient fine-tuning method that reduces trainable parameters by up to 10,000x while maintaining performance by learning low-rank decomposition matrices.",
+      summary:
+        "Efficient fine-tuning method that reduces trainable parameters by up to 10,000x while maintaining performance by learning low-rank decomposition matrices.",
       keyTakeaways: [
         "Freeze base model and learn low-rank updates",
         "Drastically reduces memory and storage requirements",
         "Enables efficient multi-task learning",
-        "No inference latency compared to full fine-tuning"
+        "No inference latency compared to full fine-tuning",
       ],
-      tags: ["Fine-Tuning", "Efficiency", "Parameter-Efficient", "LLMs"]
+      tags: ["Post-Training", "Training"],
     },
     {
-      title: "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      title:
+        "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
       authors: "Dao et al.",
       venue: "NeurIPS 2022",
       year: "2022",
       pdf: "https://arxiv.org/abs/2205.14135",
-      summary: "IO-aware exact attention algorithm that speeds up Transformers by 2-4x and reduces memory usage, enabling longer context lengths.",
+      summary:
+        "IO-aware exact attention algorithm that speeds up Transformers by 2-4x and reduces memory usage, enabling longer context lengths.",
       keyTakeaways: [
         "Account for GPU memory hierarchy in algorithm design",
         "Tiling and recomputation reduce HBM accesses",
         "Enables training with longer sequences",
-        "Exact attention (no approximation) with better performance"
+        "Exact attention (no approximation) with better performance",
       ],
-      tags: ["Optimization", "Attention", "GPU", "Systems"]
+      tags: ["GPU Programming", "Inference"],
     },
     {
       title: "Distributed Deep Learning: A Survey",
@@ -1042,14 +1001,15 @@ More content here...
       journal: "ACM Computing Surveys",
       year: "2023",
       pdf: "https://arxiv.org/abs/2301.02049",
-      summary: "Comprehensive survey of distributed deep learning techniques including data parallelism, model parallelism, and pipeline parallelism strategies.",
+      summary:
+        "Comprehensive survey of distributed deep learning techniques including data parallelism, model parallelism, and pipeline parallelism strategies.",
       keyTakeaways: [
         "Trade-offs between communication and computation",
         "Gradient compression techniques reduce bandwidth",
         "Hybrid parallelism strategies for large models",
-        "Fault tolerance critical at scale"
+        "Fault tolerance critical at scale",
       ],
-      tags: ["Distributed Systems", "Training", "Parallelism", "Scalability"]
-    }
-  ]
+      tags: ["Distributed Systems", "Training", "HPC"],
+    },
+  ],
 };

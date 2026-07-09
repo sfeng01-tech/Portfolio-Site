@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Link, NavLink, useLocation } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { Link, NavLink, useLocation } from "react-router-dom";
+import { Menu, X } from "lucide-react";
 
 const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -11,8 +11,8 @@ const Navigation = () => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   // Close mobile menu when route changes
@@ -21,23 +21,23 @@ const Navigation = () => {
   }, [location]);
 
   const navLinks = [
-    { name: 'About', path: '/' },
-    { name: 'Experience', path: '/experience' },
-    { name: 'Projects', path: '/projects' },
-    { name: 'Publications', path: '/publications' },
-    { name: 'Talks', path: '/talks' },
-    { name: 'Blog', path: '/blog' },
-    { name: 'Books', path: '/books' },
-    { name: 'Photography', path: '/photography' },
-    { name: 'Contact', path: '/contact' }
+    { name: "About", path: "/" },
+    { name: "Experience", path: "/experience" },
+    { name: "Projects", path: "/projects" },
+    { name: "Publications", path: "/publications" },
+    { name: "Talks", path: "/talks" },
+    { name: "Blog", path: "/blog" },
+    // { name: "Reading", path: "/books" },
+    // { name: "Photography", path: "/photography" },
+    { name: "Contact", path: "/contact" },
   ];
 
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled
-          ? 'bg-dark-bg/95 backdrop-blur-sm border-b border-dark-border'
-          : 'bg-dark-bg/80 backdrop-blur-sm border-b border-dark-border'
+          ? "bg-dark-bg/95 backdrop-blur-sm border-b border-dark-border"
+          : "bg-dark-bg/80 backdrop-blur-sm border-b border-dark-border"
       }`}
     >
       <div className="container-width">
@@ -58,8 +58,8 @@ const Navigation = () => {
                 className={({ isActive }) =>
                   `text-sm font-medium transition-colors ${
                     isActive
-                      ? 'text-dark-text-primary'
-                      : 'text-dark-text-secondary hover:text-dark-text-primary'
+                      ? "text-dark-text-primary"
+                      : "text-dark-text-secondary hover:text-dark-text-primary"
                   }`
                 }
               >
@@ -88,8 +88,8 @@ const Navigation = () => {
                   className={({ isActive }) =>
                     `block px-4 py-3 transition-colors ${
                       isActive
-                        ? 'text-dark-text-primary bg-dark-border'
-                        : 'text-dark-text-secondary hover:text-dark-text-primary hover:bg-dark-border'
+                        ? "text-dark-text-primary bg-dark-border"
+                        : "text-dark-text-secondary hover:text-dark-text-primary hover:bg-dark-border"
                     }`
                   }
                 >
