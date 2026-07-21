@@ -259,6 +259,19 @@ export const portfolioData = {
 
   projects: [
     {
+      title: "Orchard Inference",
+      date: "2026-07",
+      description:
+        "Machine learning inference project focused on building and evaluating efficient model inference workflows.",
+      technologies: ["Python", "Machine Learning", "Model Inference"],
+      github: "https://github.com/sfeng01-tech/Orchard-Inference/tree/main",
+      highlights: [
+        "Developed an inference-focused machine learning workflow.",
+        "Explored practical techniques for running models efficiently.",
+        "Organized the project for reproducible experimentation and evaluation.",
+      ],
+    },
+    {
       title: "tLM: A Tiny LLM from Scratch",
       date: "2025-03",
       description:
