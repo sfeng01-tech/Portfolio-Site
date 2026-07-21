@@ -261,12 +261,25 @@ export const portfolioData = {
       date: "2026-07",
       description:
         "Machine learning inference project focused on building and evaluating efficient model inference workflows.",
-      technologies: ["Python", "Machine Learning", "Model Inference"],
+      technologies: ["Python", "Machine Learning", "Model Inference", "Apple"],
       github: "https://github.com/sfeng01-tech/Orchard-Inference/tree/main",
       highlights: [
         "Developed an inference-focused machine learning workflow.",
         "Explored practical techniques for running models efficiently.",
         "Organized the project for reproducible experimentation and evaluation.",
+      ],
+    },
+    {
+      title: "KernelHub",
+      date: "2026-07",
+      description:
+        "Apple-focused systems project exploring high-performance GPU kernels and machine learning workloads.",
+      technologies: ["Apple", "GPU Kernels", "Machine Learning", "Performance Engineering"],
+      github: "https://github.com/sfeng01-tech/KernelHub",
+      highlights: [
+        "Explored GPU kernel implementations for Apple hardware.",
+        "Focused on efficient execution of machine learning workloads.",
+        "Investigated performance optimization techniques for modern AI systems.",
       ],
     },
     {
