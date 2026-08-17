@@ -673,6 +673,15 @@ export const portfolioData = {
 
   talks: [
     {
+      title: "Building Hybrid Agentic AI with vLLM Semantic Routing and FlyDSL",
+      event: "AMD Advancing AI 2026",
+      location: "Moscone Center, San Francisco, CA",
+      date: "2026-07",
+      type: "Talk",
+      description:
+        "Helped developers build agentic solutions across hybrid cloud and local environments using a vLLM semantic router, and demonstrated how FlyDSL enables fast Python kernels for performance-critical AI workloads.",
+    },
+    {
       title: "Building Agentic Applications with OpenClaw",
       event: "AMD Dev Day SF 2026",
       location: "San Francisco, CA",
@@ -680,7 +689,7 @@ export const portfolioData = {
       type: "Talk",
       post: "https://www.linkedin.com/posts/sf74_amd-aidevday-amdevs-ugcPost-7456137448390045696-ly6s/?utm_source=share&utm_medium=member_desktop&rcm=ACoAAC3X4Y4BB7T_1d9pk_OU1cVz0vO54m1Gz0I",
       description:
-        "Helped developers build agentic solutions in hybrid cloud and local environments using a vLLM semantic router, and demonstrated writing fast Python kernels with FlyDSL.",
+        "Guided developers through building and deploying personal AI agents with OpenClaw, from defining agent workflows and connecting tools to running agents locally and preparing them for real-world use. Covered practical design choices for reliable, private, and extensible personal-agent experiences.",
     },
     {
       title: "Behind the Compute: How LLMs Train, Infer, and Scale",
