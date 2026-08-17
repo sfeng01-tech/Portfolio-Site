@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mic, MapPin, Calendar, FileText, Video } from 'lucide-react';
+import { Mic, MapPin, Calendar, FileText, Video, ExternalLink } from 'lucide-react';
 
 const Talks = ({ talks }) => {
   const formatDate = (dateString) => {
@@ -70,6 +70,17 @@ const Talks = ({ talks }) => {
                   >
                     <Video size={16} className="mr-1" />
                     Video
+                  </a>
+                )}
+                {talk.post && (
+                  <a
+                    href={talk.post}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center text-sm text-dark-text-secondary hover:text-dark-text-primary transition-colors"
+                  >
+                    <ExternalLink size={16} className="mr-1" />
+                    Event post
                   </a>
                 )}
               </div>

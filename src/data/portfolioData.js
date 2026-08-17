@@ -106,6 +106,7 @@ export const portfolioData = {
     "Owned end-to-end development of 8 critical LLM optimization features in 10 weeks, reducing model execution time by 60%",
     "Defined and streamlined the technical execution plan to deliver a custom LLM serving backend in a 3× shorter timeline",
     "Contributed to MLPerf Inference v5.0 submission for SDXL, achieving 97% of the target performance.",
+    "AMD Spotlight Award — For contributions to the open-source developer ecosystem and efforts in enabling developers to build and optimize solutions on AMD hardware.",
     "Published 6+ papers in reputed AI journals and conferences",
     "Recipient of the Graduate Scholarship – New York University, USA",
     "Excellence Award – Samsung R&D Institute, India",
@@ -671,6 +672,16 @@ export const portfolioData = {
   ],
 
   talks: [
+    {
+      title: "Building Agentic Applications with OpenClaw",
+      event: "AMD Advancing AI Day 2026",
+      location: "AMD",
+      date: "2026-05",
+      type: "Talk",
+      post: "https://www.linkedin.com/posts/sf74_amd-aidevday-amdevs-ugcPost-7456137448390045696-ly6s/?utm_source=share&utm_medium=member_desktop&rcm=ACoAAC3X4Y4BB7T_1d9pk_OU1cVz0vO54m1Gz0I",
+      description:
+        "Helped developers build agentic solutions in hybrid cloud and local environments using a vLLM semantic router, and demonstrated writing fast Python kernels with FlyDSL.",
+    },
     {
       title: "Behind the Compute: How LLMs Train, Infer, and Scale",
       event: "AMD Brown Bag Session",
