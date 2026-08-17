@@ -419,6 +419,141 @@ export const portfolioData = {
     },
   ],
 
+  openSourceContributions: {
+    profile: "https://github.com/sa-faizal",
+    summary:
+      "Release engineering and compiler ecosystem contributions across IREE, IREE Turbine, Wave, and SHARK-AI.",
+    releaseWork: [
+      {
+        version: "v3.7",
+        date: "July–September 2025",
+        releases: [
+          {
+            repository: "IREE",
+            releaseUrl: "https://github.com/iree-org/iree/tree/v3.7.0",
+            releaseLabel: "Release tag",
+            bumpUrl: "https://github.com/iree-org/iree/pull/21460",
+          },
+          {
+            repository: "IREE Turbine",
+            releaseUrl: "https://github.com/iree-org/iree-turbine/releases/tag/v3.7.0",
+            bumpUrl: "https://github.com/iree-org/iree-turbine/pull/1088",
+          },
+          {
+            repository: "Wave",
+            releaseUrl: "https://github.com/iree-org/wave/releases/tag/v3.7.0",
+          },
+          {
+            repository: "SHARK-AI",
+            releaseUrl: "https://github.com/nod-ai/amd-shark-ai/releases/tag/v3.7.0",
+            bumpUrl: "https://github.com/nod-ai/amd-shark-ai/pull/1895",
+          },
+        ],
+      },
+      {
+        version: "v3.8",
+        date: "September–October 2025",
+        releases: [
+          {
+            repository: "IREE",
+            releaseUrl: "https://github.com/iree-org/iree/tree/v3.8.0",
+            releaseLabel: "Release tag",
+            bumpUrl: "https://github.com/iree-org/iree/pull/21852",
+          },
+          {
+            repository: "IREE Turbine",
+            releaseUrl: "https://github.com/iree-org/iree-turbine/releases/tag/v3.8.0",
+            bumpUrl: "https://github.com/iree-org/iree-turbine/pull/1138",
+          },
+          {
+            repository: "Wave",
+            releaseUrl: "https://github.com/iree-org/wave/releases/tag/v3.8.0",
+            bumpUrl: "https://github.com/iree-org/wave/pull/362",
+          },
+          {
+            repository: "SHARK-AI",
+            releaseUrl: "https://github.com/nod-ai/amd-shark-ai/releases/tag/v3.8.0",
+            bumpUrl: "https://github.com/nod-ai/amd-shark-ai/pull/2183",
+          },
+        ],
+      },
+      {
+        version: "v3.9",
+        date: "October–December 2025",
+        releases: [
+          {
+            repository: "IREE",
+            releaseUrl: "https://github.com/iree-org/iree/tree/v3.9.0",
+            releaseLabel: "Release tag",
+            bumpUrl: "https://github.com/iree-org/iree/pull/22308",
+          },
+          {
+            repository: "IREE Turbine",
+            releaseUrl: "https://github.com/iree-org/iree-turbine/releases/tag/v3.9.0",
+            bumpUrl: "https://github.com/iree-org/iree-turbine/pull/1177",
+          },
+          {
+            repository: "Wave",
+            releaseUrl: "https://github.com/iree-org/wave/releases/tag/v3.9",
+            bumpUrl: "https://github.com/iree-org/wave/pull/481",
+          },
+          {
+            repository: "SHARK-AI",
+            releaseUrl: "https://github.com/nod-ai/amd-shark-ai/releases/tag/v3.9.0",
+            bumpUrl: "https://github.com/nod-ai/amd-shark-ai/pull/2509",
+          },
+        ],
+      },
+    ],
+    contributions: [
+      {
+        repository: "iree-org/iree",
+        title: "Bump version to 3.10 after 3.9 release",
+        date: "2025-11-25",
+        url: "https://github.com/iree-org/iree/pull/22759",
+        description:
+          "Updated the core IREE compiler project for the 3.10 release following 3.9.",
+        changes: "2 files changed · +2 / −2",
+      },
+      {
+        repository: "iree-org/wave",
+        title: "Bump version to 3.9 for release",
+        date: "2025-11-25",
+        url: "https://github.com/iree-org/wave/pull/481",
+        description:
+          "Prepared Wave, IREE's symbolic Python DSL and compiler for high-performance ML, for its 3.9 release.",
+        changes: "2 files changed · +3 / −3",
+      },
+      {
+        repository: "iree-org/wave",
+        title: "Bumped wave-lang to 3.8.1",
+        date: "2025-11-03",
+        url: "https://github.com/iree-org/wave/pull/413",
+        description:
+          "Delivered a Wave language version update as part of the 3.8.1 release cycle.",
+        changes: "1 file changed · +1 / −1",
+      },
+      {
+        repository: "iree-org/wave",
+        title: "Tensor Addition example notebook",
+        date: "2025-08-26",
+        url: "https://github.com/iree-org/wave/pull/195",
+        description:
+          "Added a Tensor Addition example notebook to improve the Wave learning and experimentation experience.",
+        changes: "Merged pull request",
+      },
+      {
+        repository: "iree-org/wave",
+        title: "Update ROCm 7 Docker installation for TheRock CI runner",
+        date: "2025-09-08",
+        url: "https://github.com/iree-org/wave/pull/263",
+        description:
+          "Updated the ROCm 7 Docker installation used by the MI355x TheRock CI runner.",
+        changes: "Merged pull request",
+      },
+    ],
+  },
+
   publications: [
     {
       title:

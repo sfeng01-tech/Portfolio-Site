@@ -6,6 +6,7 @@ import Navigation from './components/Navigation';
 import HomePage from './pages/HomePage';
 import ExperiencePage from './pages/ExperiencePage';
 import ProjectsPage from './pages/ProjectsPage';
+import OpenSourcePage from './pages/OpenSourcePage';
 import PublicationsPage from './pages/PublicationsPage';
 import TalksPage from './pages/TalksPage';
 import BlogPage from './pages/BlogPage';
@@ -53,6 +54,12 @@ function App() {
               <>
                 <Navigation />
                 <main><ProjectsPage /></main>
+              </>
+            } />
+            <Route path="/open-source" element={
+              <>
+                <Navigation />
+                <main><OpenSourcePage /></main>
               </>
             } />
             <Route path="/publications" element={
