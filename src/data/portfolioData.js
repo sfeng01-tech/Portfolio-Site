@@ -530,6 +530,22 @@ export const portfolioData = {
   publications: [
     {
       title:
+        "An Automated Framework to Classify Skin Lesions Using Multi-Head Self Attention Layer-Based Vision Transformers",
+      authors: [
+        "Sahil Faizal",
+        "Charu Anant Rajput",
+        "Manas Ranjan Prusty",
+      ],
+      venue: "Frontiers in Artificial Intelligence",
+      year: "2026",
+      type: "Journal",
+      location: "Medicine and Public Health",
+      pdf: "https://doi.org/10.3389/frai.2026.1781796",
+      abstract:
+        "An automated nine-class skin-lesion classification framework using contrast stretching for image enhancement and ROI segmentation, Vision Transformer feature extraction with multi-head self-attention, and a lightweight MLP classifier. The approach achieved 98% training accuracy and 93.22% test accuracy across combined HAM10000 and PAD-UFES datasets.",
+    },
+    {
+      title:
         "Wave: A Symbolic Python DSL and Compiler for High-Performance Machine Learning",
       authors: [
         "Harsh Menon",
