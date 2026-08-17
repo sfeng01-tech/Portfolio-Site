@@ -422,7 +422,7 @@ export const portfolioData = {
   openSourceContributions: {
     profile: "https://github.com/sa-faizal",
     summary:
-      "Release engineering and compiler ecosystem contributions across IREE, IREE Turbine, Wave, and SHARK-AI.",
+      "Release engineering for AI/ML compiler and inference software across IREE, IREE Turbine, Wave, and SHARK-AI.",
     releaseWork: [
       {
         version: "v3.7",
@@ -506,33 +506,6 @@ export const portfolioData = {
       },
     ],
     contributions: [
-      {
-        repository: "iree-org/iree",
-        title: "Bump version to 3.10 after 3.9 release",
-        date: "2025-11-25",
-        url: "https://github.com/iree-org/iree/pull/22759",
-        description:
-          "Updated the core IREE compiler project for the 3.10 release following 3.9.",
-        changes: "2 files changed · +2 / −2",
-      },
-      {
-        repository: "iree-org/wave",
-        title: "Bump version to 3.9 for release",
-        date: "2025-11-25",
-        url: "https://github.com/iree-org/wave/pull/481",
-        description:
-          "Prepared Wave, IREE's symbolic Python DSL and compiler for high-performance ML, for its 3.9 release.",
-        changes: "2 files changed · +3 / −3",
-      },
-      {
-        repository: "iree-org/wave",
-        title: "Bumped wave-lang to 3.8.1",
-        date: "2025-11-03",
-        url: "https://github.com/iree-org/wave/pull/413",
-        description:
-          "Delivered a Wave language version update as part of the 3.8.1 release cycle.",
-        changes: "1 file changed · +1 / −1",
-      },
       {
         repository: "iree-org/wave",
         title: "Tensor Addition example notebook",

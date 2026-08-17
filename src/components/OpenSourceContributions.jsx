@@ -32,7 +32,7 @@ const OpenSourceContributions = ({ contributions }) => {
             <h3 className="text-2xl font-bold text-dark-text-primary">Release Engineering</h3>
           </div>
           <p className="text-dark-text-secondary mb-6 max-w-3xl">
-            Authored release notes and coordinated the corresponding version updates across the IREE ecosystem.
+            Owned release cutovers across an AI/ML compiler and inference stack: maintained version branches, authored release notes, updated release metadata, and coordinated CI, packaging, and compatibility validation. This work required validating compiler and runtime changes against GPU-backed inference workflows—not just publishing a version number.
           </p>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {contributions.releaseWork.map((release) => (
