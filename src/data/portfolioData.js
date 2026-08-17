@@ -674,8 +674,8 @@ export const portfolioData = {
   talks: [
     {
       title: "Building Agentic Applications with OpenClaw",
-      event: "AMD Advancing AI Day 2026",
-      location: "AMD",
+      event: "AMD Dev Day SF 2026",
+      location: "San Francisco, CA",
       date: "2026-05",
       type: "Talk",
       post: "https://www.linkedin.com/posts/sf74_amd-aidevday-amdevs-ugcPost-7456137448390045696-ly6s/?utm_source=share&utm_medium=member_desktop&rcm=ACoAAC3X4Y4BB7T_1d9pk_OU1cVz0vO54m1Gz0I",
