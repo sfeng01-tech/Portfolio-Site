@@ -506,6 +506,15 @@ export const portfolioData = {
     ],
     inProgress: [
       {
+        repository: "ml-explore/mlx-lm",
+        title: "Declare MLX norm convention in converted models",
+        pullRequestUrl: "https://github.com/ml-explore/mlx-lm/pull/1752",
+        issueTitle: "Record RMSNorm storage state in converted metadata",
+        issueUrl: "https://github.com/ml-explore/mlx-lm/issues/1445",
+        description:
+          "Declares the MLX norm convention in converted config and safetensor metadata, so downstream runtimes no longer need to infer whether RMSNorm weights require an architecture-specific offset.",
+      },
+      {
         repository: "ml-explore/mlx-examples",
         title: "Add Whisper beam-search decoding",
         pullRequestUrl: "https://github.com/ml-explore/mlx-examples/pull/1439",
