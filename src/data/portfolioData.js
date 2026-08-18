@@ -693,7 +693,7 @@ export const portfolioData = {
 
   talks: [
     {
-      title: "Building Hybrid Agentic AI with vLLM Semantic Routing and FlyDSL",
+      title: "Hybrid Agentic AI with vLLM Semantic Routing and FlyDSL",
       event: "AMD Advancing AI 2026",
       location: "Moscone Center, San Francisco, CA",
       date: "2026-07",
