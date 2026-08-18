@@ -507,6 +507,15 @@ export const portfolioData = {
     inProgress: [
       {
         repository: "ml-explore/mlx-examples",
+        title: "Add Whisper beam-search decoding",
+        pullRequestUrl: "https://github.com/ml-explore/mlx-examples/pull/1439",
+        issueTitle: "Whisper numerical-parity tests fail with MLX 0.32.0 on Apple Silicon",
+        issueUrl: "https://github.com/ml-explore/mlx-examples/issues/1440",
+        description:
+          "Adds beam candidate expansion, ranking, cache reordering, CLI support, and regression coverage for MLX Whisper decoding. The related issue documents a separately reproducible numerical-parity regression with MLX 0.32.0.",
+      },
+      {
+        repository: "ml-explore/mlx-examples",
         title: "Whisper: save converted weights as weights.safetensors",
         pullRequestUrl: "https://github.com/ml-explore/mlx-examples/pull/1438",
         issueTitle: "Whisper conversion output is incompatible with mlx-whisper's loader",
