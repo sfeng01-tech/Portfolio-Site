@@ -10,9 +10,11 @@ const OpenSourceContributions = ({ contributions }) => {
             <h2 id="open-source-heading" className="text-4xl md:text-5xl font-bold text-dark-text-primary mb-4">
               Open Source Contributions
             </h2>
-            <p className="text-dark-text-secondary max-w-2xl leading-relaxed">
-              {contributions.summary}
-            </p>
+            {contributions.summary && (
+              <p className="text-dark-text-secondary max-w-2xl leading-relaxed">
+                {contributions.summary}
+              </p>
+            )}
           </div>
           <a
             href={contributions.profile}

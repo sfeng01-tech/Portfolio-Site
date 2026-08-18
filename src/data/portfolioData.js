@@ -422,8 +422,6 @@ export const portfolioData = {
 
   openSourceContributions: {
     profile: "https://github.com/sa-faizal",
-    summary:
-      "Release engineering for AI/ML compiler and inference software across IREE, IREE Turbine, Wave, and SHARK-AI.",
     releaseWork: [
       {
         version: "v3.7",
