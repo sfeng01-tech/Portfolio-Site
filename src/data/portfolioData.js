@@ -506,6 +506,26 @@ export const portfolioData = {
         ],
       },
     ],
+    inProgress: [
+      {
+        repository: "ml-explore/mlx-examples",
+        title: "Whisper: save converted weights as weights.safetensors",
+        pullRequestUrl: "https://github.com/ml-explore/mlx-examples/pull/1438",
+        issueTitle: "Whisper conversion output is incompatible with mlx-whisper's loader",
+        issueUrl: "https://github.com/ml-explore/mlx-examples/issues/1421",
+        description:
+          "Fixes a mismatch between the Whisper conversion artifact name and the released mlx-whisper loader, with regression coverage for serialization, loading, and conversion documentation.",
+      },
+      {
+        repository: "apple/coremltools",
+        title: "Add InstanceNorm3d alias-conversion regression coverage",
+        pullRequestUrl: "https://github.com/apple/coremltools/pull/2820",
+        issueTitle: "CoreML CPU InstanceNorm3d behavior with track_running_stats",
+        issueUrl: "https://github.com/apple/coremltools/issues/2666",
+        description:
+          "Adds TorchScript and torch.export regression coverage for InstanceNorm3d alias conversion, including both running-stat configurations.",
+      },
+    ],
     contributions: [
       {
         repository: "iree-org/wave",
