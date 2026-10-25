@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import ThemeToggle from '../components/ThemeToggle';
 import './orin.css';
 
-const sourceLabels = { x: 'X / Twitter', twitter: 'X / Twitter', linkedin: 'LinkedIn', reddit: 'Reddit', arxiv: 'arXiv', hackernews: 'Hacker News', google_news: 'Google News', threads: 'Threads', rss: 'Articles' };
+const sourceLabels = { x: 'X / Twitter', twitter: 'X / Twitter', linkedin: 'LinkedIn', reddit: 'Reddit', arxiv: 'arXiv', hackernews: 'Hacker News', google_news: 'Google News', threads: 'Threads', huggingface: 'Hugging Face Papers', alphaxiv: 'alphaXiv', substack: 'Substack', rss: 'Articles' };
 const displaySource = (source) => sourceLabels[source] || source;
 const localDate = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles' }).format(new Date());
 const safeUrl = (url) => { try { const parsed = new URL(url); return parsed.protocol === 'https:' ? parsed.href : null; } catch { return null; } };

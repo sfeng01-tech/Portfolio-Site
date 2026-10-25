@@ -6,6 +6,10 @@
   "maxRunUsd": 0.05,
   "topics": ["ROCm", "GPU", "kernel", "Instinct", "LLM", "inference", "training", "agent", "transformer", "distributed", "machine learning", "artificial intelligence", "AI", "Cerebras", "CUDA", "Triton", "compiler", "vLLM", "SGLang"],
   "feeds": [
+    {"source": "huggingface", "url": "https://huggingface.co/api/daily_papers?limit=50"},
+    {"source": "alphaxiv", "url": "https://api.alphaxiv.org/papers/v3/feed?sort=Hot&interval=3%20Days&pageNum=0&pageSize=40"},
+    {"source": "substack", "url": "https://magazine.sebastianraschka.com/feed"},
+    {"source": "substack", "url": "https://latent.space/feed"},
     { "source": "arxiv", "url": "https://rss.arxiv.org/rss/cs.LG" },
     { "source": "arxiv", "url": "https://rss.arxiv.org/rss/cs.DC" },
     { "source": "hackernews", "url": "https://news.ycombinator.com/rss" },

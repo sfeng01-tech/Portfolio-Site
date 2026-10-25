@@ -10,6 +10,16 @@ X and LinkedIn browser collection use normal Playwright Chromium sessions with a
 
 Only visible source excerpts are collected. Links always identify their provenance: social permalinks, Reddit RSS links, arXiv abstracts and HN discussions. Full external articles/papers are not silently fetched. Research claims remain claims from supplied abstracts. Popularity is shown only when a numeric metric was actually observed; missing metrics remain missing. Items are prioritized by topic matches and recency with source quotas. Observed engagement breaks relevance ties only among posts from the same source; cross-platform raw counts are never compared, and missing metrics remain unknown; this is a relevant daily selection, not an exhaustive popularity ranking across entire platforms. Unknown publication dates remain unknown. Site markup changes may require selector maintenance.
 
+## Hugging Face, alphaXiv and Substack
+
+The default and local source configurations include Hugging Face Daily Papers (up to 50 entries), alphaXiv's Hot feed over three days (up to 40 entries), and Substack feeds for **Ahead of AI** and **Latent Space**. They run in the existing daily workflow and require no additional API keys. Orin uses original paper abstracts and the public excerpts supplied by RSS; it does not fetch paywalled content. Source labels and filters distinguish all three in the reading room. Publication dates still follow the configured 72-hour freshness window, so an older paper newly featured on a platform can be excluded.
+
+Hugging Face uses [`/api/daily_papers`](https://huggingface.co/docs/huggingface_hub/en/package_reference/hf_api#huggingface_hub.HfApi.list_daily_papers). alphaXiv uses its current public website endpoint, `https://api.alphaxiv.org/papers/v3/feed?sort=Hot&interval=3%20Days&pageNum=0&pageSize=40`; this website API can change, and failures appear in Collection notes without stopping other sources. Observed Hugging Face upvotes/comments and alphaXiv public votes are retained when provided.
+
+To add a Substack publication, append `{ "source": "substack", "url": "https://PUBLICATION.substack.com/feed" }` to `feeds`. Substack documents its [publication RSS feeds](https://support.substack.com/hc/en-us/articles/360038239391-Is-there-an-RSS-feed-for-my-publication). Custom domains must also be explicitly added to the Substack allowlists in `scripts/orin/core.mjs` and `server/orin.js`; the two starter publications' custom domains are already included. Use the final feed URL directly because collection rejects redirects.
+
+If GitHub Actions has an `ORIN_CONFIG` variable, add these four feed entries to that JSON too: it overrides `config.example.json`. Deploy the updated backend before running the updated collector so ingestion accepts the new source names. No database migration or additional scheduler is needed.
+
 ## GitHub Actions setup
 
 `.github/workflows/orin-digest.yml` runs daily at 14:17 UTC (07:17 PDT, 06:17 PST), plus manual dispatch. GitHub may delay scheduled jobs. It has read-only repository permissions, no pull-request trigger, a 15-minute timeout and one job at a time. Nothing purchases a server or creates a paid service.

@@ -85,3 +85,49 @@ test('Threads keyword search uses the user token and maps public posts', async (
   const missing = createThreadsApi({ accessToken: '' });
   await assert.rejects(() => missing({ source: 'threads', url }), /THREADS_ACCESS_TOKEN/);
 });
+
+test('Hugging Face daily papers keep abstracts, publication dates and observed votes', async () => {
+  const [item] = await collectFeed({ source: 'huggingface', url: 'https://huggingface.co/api/daily_papers?limit=50' }, {
+    fetchImpl: async (url, options) => {
+      assert.equal(options.redirect, 'error');
+      return new Response(JSON.stringify([{ paper: { id: '2610.12345', title: 'GPU inference', summary: 'An abstract about inference.', authors: [{ name: 'Researcher' }], publishedAt: '2026-10-23T00:00:00Z', upvotes: 12 }, numComments: 3 }, { paper: { id: '../bad' } }]));
+    },
+  });
+  assert.equal(item.url, 'https://huggingface.co/papers/2610.12345');
+  assert.equal(item.excerpt, 'An abstract about inference.');
+  assert.equal(item.author, 'Researcher');
+  assert.equal(item.publishedAt, '2026-10-23T00:00:00.000Z');
+  assert.deepEqual(item.metrics, { likes: 12, comments: 3 });
+});
+
+test('alphaXiv maps its live feed schema and leaves missing metrics unknown', async () => {
+  const items = await collectFeed({ source: 'alphaxiv', url: 'https://api.alphaxiv.org/papers/v3/feed?sort=Hot&interval=3%20Days&pageNum=0&pageSize=40' }, {
+    fetchImpl: async () => new Response(JSON.stringify({ papers: [{ universal_paper_id: '2610.12345', title: 'GPU training', abstract: 'Original abstract.', paper_summary: { summary: 'Generated summary.' }, authors: ['A', 'B'], first_publication_date: '2026-10-23', metrics: { public_total_votes: 0 } }, { universal_paper_id: '2610.54321', title: 'Kernels', abstract: 'Compiler abstract.' }] })),
+  });
+  assert.equal(items[0].url, 'https://www.alphaxiv.org/abs/2610.12345');
+  assert.equal(items[0].excerpt, 'Original abstract.');
+  assert.equal(items[0].author, 'A, B');
+  assert.deepEqual(items[0].metrics, { likes: 0 });
+  assert.equal(items[1].metrics, undefined);
+});
+
+test('paper sources reject unexpected endpoints and malformed responses without retries', async () => {
+  const unexpected = async () => { throw new Error('must not fetch'); };
+  for (const url of ['https://huggingface.co.evil.test/api/daily_papers', 'https://huggingface.co/api/models']) {
+    await assert.rejects(() => collectFeed({ source: 'huggingface', url }, { fetchImpl: unexpected }), /allowlist|endpoint/);
+  }
+  const feed = { source: 'alphaxiv', url: 'https://api.alphaxiv.org/papers/v3/feed' };
+  await assert.rejects(() => collectFeed(feed, { fetchImpl: async () => new Response('{}') }), /invalid listing/);
+  let calls = 0;
+  await assert.rejects(() => collectFeed(feed, { fetchImpl: async () => { calls++; return new Response('', { status: 429 }); } }), /rate limited/);
+  assert.equal(calls, 1);
+});
+
+test('Substack supports publication feeds and explicit custom domains, rejecting unrelated links', async () => {
+  for (const host of ['example.substack.com', 'latent.space', 'magazine.sebastianraschka.com']) {
+    const items = await collectFeed({ source: 'substack', url: `https://${host}/feed` }, { fetchImpl: async () => new Response(`<rss><channel><item><title>GPU systems</title><link>https://${host}/p/gpu</link><description>AI research</description></item><item><title>Wrong host</title><link>https://evil.test/p/gpu</link><description>AI</description></item></channel></rss>`) });
+    assert.equal(items.length, 1);
+    assert.equal(items[0].source, 'substack');
+  }
+  await assert.rejects(() => collectFeed({ source: 'substack', url: 'https://substack.com.evil.test/feed' }), /allowlist/);
+});

@@ -8,13 +8,16 @@ export const SOURCE_HOSTS = {
   hackernews: ['news.ycombinator.com'],
   google_news: ['news.google.com'],
   threads: ['graph.threads.net', 'threads.com', 'www.threads.com', 'threads.net', 'www.threads.net'],
+  huggingface: ['huggingface.co'],
+  alphaxiv: ['api.alphaxiv.org', 'alphaxiv.org', 'www.alphaxiv.org'],
+  substack: ['magazine.sebastianraschka.com', 'latent.space', 'www.latent.space'],
   rss: ['rocm.blogs.amd.com', 'developer.nvidia.com', 'huggingface.co', 'pytorch.org'],
 };
 
 export function allowedSourceUrl(source, value) {
   try {
     const url = new URL(value);
-    return url.protocol === 'https:' && !url.username && !url.password && !url.port && SOURCE_HOSTS[source]?.includes(url.hostname);
+    return url.protocol === 'https:' && !url.username && !url.password && !url.port && (SOURCE_HOSTS[source]?.includes(url.hostname) || (source === 'substack' && /^[a-z0-9-]+\.substack\.com$/.test(url.hostname)));
   } catch { return false; }
 }
 

@@ -166,7 +166,38 @@ export function createThreadsApi({ accessToken = process.env.THREADS_ACCESS_TOKE
   };
 }
 
-export async function collectFeed(feed, { redditApi, xApi, threadsApi } = {}) {
+export async function collectPapers(feed, { fetchImpl = fetch } = {}) {
+  const endpoints = { huggingface: ['huggingface.co', '/api/daily_papers'], alphaxiv: ['api.alphaxiv.org', '/papers/v3/feed'] };
+  if (!endpoints[feed.source] || !allowedSourceUrl(feed.source, feed.url)) throw new Error('Paper API URL is outside the configured source allowlist');
+  const url = new URL(feed.url);
+  const [host, pathname] = endpoints[feed.source];
+  if (url.hostname !== host || url.pathname !== pathname) throw new Error('Unsupported paper API endpoint');
+  const response = await fetchImpl(url, { redirect: 'error', signal: AbortSignal.timeout(30_000), headers: { 'User-Agent': 'ORIN-personal-digest/1.0', Accept: 'application/json' } });
+  if (!response.ok) throw new Error(response.status === 429 ? 'Source rate limited; waiting until next scheduled run' : `Paper API returned HTTP ${response.status}`);
+  const payload = JSON.parse(await boundedText(response));
+  const rows = feed.source === 'huggingface' ? payload : payload?.papers;
+  if (!Array.isArray(rows)) throw new Error('Paper API returned an invalid listing');
+  return rows.slice(0, 100).flatMap(row => {
+    try {
+      if (!row || typeof row !== 'object') return [];
+      const hf = feed.source === 'huggingface';
+      const paper = hf ? row.paper : row;
+      const id = hf ? paper?.id : paper?.universal_paper_id;
+      if (typeof id !== 'string' || !/^[a-z0-9][a-z0-9._-]{0,150}$/i.test(id)) return [];
+      const likes = hf ? paper.upvotes : paper.metrics?.public_total_votes;
+      return [normalizeItem({
+        url: hf ? `https://huggingface.co/papers/${id}` : `https://www.alphaxiv.org/abs/${id}`,
+        title: paper.title, excerpt: hf ? paper.summary : paper.abstract,
+        author: (paper.authors || []).map(author => typeof author === 'string' ? author : author.name).filter(Boolean).join(', '),
+        publishedAt: hf ? paper.publishedAt : paper.first_publication_date || paper.publication_date,
+        metrics: { ...(Number.isFinite(likes) ? { likes } : {}), ...(hf && Number.isFinite(row.numComments) ? { comments: row.numComments } : {}) },
+      }, feed.source)];
+    } catch { return []; }
+  });
+}
+
+export async function collectFeed(feed, { redditApi, xApi, threadsApi, fetchImpl = fetch } = {}) {
+  if (['huggingface', 'alphaxiv'].includes(feed.source)) return collectPapers(feed, { fetchImpl });
   if (feed.source === 'twitter') {
     if (!xApi) throw new Error('X API is not configured; browser collection is disabled for the daily cap');
     return xApi(feed);
@@ -179,8 +210,8 @@ export async function collectFeed(feed, { redditApi, xApi, threadsApi } = {}) {
     if (!threadsApi) throw new Error('Threads API is not configured; set the THREADS_ACCESS_TOKEN Actions secret');
     return threadsApi(feed);
   }
-  if (!['arxiv', 'hackernews', 'google_news', 'reddit', 'rss'].includes(feed.source) || !allowedSourceUrl(feed.source, feed.url)) throw new Error('Feed URL is outside the configured source allowlist');
-  const response = await fetch(feed.url, { redirect: 'error', signal: AbortSignal.timeout(30_000), headers: { 'User-Agent': 'ORIN-personal-digest/1.0', Accept: 'application/rss+xml, application/atom+xml, application/xml' } });
+  if (!['arxiv', 'hackernews', 'google_news', 'substack', 'rss'].includes(feed.source) || !allowedSourceUrl(feed.source, feed.url)) throw new Error('Feed URL is outside the configured source allowlist');
+  const response = await fetchImpl(feed.url, { redirect: 'error', signal: AbortSignal.timeout(30_000), headers: { 'User-Agent': 'ORIN-personal-digest/1.0', Accept: 'application/rss+xml, application/atom+xml, application/xml' } });
   if (!response.ok) throw new Error(response.status === 429 ? 'Source rate limited; waiting until next scheduled run' : `Feed returned HTTP ${response.status}`);
   return parseFeed(await boundedText(response), feed.source);
 }
