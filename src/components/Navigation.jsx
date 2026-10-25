@@ -2,9 +2,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { ArrowUpRight, Menu, X } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
+import { publicSections } from '../config/publicSections';
 
 const navLinks = [
-  ['About', '/'], ['Experience', '/experience'], ['Projects', '/projects'],
+  ['About', '/'],
+  ...(publicSections.experience ? [['Experience', '/experience']] : []),
+  ...(publicSections.projects ? [['Projects', '/projects']] : []),
   ['Open Source', '/open-source'], ['Publications', '/publications'],
   ['Talks', '/talks'], ['Blog', '/blog'],
 ];

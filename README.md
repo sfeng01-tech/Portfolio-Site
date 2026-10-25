@@ -1,6 +1,6 @@
 # Professional Portfolio Website
 
-A modern, responsive portfolio website for Tech Leads and AI Technical Program Managers. Built with React, Vite, and Tailwind CSS, featuring a sleek black/greyish color theme.
+A modern, responsive portfolio website for Tech Leads and AI Technical Program Managers. Built with React, Vite, and Tailwind CSS, with light and dark themes and a private ORIN research reading space.
 
 ## Features
 
@@ -154,3 +154,9 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Support
 
 For questions or issues, please open an issue on GitHub.
+
+## ORIN private reading room
+
+Visit `/orin` for the owner-only daily digest. Projects and Experience are currently hidden through `src/config/publicSections.js`, with their source retained.
+
+See [ORIN hosting and database setup](docs/ORIN.md) and [daily collection, model choices, and pricing](docs/ORIN-SOURCES.md). The current Render static service cannot execute API handlers; ORIN needs a Node web service (`npm start`) or compatible serverless hosting. `render-node.yaml` is an optional Node service blueprint; the existing static configuration remains unchanged.

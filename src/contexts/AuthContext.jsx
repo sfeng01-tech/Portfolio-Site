@@ -16,6 +16,9 @@ export const AuthProvider = ({ children }) => {
         });
 
         if (response.ok) {
+          if (!response.headers.get('content-type')?.includes('application/json')) {
+            throw new Error('GitHub sign-in requires the server API. Use the Node server or a deployment with API support.');
+          }
           const payload = await response.json();
           setUser(payload.user);
         } else if (response.status !== 401 && response.status !== 404) {
@@ -34,8 +37,8 @@ export const AuthProvider = ({ children }) => {
     restoreSession();
   }, []);
 
-  const login = () => {
-    window.location.assign('/api/auth/login');
+  const login = (returnTo) => {
+    window.location.assign(returnTo === '/orin' ? '/api/auth/login?returnTo=%2Forin' : '/api/auth/login');
   };
 
   const logout = async () => {

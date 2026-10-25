@@ -24,10 +24,14 @@ export default function handler(req, res) {
     state
   });
 
-  res.setHeader('Set-Cookie', serializeCookie(req, STATE_COOKIE, state, {
+  const destination = req.query?.returnTo === '/orin' ? '/orin' : '/admin';
+  res.setHeader('Set-Cookie', [serializeCookie(req, STATE_COOKIE, state, {
     maxAge: 10 * 60,
     path: '/api/auth/callback'
-  }));
+  }), serializeCookie(req, 'portfolio_oauth_destination', destination, {
+    maxAge: 10 * 60,
+    path: '/api/auth/callback'
+  })]);
   res.statusCode = 302;
   res.setHeader('Location', `https://github.com/login/oauth/authorize?${parameters}`);
   return res.end();

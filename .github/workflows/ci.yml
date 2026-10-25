@@ -36,3 +36,16 @@ jobs:
 
       - name: Build production bundle
         run: npm run build
+
+  collector-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install isolated worker dependencies
+        run: npm ci --ignore-scripts --prefix scripts/orin
+      - name: Test collection and source validation
+        run: npm test --prefix scripts/orin

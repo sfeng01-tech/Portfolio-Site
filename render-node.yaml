@@ -1,0 +1,24 @@
+# Optional Node web service for ORIN and GitHub authentication.
+# Existing render.yaml stays static until you explicitly switch hosting.
+services:
+  - type: web
+    name: sahil-ai-portfolio-web
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: APP_ORIGIN
+        sync: false
+      - key: GITHUB_CLIENT_ID
+        sync: false
+      - key: GITHUB_CLIENT_SECRET
+        sync: false
+      - key: ORIN_DATABASE_URL
+        sync: false
+      - key: ORIN_INGEST_TOKEN
+        sync: false

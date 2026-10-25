@@ -1,0 +1,69 @@
+name: ORIN daily digest
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 07:17 Pacific daylight time / 06:17 Pacific standard time.
+    - cron: '17 14 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: orin-daily-digest
+  cancel-in-progress: false
+
+jobs:
+  digest:
+    if: github.event_name == 'workflow_dispatch' || vars.ORIN_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      ORIN_INGEST_URL: ${{ secrets.ORIN_INGEST_URL }}
+      ORIN_INGEST_TOKEN: ${{ secrets.ORIN_INGEST_TOKEN }}
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+      ORIN_BROWSER_STORAGE_STATE: ${{ secrets.ORIN_BROWSER_STORAGE_STATE }}
+      ORIN_CONFIG: ${{ vars.ORIN_CONFIG }}
+    steps:
+      - name: Check configuration
+        id: ready
+        shell: bash
+        run: |
+          if [[ -z "$ORIN_INGEST_URL" || -z "$ORIN_INGEST_TOKEN" || -z "$OPENROUTER_API_KEY" ]]; then
+            echo 'ready=false' >> "$GITHUB_OUTPUT"
+            echo 'ORIN skipped: configure ingest URL/token and OpenRouter repository secrets first.'
+          else
+            echo 'ready=true' >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v4
+        if: steps.ready.outputs.ready == 'true'
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        if: steps.ready.outputs.ready == 'true'
+        with:
+          node-version: '22'
+      - name: Install isolated worker dependencies
+        if: steps.ready.outputs.ready == 'true'
+        working-directory: scripts/orin
+        run: npm ci --ignore-scripts
+      - name: Install Chromium
+        if: steps.ready.outputs.ready == 'true' && env.ORIN_BROWSER_STORAGE_STATE != ''
+        working-directory: scripts/orin
+        run: npx playwright install --with-deps chromium
+      - name: Prepare source configuration
+        if: steps.ready.outputs.ready == 'true'
+        working-directory: scripts/orin
+        shell: bash
+        run: |
+          umask 077
+          if [[ -n "$ORIN_CONFIG" ]]; then
+            printf '%s' "$ORIN_CONFIG" > config.local.json
+          else
+            cp config.example.json config.local.json
+          fi
+      - name: Collect, group and publish
+        if: steps.ready.outputs.ready == 'true'
+        working-directory: scripts/orin
+        run: node collect.mjs --once
+      # No profile, digest, credential or browser-state caches/artifacts are uploaded.

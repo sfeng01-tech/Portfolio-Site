@@ -1,0 +1,18 @@
+{
+  "timezone": "America/Los_Angeles",
+  "model": "z-ai/glm-5.3-flash",
+  "maxItems": 60,
+  "maxAgeHours": 72,
+  "maxRunUsd": 0.05,
+  "topics": ["ROCm", "GPU", "kernel", "Instinct", "LLM", "inference", "training", "agent", "transformer", "distributed", "machine learning", "artificial intelligence", "AI", "Cerebras", "CUDA", "Triton", "compiler", "vLLM", "SGLang"],
+  "feeds": [
+    { "source": "arxiv", "url": "https://rss.arxiv.org/rss/cs.LG" },
+    { "source": "arxiv", "url": "https://rss.arxiv.org/rss/cs.DC" },
+    { "source": "hackernews", "url": "https://news.ycombinator.com/rss" }
+  ],
+  "social": [
+    { "source": "twitter", "enabled": false, "urls": ["https://x.com/search?q=ROCm%20OR%20GPU%20kernels%20OR%20LLM%20inference&f=live"] },
+    { "source": "linkedin", "enabled": false, "urls": ["https://www.linkedin.com/search/results/content/?keywords=ROCm%20GPU%20LLM"] },
+    { "source": "reddit", "enabled": false, "urls": ["https://www.reddit.com/r/LocalLLaMA/top/?t=day", "https://www.reddit.com/r/MachineLearning/top/?t=day"] }
+  ]
+}

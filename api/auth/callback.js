@@ -34,6 +34,7 @@ export default async function handler(req, res) {
   if (typeof code !== 'string') return redirectWithError(res, 'missing_code');
 
   const expectedState = parseCookies(req)[STATE_COOKIE];
+  const destination = parseCookies(req).portfolio_oauth_destination === '/orin' ? '/orin' : '/admin';
   if (!statesMatch(state, expectedState)) {
     return redirectWithError(res, 'invalid_state');
   }
@@ -80,10 +81,14 @@ export default async function handler(req, res) {
       serializeCookie(req, STATE_COOKIE, '', {
         maxAge: 0,
         path: '/api/auth/callback'
+      }),
+      serializeCookie(req, 'portfolio_oauth_destination', '', {
+        maxAge: 0,
+        path: '/api/auth/callback'
       })
     ]);
     res.statusCode = 302;
-    res.setHeader('Location', '/admin');
+    res.setHeader('Location', destination);
     return res.end();
   } catch {
     return redirectWithError(res, 'internal_error');
