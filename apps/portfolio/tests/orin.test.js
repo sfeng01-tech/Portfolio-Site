@@ -157,3 +157,25 @@ test('explicit feedback rejects booleans and out-of-range values before database
     }
   } finally {global.fetch=originalFetch;}
 });
+
+test('a same-day run is additive unless it explicitly asks to replace the day', () => {
+  const merged = validateIngest({ date: '2026-10-25', items: [entry] });
+  assert.equal(merged.replace, false, 'partial runs must not be able to shrink a published day');
+
+  const explicit = validateIngest({ date: '2026-10-25', items: [entry], replace: true });
+  assert.equal(explicit.replace, true);
+  assert.throws(() => validateIngest({ date: '2026-10-25', items: [entry], replace: 'yes' }));
+  assert.throws(() => validateIngest({ date: '2026-10-25', items: [entry], replace: 1 }));
+
+  // The flag survives suppression pruning, which is how the handler sees it.
+  const kept = suppressPreviousItems(explicit, [], []);
+  assert.equal(kept.replace, true);
+  assert.equal(kept.skipped, 0);
+
+  const two = validateIngest({ date: '2026-10-25', items: [entry, { ...entry, url: 'https://arxiv.org/abs/2601.99999', title: 'Another GPU paper' }] });
+  assert.equal(two.items.length, 2);
+  const pruned = suppressPreviousItems(two, [two.items[0].id], []);
+  assert.equal(pruned.items.length, 1);
+  assert.equal(pruned.skipped, 1);
+  assert.equal(pruned.replace, false, 'additive mode is the default even when items are pruned');
+});

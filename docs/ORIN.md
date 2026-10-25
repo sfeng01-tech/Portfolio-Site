@@ -16,7 +16,11 @@ All owner endpoints require the existing HttpOnly GitHub session cookie. `PATCH`
 
 - `GET /api/orin/digest`: latest available digest, or `?date=YYYY-MM-DD` for a selected day. `?saved=true` includes bookmarked items across dates (up to 500). Response: `{date, availableDates, digest, items, sourceStatus}`. `availableDates` contains the last 90 digest dates.
 - `PATCH /api/orin/items`: `{id, read?: boolean, saved?: boolean}`. Returns `{id, read, saved}`. Read/bookmark state survives re-ingestion and carries across days for the same canonical URL.
-- `POST /api/orin/ingest`: requires `Authorization: Bearer ORIN_INGEST_TOKEN` and JSON. The token is independent of browser authentication. Returns `{count, skipped, date}`. Articles already included on an earlier day are suppressed server-side, while same-day retries remain valid. Group references are pruned and affected summaries cleared to avoid describing excluded articles. Each run atomically replaces that day's membership and digest; shared items are upserted without losing read/bookmark state. Historical item records and bookmarks remain retained.
+- `POST /api/orin/ingest`: requires `Authorization: Bearer ORIN_INGEST_TOKEN` and JSON. The token is independent of browser authentication. Returns `{count, skipped, added, members, date, mode}`. Articles already included on an earlier day are suppressed server-side, while same-day retries remain valid. Group references are pruned and affected summaries cleared to avoid describing excluded articles.
+
+  Same-day membership is **additive**: a run adds its items to the day and the digest text is refreshed, but items an earlier run already published for that day are not removed. A partial run — a blocked source, a spent daily cap, a model outage — therefore cannot erase a richer digest, which is what previously left a day showing six finds after a thin later run. Pass `"replace": true` to opt back into swapping the day's membership outright, which is only appropriate when correcting a known-bad day. `added` reports how many of the run's items were newly attached and `members` the day's total afterwards, so a degrading source mix is visible in the run log. Shared items are upserted without losing read/bookmark state, and historical item records and bookmarks remain retained.
+
+  Note that retained items from an earlier run can be absent from the newest digest's `groups`, because that synthesis only saw the latest payload. They still appear in the digest item list and in the brain.
 
 Example ingestion payload (up to 100 items and 2 MB):
 

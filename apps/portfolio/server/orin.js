@@ -88,9 +88,10 @@ export function validateIngest(body) {
     if (!value || !['llm', 'keyword'].includes(value.method)) throw fail('Invalid ranking status');
     rankingStatus = { method: value.method, message: string(value.message, 500), model: string(value.model, 150, true) };
   }
+  if (body.replace !== undefined && typeof body.replace !== 'boolean') throw fail('Invalid replace flag');
   // Keep metadata in existing JSON storage: no database migration is required.
   if (digest && rankingStatus) digest.rankingStatus = rankingStatus;
-  return { date: body.date, items: uniqueItems, digest, sourceStatus };
+  return { date: body.date, items: uniqueItems, digest, sourceStatus, replace: body.replace === true };
 }
 
 // Pure transformation used after querying prior-day membership. Retain same-day

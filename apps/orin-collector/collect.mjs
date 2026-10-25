@@ -164,7 +164,7 @@ async function main() {
     state.days = Object.fromEntries(Object.entries(state.days).filter(([day]) => day >= cutoff));
     state.lastSuccess = new Date().toISOString();
     await saveJson(path.join(stateDir, 'state.json'), state);
-    console.info(`Published ORIN ${date}: ${result.count} items (${result.skipped || 0} previously delivered URLs skipped). ${sourceStatus.filter(row => ['blocked', 'error'].includes(row.status)).length} sources need attention.`);
+    console.info(`Published ORIN ${date}: ${result.count} items, ${result.added ?? result.count} new to the day (${result.members ?? result.count} members after merge, ${result.skipped || 0} previously delivered URLs skipped). ${sourceStatus.filter(row => ['blocked', 'error'].includes(row.status)).length} sources need attention.`);
   } finally { await lock.close(); await unlink(lockPath); }
 }
 
