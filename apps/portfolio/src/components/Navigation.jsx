@@ -10,6 +10,7 @@ const navLinks = [
   ...(publicSections.projects ? [['Projects', '/projects']] : []),
   ['Open Source', '/open-source'], ['Publications', '/publications'],
   ['Talks', '/talks'], ['Blog', '/blog'],
+  ['ORIN', '/orin'],
 ];
 
 export default function Navigation() {

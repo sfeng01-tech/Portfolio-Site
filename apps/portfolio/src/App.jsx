@@ -106,7 +106,12 @@ function App() {
             } />
 
             {/* Admin Routes */}
-            <Route path="/orin" element={<OrinEntry />} />
+            <Route path="/orin" element={
+              <>
+                <Navigation />
+                <OrinEntry />
+              </>
+            } />
             <Route path="/admin/login" element={<LoginPage />} />
             <Route path="/admin" element={
               <ProtectedRoute>

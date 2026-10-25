@@ -1,8 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowLeft, ArrowUpRight, Bookmark, Check, Compass, Github, Lock, LogOut, RefreshCw, Search, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { ArrowUpRight, Bookmark, Check, Compass, Github, Lock, LogOut, RefreshCw, Search, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import ThemeToggle from '../components/ThemeToggle';
 import OrinBrain from '../components/orin/OrinBrain';
 import { displaySource } from '../components/orin/brainGraph';
 import './orin.css';
@@ -78,7 +76,7 @@ export default function OrinPage() {
   }
 
   return <div className="orin-shell">
-    <header className="orin-header"><Link to="/" className="orin-back"><ArrowLeft size={15}/> Portfolio</Link><span className="orin-private"><Lock size={12}/> PERSONAL SPACE</span><ThemeToggle/>{user && <button onClick={logout} className="orin-icon" aria-label="Sign out"><LogOut size={17}/></button>}</header>
+    <div className="orin-topbar"><span className="orin-private"><Lock size={12}/> PERSONAL SPACE</span>{user && <button onClick={logout} className="orin-icon" aria-label="Sign out"><LogOut size={17}/></button>}</div>
     <main id="main-content" className="orin-main">
       <div className="orin-intro"><div className="eyebrow"><Compass size={15}/> A WORLD OF EXPLORATION & STUDY</div><h1>ORIN<span>.</span></h1><p>A quieter place to follow your curiosity.</p></div>
       {authLoading ? <div className="orin-state" role="status">Opening your space…</div> : !user ? <section className="orin-gate"><div className="orin-lock"><Lock size={25} strokeWidth={1.4}/></div><div className="eyebrow">JUST FOR YOU</div><h2>Your daily window into<br/>what’s worth understanding.</h2><p>Research, ideas, and conversations from across AI and systems. Gathered in one private reading space.</p><button className="button-primary" disabled={Boolean(authError)} onClick={() => login('/orin')}><Github size={17}/> Sign in with GitHub <ArrowUpRight size={16}/></button><small>Access is restricted to the portfolio owner’s GitHub account.</small>{authError && <p role="alert" className="orin-error">{authError}</p>}</section> : <>
