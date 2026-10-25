@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { requireIngestToken, requireOrinOwner, safeUrl, suppressPreviousItems, validDate, validateIngest } from '../server/orin.js';
-import digestHandler from '../api/orin/digest.js';
-import itemsHandler from '../api/orin/items.js';
-import ingestHandler from '../api/orin/ingest.js';
+import digestHandler from '../../../api/orin/digest.js';
+import itemsHandler from '../../../api/orin/items.js';
+import ingestHandler from '../../../api/orin/ingest.js';
 
 const entry = { source: 'arxiv', url: 'https://arxiv.org/abs/2601.12345', title: 'A GPU paper', excerpt: 'Untrusted extracted text', author: '', topics: ['ROCm'] };
 const response = () => ({ headers: {}, statusCode: 200, setHeader(key, value) { this.headers[key] = value; }, status(code) { this.statusCode = code; return this; }, json(body) { this.body = body; return this; } });

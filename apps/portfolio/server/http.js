@@ -2,20 +2,21 @@ import http from 'node:http';
 import { readFile, realpath, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import login from '../api/auth/login.js';
-import callback from '../api/auth/callback.js';
-import logout from '../api/auth/logout.js';
-import session from '../api/auth/session.js';
-import portfolio from '../api/portfolio.js';
-import digest from '../api/orin/digest.js';
-import items from '../api/orin/items.js';
-import ingest from '../api/orin/ingest.js';
+import login from '../../../api/auth/login.js';
+import callback from '../../../api/auth/callback.js';
+import logout from '../../../api/auth/logout.js';
+import session from '../../../api/auth/session.js';
+import portfolio from '../../../api/portfolio.js';
+import digest from '../../../api/orin/digest.js';
+import items from '../../../api/orin/items.js';
+import ingest from '../../../api/orin/ingest.js';
+import preferences from '../../../api/orin/preferences.js';
 
 const handlers = new Map([
   ['/api/auth/login', login], ['/api/auth/callback', callback],
   ['/api/auth/logout', logout], ['/api/auth/session', session],
   ['/api/portfolio', portfolio], ['/api/orin/digest', digest],
-  ['/api/orin/items', items], ['/api/orin/ingest', ingest]
+  ['/api/orin/preferences', preferences], ['/api/orin/items', items], ['/api/orin/ingest', ingest]
 ]);
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.ico': 'image/x-icon', '.woff': 'font/woff', '.woff2': 'font/woff2', '.pdf': 'application/pdf', '.txt': 'text/plain; charset=utf-8', '.xml': 'application/xml; charset=utf-8' };
 

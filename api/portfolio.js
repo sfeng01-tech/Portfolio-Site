@@ -3,7 +3,7 @@ import {
   getAuthorizedUser,
   githubFetch,
   requireSameOrigin
-} from '../server/githubAuth.js';
+} from '../apps/portfolio/server/githubAuth.js';
 
 const contentPath = `/repos/${REPOSITORY.owner}/${REPOSITORY.name}/contents/${REPOSITORY.dataFile}`;
 

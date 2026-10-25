@@ -25,7 +25,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
@@ -45,7 +45,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Install isolated worker dependencies
-        run: npm ci --ignore-scripts --prefix scripts/orin
+          cache: npm
+      - name: Install collector workspace dependencies
+        run: npm ci --workspace=@portfolio/orin-collector --ignore-scripts
       - name: Test collection and source validation
-        run: npm test --prefix scripts/orin
+        run: npm run test:orin

@@ -1,42 +1,24 @@
 {
-  "name": "portfolio-site",
+  "name": "portfolio-site-monorepo",
   "private": true,
   "version": "1.0.0",
-  "type": "module",
+  "packageManager": "npm@10.8.2",
+  "engines": {
+    "node": ">=20.19"
+  },
+  "workspaces": [
+    "apps/portfolio",
+    "apps/orin-collector"
+  ],
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "test": "node --test tests/*.test.js",
-    "start": "node server/http.js",
-    "dev:server": "node --env-file-if-exists=.env.local server/http.js"
-  },
-  "dependencies": {
-    "@babel/parser": "^7.28.5",
-    "@headlessui/react": "^2.2.9",
-    "@neondatabase/serverless": "^1.2.0",
-    "date-fns": "^4.1.0",
-    "easymde": "^2.20.0",
-    "lucide-react": "^0.263.1",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-hot-toast": "^2.6.0",
-    "react-markdown": "^9.0.1",
-    "react-router-dom": "^6.28.0",
-    "react-select": "^5.10.2",
-    "react-simplemde-editor": "^5.2.0",
-    "rehype-highlight": "^7.0.0",
-    "remark-gfm": "^4.0.0",
-    "slugify": "^1.6.6",
-    "zod": "^4.3.6"
-  },
-  "devDependencies": {
-    "@types/react": "^18.3.3",
-    "@types/react-dom": "^18.3.0",
-    "@vitejs/plugin-react": "^4.3.1",
-    "autoprefixer": "^10.4.20",
-    "postcss": "^8.4.49",
-    "tailwindcss": "^3.4.17",
-    "vite": "^6.0.5"
+    "dev": "npm run dev --workspace=@portfolio/site",
+    "build": "npm run build --workspace=@portfolio/site && node scripts/copy-portfolio-build.mjs",
+    "preview": "npm run preview --workspace=@portfolio/site",
+    "start": "npm run start --workspace=@portfolio/site",
+    "dev:server": "npm run dev:server --workspace=@portfolio/site",
+    "test:portfolio": "npm run test --workspace=@portfolio/site",
+    "test:orin": "npm run test --workspace=@portfolio/orin-collector",
+    "test": "npm run test:portfolio && npm run test:orin",
+    "collect": "npm run collect --workspace=@portfolio/orin-collector"
   }
 }

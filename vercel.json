@@ -1,5 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "npm ci --workspace=@portfolio/site",
+  "buildCommand": "npm run build --workspace=@portfolio/site",
+  "outputDirectory": "apps/portfolio/dist",
   "rewrites": [
     {
       "source": "/(.*)",

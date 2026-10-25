@@ -18,5 +18,5 @@ export const CATEGORIES = [
 export const REPO_CONFIG = {
   owner: 'sfeng01-tech',
   name: 'Portfolio-Site',
-  dataFile: 'src/data/portfolioData.js'
+  dataFile: 'apps/portfolio/src/data/portfolioData.js'
 };

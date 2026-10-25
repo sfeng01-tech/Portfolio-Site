@@ -2,7 +2,7 @@ services:
   - type: web
     name: sf-portfolio
     runtime: static
-    buildCommand: npm ci && npm run build
+    buildCommand: npm ci --workspace=@portfolio/site && npm run build
     staticPublishPath: ./dist
     autoDeployTrigger: commit
     routes:

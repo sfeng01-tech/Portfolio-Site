@@ -2,7 +2,7 @@ export const REPOSITORY = {
   owner: process.env.GITHUB_REPOSITORY_OWNER || 'sfeng01-tech',
   name: process.env.GITHUB_REPOSITORY_NAME || 'Portfolio-Site',
   branch: process.env.GITHUB_REPOSITORY_BRANCH || 'main',
-  dataFile: 'src/data/portfolioData.js'
+  dataFile: 'apps/portfolio/src/data/portfolioData.js'
 };
 
 export const TOKEN_COOKIE = 'portfolio_github_token';

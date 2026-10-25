@@ -2,7 +2,7 @@ import {
   TOKEN_COOKIE,
   requireSameOrigin,
   serializeCookie
-} from '../../server/githubAuth.js';
+} from '../../apps/portfolio/server/githubAuth.js';
 
 export default function handler(req, res) {
   if (req.method !== 'POST') {

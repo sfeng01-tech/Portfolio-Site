@@ -1,7 +1,7 @@
 import {
   getAuthorizedUser,
   publicUser
-} from '../../server/githubAuth.js';
+} from '../../apps/portfolio/server/githubAuth.js';
 
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');

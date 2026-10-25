@@ -32,6 +32,18 @@ export function canonicalUrl(value) {
   return url.toString();
 }
 
+// Only recognize explicit paper permalinks on known research platforms.
+export function paperIdentity(value) {
+  const url = new URL(value);
+  const prefixes = { 'arxiv.org': /^\/(?:abs|pdf)\//, 'export.arxiv.org': /^\/(?:abs|pdf)\//, 'huggingface.co': /^\/papers\//, 'alphaxiv.org': /^\/abs\//, 'www.alphaxiv.org': /^\/abs\// };
+  const prefix = prefixes[url.hostname];
+  if (prefix?.test(url.pathname)) {
+    const id = url.pathname.replace(prefix, '').replace(/\.pdf$/, '').replace(/v\d+$/, '');
+    if (/^(?:\d{4}\.\d{4,5}|[a-z-]+(?:\.[A-Z]{2})?\/\d{7})$/.test(id)) return `arxiv:${id}`;
+  }
+  return canonicalUrl(value);
+}
+
 export function plainText(value) {
   return String(value ?? '').replace(/<[^>]*>/g, ' ').replace(/&#(x[0-9a-f]+|\d+);/gi, (match, code) => {
     const number = code.toLowerCase().startsWith('x') ? parseInt(code.slice(1), 16) : Number(code);
@@ -46,7 +58,7 @@ export function normalizeItem(item, source, now = new Date()) {
   const title = plainText(item.title).slice(0, 500);
   const excerpt = plainText(item.excerpt).slice(0, 12000);
   if (!title || !excerpt) throw new Error('Missing title or excerpt');
-  const result = { id: createHash('sha256').update(url).digest('hex'), source, url, title, excerpt, collectedAt: now.toISOString() };
+  const result = { paperId: paperIdentity(url).startsWith('arxiv:') ? paperIdentity(url) : undefined, id: createHash('sha256').update(url).digest('hex'), source, url, title, excerpt, collectedAt: now.toISOString() };
   if (item.author) result.author = plainText(item.author).slice(0, 200);
   if (item.publishedAt && Number.isFinite(Date.parse(item.publishedAt))) result.publishedAt = new Date(item.publishedAt).toISOString();
   const metrics = Object.fromEntries(Object.entries(item.metrics || {}).filter(([key, value]) => ['likes', 'reposts', 'comments', 'score'].includes(key) && Number.isFinite(value) && value >= 0 && value <= 1e10).map(([key, value]) => [key, Math.floor(value)]));

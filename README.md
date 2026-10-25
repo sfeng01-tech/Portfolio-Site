@@ -22,12 +22,16 @@ A modern, responsive portfolio website for Tech Leads and AI Technical Program M
 - **Tailwind CSS**: Utility-first CSS framework
 - **Lucide React**: Beautiful icon library
 
+## Monorepo layout
+
+The repository uses npm workspaces with one lockfile. The portfolio and its server adapter live in `apps/portfolio`; the independently scheduled ORIN collector lives in `apps/orin-collector`. The API handlers stay at the repository root because Vercel discovers functions from the root `api/` directory. Root scripts provide common developer commands, and deployments can install only the workspace they run.
+
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 18+
-- npm or yarn
+- Node.js 22
+- npm 10
 
 ### Installation
 
@@ -37,9 +41,9 @@ git clone <your-repo-url>
 cd Portfolio-Site
 ```
 
-2. Install dependencies:
+2. Install all workspace dependencies from the repository root:
 ```bash
-npm install
+npm ci
 ```
 
 3. Start the development server:
@@ -55,7 +59,7 @@ npm run dev
 npm run build
 ```
 
-The built files will be in the `dist` directory.
+The portfolio build is in `apps/portfolio/dist`. The root `npm run build` also copies it to `dist` for the existing Render Static Site configuration.
 
 ### Preview Production Build
 
@@ -67,7 +71,7 @@ npm run preview
 
 ### Update Your Information
 
-Edit the `src/data/portfolioData.js` file to add your personal information:
+Edit `apps/portfolio/src/data/portfolioData.js` to add your personal information:
 
 1. **Profile**: Name, title, email, social links
 2. **Skills**: Organized by categories
@@ -81,7 +85,7 @@ Edit the `src/data/portfolioData.js` file to add your personal information:
 
 ### Customize Colors
 
-The color theme can be adjusted in `tailwind.config.js`:
+The color theme can be adjusted in `apps/portfolio/tailwind.config.js`:
 
 ```javascript
 colors: {
@@ -102,28 +106,28 @@ colors: {
 
 ```
 Portfolio-Site/
-├── src/
-│   ├── components/
-│   │   ├── Navigation.jsx
-│   │   ├── Hero.jsx
-│   │   ├── Experience.jsx
-│   │   ├── Projects.jsx
-│   │   ├── Publications.jsx
-│   │   ├── Talks.jsx
-│   │   ├── Blog.jsx
-│   │   ├── Photography.jsx
-│   │   └── Contact.jsx
-│   ├── data/
-│   │   └── portfolioData.js
-│   ├── App.jsx
-│   ├── main.jsx
-│   └── index.css
-├── public/
-├── index.html
-├── package.json
-├── vite.config.js
-└── tailwind.config.js
+├── apps/
+│   ├── portfolio/
+│   │   ├── src/
+│   │   │   ├── components/
+│   │   │   ├── data/
+│   │   │   ├── pages/
+│   │   │   └── App.jsx
+│   │   ├── server/
+│   │   ├── tests/
+│   │   ├── index.html
+│   │   └── package.json
+│   └── orin-collector/
+│       ├── collect.mjs
+│       ├── config.example.json
+│       └── package.json
+├── api/                 # root-discovered Vercel API functions
+├── docs/
+├── package.json         # workspace scripts and package manager root
+└── package-lock.json
 ```
+
+`npm test` runs both workspace test suites. For a local ORIN collection dry run, use `npm run collect --workspace=@portfolio/orin-collector -- --once --rss-only --dry-run`.
 
 ## Deployment
 
@@ -138,7 +142,7 @@ vercel
 ### Netlify
 ```bash
 npm run build
-# Drag and drop the 'dist' folder to Netlify
+# Drag and drop 'apps/portfolio/dist' to Netlify
 ```
 
 ### GitHub Pages
@@ -157,6 +161,6 @@ For questions or issues, please open an issue on GitHub.
 
 ## ORIN private reading room
 
-Visit `/orin` for the owner-only daily digest. Projects and Experience are currently hidden through `src/config/publicSections.js`, with their source retained.
+Visit `/orin` for the owner-only daily digest. Projects and Experience are currently hidden through `apps/portfolio/src/config/publicSections.js`, with their source retained.
 
 See [ORIN hosting and database setup](docs/ORIN.md) and [daily collection, model choices, and pricing](docs/ORIN-SOURCES.md). The current Render static service cannot execute API handlers; ORIN needs a Node web service (`npm start`) or compatible serverless hosting. `render-node.yaml` is an optional Node service blueprint; the existing static configuration remains unchanged.

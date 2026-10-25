@@ -7,7 +7,7 @@ import {
   githubFetch,
   parseCookies,
   serializeCookie
-} from '../../server/githubAuth.js';
+} from '../../apps/portfolio/server/githubAuth.js';
 
 const redirectWithError = (res, error) => {
   res.statusCode = 302;

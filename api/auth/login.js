@@ -3,7 +3,7 @@ import {
   STATE_COOKIE,
   getOrigin,
   serializeCookie
-} from '../../server/githubAuth.js';
+} from '../../apps/portfolio/server/githubAuth.js';
 
 export default function handler(req, res) {
   if (req.method !== 'GET') {

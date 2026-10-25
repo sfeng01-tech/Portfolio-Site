@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import login from '../api/auth/login.js';
+import login from '../../../api/auth/login.js';
 
 function response() {
   return { headers: {}, setHeader(key, value) { this.headers[key] = value; }, end() {}, status(code) { this.statusCode = code; return this; }, json(value) { this.body = value; return this; } };

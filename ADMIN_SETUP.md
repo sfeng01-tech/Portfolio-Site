@@ -130,7 +130,7 @@ All content uses the following standardized categories:
 
 1. **Edit Content** → Form in admin panel
 2. **Save** → Validates and commits to GitHub via API
-3. **GitHub** → Receives commit to `src/data/portfolioData.js`
+3. **GitHub** → Receives commit to `apps/portfolio/src/data/portfolioData.js`
 4. **Auto-Deploy** → Vercel/Netlify rebuilds site (2-3 minutes)
 5. **Live** → Changes appear on your portfolio
 
@@ -165,7 +165,7 @@ All content uses the following standardized categories:
 ## File Structure
 
 ```
-src/
+apps/portfolio/src/
 ├── components/
 │   ├── admin/
 │   │   ├── AdminLayout.jsx          # Admin panel layout

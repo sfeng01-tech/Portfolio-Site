@@ -1,6 +1,6 @@
 # ORIN daily collection
 
-ORIN prioritizes AI systems, GPU kernels, ROCm, LLM training/inference, agents, distributed computing and research papers. The independent Node runner in `scripts/orin` collects source excerpts, groups related findings with OpenRouter, and publishes to the private ingestion API. The website's Node service serves the authenticated reading space and Neon persists the digest; browser jobs run in GitHub Actions. The existing Render deployment is a static site and needs conversion to a Node web service before authentication and ingestion endpoints can work.
+ORIN prioritizes AI systems, GPU kernels, ROCm, LLM training/inference, agents, distributed computing and research papers. The independent Node runner in `apps/orin-collector` collects source excerpts, groups related findings with OpenRouter, and publishes to the private ingestion API. The website app in `apps/portfolio` serves the authenticated reading space and Neon persists the digest; browser jobs run in GitHub Actions. The existing Render deployment is a static site and needs conversion to a Node web service before authentication and ingestion endpoints can work.
 
 ## What runs now and what needs setup
 
@@ -18,7 +18,7 @@ All four requested newsletter feeds were checked on October 25, 2026. NLP News�
 
 Hugging Face uses [`/api/daily_papers`](https://huggingface.co/docs/huggingface_hub/en/package_reference/hf_api#huggingface_hub.HfApi.list_daily_papers). alphaXiv uses its current public website endpoint, `https://api.alphaxiv.org/papers/v3/feed?sort=Hot&interval=3%20Days&pageNum=0&pageSize=40`; this website API can change, and failures appear in Collection notes without stopping other sources. Observed Hugging Face upvotes/comments and alphaXiv public votes are retained when provided.
 
-To add a Substack publication, append `{ "source": "substack", "url": "https://PUBLICATION.substack.com/feed" }` to `feeds`. Substack documents its [publication RSS feeds](https://support.substack.com/hc/en-us/articles/360038239391-Is-there-an-RSS-feed-for-my-publication). Custom domains must also be explicitly added to the Substack allowlists in `scripts/orin/core.mjs` and `server/orin.js`; the configured publications' custom domains are already included. Use the final feed URL directly because collection rejects redirects.
+To add a Substack publication, append `{ "source": "substack", "url": "https://PUBLICATION.substack.com/feed" }` to `feeds`. Substack documents its [publication RSS feeds](https://support.substack.com/hc/en-us/articles/360038239391-Is-there-an-RSS-feed-for-my-publication). Custom domains must also be explicitly added to the Substack allowlists in `apps/orin-collector/core.mjs` and `apps/portfolio/server/orin.js`; the configured publications' custom domains are already included. Use the final feed URL directly because collection rejects redirects.
 
 If GitHub Actions has an `ORIN_CONFIG` variable, add the configured feed entries to that JSON too: it overrides `config.example.json`. Deploy the updated backend before running the updated collector so ingestion accepts the new source names. No database migration or additional scheduler is needed.
 
@@ -64,35 +64,35 @@ Set the Actions variable `REDDIT_USERNAME` to the Reddit account name used to re
 
 X uses the v2 recent-search endpoint (one query, `max_results=50`) rather than browser automation. Before the request, GitHub Actions restores and reserves a per-Pacific-day cache marker; a same-day scheduled rerun or manual rerun skips X. This bounds ORIN to one request and at most 50 returned posts per Pacific calendar day. At X's current $0.005 per post-read price, the upper estimate is $0.25/day or about $7.50 per 30-day month when all 50 posts are returned; actual use is charged per post returned. X has moved to pay-per-use pricing, so this is not a free-tier integration. [X Developer Platform pricing](https://developer.x.com/).
 
-Set repository **Actions variable** `ORIN_ENABLED` to `true` to enable scheduled runs. Manual workflow dispatch is available while the schedule is disabled and still checks required secrets. Set `ORIN_CONFIG` to a JSON copy of `scripts/orin/config.example.json` with desired sources enabled. Without that variable, the default public feeds run and social sources stay disabled. Disabled jobs or missing required secrets skip before dependency/browser installation. Do not turn on a browser source without its storage state; it will need login. Browser sessions are account credentials: use repository secrets, restrict workflow editing, and never attach them to logs, caches or artifacts. Sessions expire; renew manually when the digest reports a block. Because the runner receives source excerpts and sends them to OpenRouter, enable only material you want processed by that model/provider.
+Set repository **Actions variable** `ORIN_ENABLED` to `true` to enable scheduled runs. Manual workflow dispatch is available while the schedule is disabled and still checks required secrets. Set `ORIN_CONFIG` to a JSON copy of `apps/orin-collector/config.example.json` with desired sources enabled. Without that variable, the default public feeds run and social sources stay disabled. Disabled jobs or missing required secrets skip before dependency/browser installation. Do not turn on a browser source without its storage state; it will need login. Browser sessions are account credentials: use repository secrets, restrict workflow editing, and never attach them to logs, caches or artifacts. Sessions expire; renew manually when the digest reports a block. Because the runner receives source excerpts and sends them to OpenRouter, enable only material you want processed by that model/provider.
 
 This repository is private: standard GitHub-hosted runners consume the account's included plan minutes, then billable minutes. A 5–10 minute daily job would use roughly 150–300 minutes/month, but actual duration and browser installation overhead need measurement. Check your account allowance and spending limits. [GitHub billing documentation](https://docs.github.com/en/billing/concepts/product-billing/github-actions).
 
 For setup from a trusted workstation:
 
 ```sh
-npm ci --prefix scripts/orin
-npm exec --prefix scripts/orin -- playwright install chromium
-cp scripts/orin/config.example.json scripts/orin/config.local.json
+npm ci --workspace=@portfolio/orin-collector --ignore-scripts
+npm exec --workspace=@portfolio/orin-collector -- playwright install chromium
+cp apps/orin-collector/config.example.json apps/orin-collector/config.local.json
 # Set social enabled=true for desired browser sources in config.local.json.
-node scripts/orin/collect.mjs --login twitter
-node scripts/orin/collect.mjs --login linkedin
-node scripts/orin/collect.mjs --sync-sessions --repo sfeng01-tech/Portfolio-Site
+npm run collect --workspace=@portfolio/orin-collector -- --login twitter
+npm run collect --workspace=@portfolio/orin-collector -- --login linkedin
+npm run collect --workspace=@portfolio/orin-collector -- --sync-sessions --repo sfeng01-tech/Portfolio-Site
 ```
 
 Each login opens a dedicated ORIN profile. Sign in manually and close the window when done. `--sync-sessions` filters each profile to its source domains and uploads the combined state directly to `ORIN_BROWSER_STORAGE_STATE` through GitHub CLI stdin. It does not print the state or write a separate session export file. Third-party identity-provider cookies and origins are excluded. Large state is gzip-compressed before storage; the worker accepts raw JSON or a `gzip:`-prefixed secret. The optional `--export-sessions` command still writes a filtered `.state/browser-sessions.json` with permissions 0600 for manual setup; do not send that file through chat, upload it as an artifact, or commit it. Some providers bind sessions to a device/IP; the cloud runner may reject an exported session, in which case leave the source disabled until a supported authorized connection is available. [Playwright authentication storage-state documentation](https://playwright.dev/docs/auth).
 
 ## Local verification and operation
 
-Node 20.19+ is required (Node 22 recommended). Worker dependencies are isolated from the website package: `playwright` and `fast-xml-parser`, pinned by `scripts/orin/package-lock.json`.
+Node 22 is the repository runtime. ORIN's `playwright` and `fast-xml-parser` dependencies are declared only by its workspace package; the root lockfile records the versions for the whole monorepo. Hosting installs can select only the workspace they run.
 
 ```sh
-npm test --prefix scripts/orin
+npm run test:orin
 # Public feed fetch only, no model bill, no Keychain access, no publication:
-node scripts/orin/collect.mjs --once --rss-only --dry-run
+npm run collect --workspace=@portfolio/orin-collector -- --once --rss-only --dry-run
 ```
 
-Dry-run saves a private `.state/preview.json`; it does not advance the cursor. For publication, set the ingest URL/token and OpenRouter key in the worker environment, then run `node scripts/orin/collect.mjs --once`. On macOS, `--keychain-openrouter` reads service `openrouter-api-key` directly into process memory only when a model call is needed; it never prints the key. On GitHub Actions, use the environment secret instead. No credential is embedded in the client build.
+Dry-run saves a private `.state/preview.json`; it does not advance the cursor. For publication, set the ingest URL/token and OpenRouter key in the worker environment, then run `npm run collect --workspace=@portfolio/orin-collector -- --once`. On macOS, `--keychain-openrouter` reads service `openrouter-api-key` directly into process memory only when a model call is needed; it never prints the key. On GitHub Actions, use the environment secret instead. No credential is embedded in the client build.
 
 Each invocation is one pass; the workflow provides scheduling. Do not create an additional second scheduler for the same endpoint. A lock prevents overlapping runs on a persistent host. The worker records source checks, canonical URL deduplication, timestamps and a pending ingest payload. Local state advances only after a successful ingest, and same-day reruns rebuild the day's digest. URLs older than the configured 72-hour window are excluded when publication dates exist. Local state is pruned after 45 days; ephemeral Actions workers rely on the backend database to suppress URLs already included in earlier days and preserve read/saved state. The backend prunes empty groups after removing previously delivered items. Ephemeral workers can fetch the same source post again, but it should not appear as a new digest entry on another day. Browser cursors themselves do not persist across Actions jobs.
 

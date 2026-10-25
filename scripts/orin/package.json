@@ -1,8 +1,0 @@
-{
-  "name": "orin-local-runner",
-  "private": true,
-  "type": "module",
-  "engines": { "node": ">=20.19" },
-  "scripts": { "test": "node --test *.test.mjs", "collect": "node collect.mjs" },
-  "dependencies": { "fast-xml-parser": "^5.3.0", "playwright": "^1.56.0" }
-}

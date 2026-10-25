@@ -27,6 +27,21 @@ export function safeUrl(value, source) {
   for (const key of [...url.searchParams.keys()]) if (/^(utm_|fbclid|gclid)/i.test(key)) url.searchParams.delete(key);
   return url.toString();
 }
+export function paperIdFor(value) {
+  const url = new URL(value);
+  const prefixes = { 'arxiv.org': /^\/(?:abs|pdf)\//, 'export.arxiv.org': /^\/(?:abs|pdf)\//, 'huggingface.co': /^\/papers\//, 'alphaxiv.org': /^\/abs\//, 'www.alphaxiv.org': /^\/abs\// };
+  const prefix = prefixes[url.hostname];
+  if (!prefix?.test(url.pathname)) return undefined;
+  const id = url.pathname.replace(prefix, '').replace(/\.pdf$/, '').replace(/v\d+$/, '');
+  return /^(?:\d{4}\.\d{4,5}|[a-z-]+(?:\.[A-Z]{2})?\/\d{7})$/.test(id) ? `arxiv:${id}` : undefined;
+}
+export function validateRanking(value) {
+  if (value === undefined) return undefined;
+  const tracks = ['GPU kernels', 'Quantization', 'Inference', 'Training', 'Agents', 'AI hardware', 'Research'];
+  if (!value || value.method !== 'llm' || !Number.isInteger(value.score) || value.score < 0 || value.score > 100 || typeof value.discovery !== 'boolean'
+      || !Array.isArray(value.tracks) || value.tracks.length < 1 || value.tracks.length > 3 || value.tracks.some(track => !tracks.includes(track))) throw fail('Invalid ranking');
+  return { method: 'llm', score: value.score, tracks: value.tracks, reason: string(value.reason, 240), discovery: value.discovery };
+}
 const timestamp = value => {
   if (value === undefined || value === null || value === '') return null;
   if (typeof value !== 'string' || value.length > 40 || Number.isNaN(Date.parse(value))) throw fail('Invalid timestamp');
@@ -48,7 +63,7 @@ export function validateIngest(body) {
       }
     }
     if (item.topics !== undefined && (!Array.isArray(item.topics) || item.topics.length > 20)) throw fail('Invalid topics');
-    return { id: itemId(url), source: item.source, url, title: string(item.title, 500), excerpt: string(item.excerpt ?? item.text, 12000, true), author: string(item.author, 200, true), publishedAt: timestamp(item.publishedAt), collectedAt: timestamp(item.collectedAt), metrics, topics: (item.topics || []).map(topic => string(topic, 100)) };
+    return { ranking: validateRanking(item.ranking), paperId: paperIdFor(url), id: itemId(url), source: item.source, url, title: string(item.title, 500), excerpt: string(item.excerpt ?? item.text, 12000, true), author: string(item.author, 200, true), publishedAt: timestamp(item.publishedAt), collectedAt: timestamp(item.collectedAt), metrics, topics: (item.topics || []).map(topic => string(topic, 100)) };
   });
   const uniqueItems = [...new Map(items.map(item => [item.id, item])).values()];
   const knownUrls = new Set(uniqueItems.map(item => item.url));
@@ -67,14 +82,23 @@ export function validateIngest(body) {
     if (!ORIN_SOURCES.includes(status.source) || !['ok', 'blocked', 'error', 'disabled'].includes(status.status)) throw fail('Invalid source status');
     return { source: status.source, status: status.status, message: string(status.message, 500, true), checkedAt: timestamp(status.checkedAt), ...(status.url ? { url: safeUrl(status.url) } : {}) };
   });
+  let rankingStatus;
+  if (body.rankingStatus !== undefined) {
+    const value = body.rankingStatus;
+    if (!value || !['llm', 'keyword'].includes(value.method)) throw fail('Invalid ranking status');
+    rankingStatus = { method: value.method, message: string(value.message, 500), model: string(value.model, 150, true) };
+  }
+  // Keep metadata in existing JSON storage: no database migration is required.
+  if (digest && rankingStatus) digest.rankingStatus = rankingStatus;
   return { date: body.date, items: uniqueItems, digest, sourceStatus };
 }
 
 // Pure transformation used after querying prior-day membership. Retain same-day
 // retries; remove summaries that could otherwise describe an excluded article.
-export function suppressPreviousItems(payload, previousIds) {
+export function suppressPreviousItems(payload, previousIds, previousPaperIds = []) {
   const excluded = new Set(previousIds);
-  const items = payload.items.filter(item => !excluded.has(item.id));
+  const papers = new Set(previousPaperIds);
+  const items = payload.items.filter(item => !excluded.has(item.id) && !(item.paperId && papers.has(item.paperId)));
   if (items.length === payload.items.length) return { ...payload, skipped: 0 };
   const keptUrls = new Set(items.map(item => item.url));
   const digest = payload.digest ? {
