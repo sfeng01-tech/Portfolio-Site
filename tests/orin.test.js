@@ -25,6 +25,8 @@ test('URLs reject unsafe schemes, credentials, local targets, and mismatched sou
   assert.equal(safeUrl('https://x.com/person/status/1', 'twitter'), 'https://x.com/person/status/1');
   assert.equal(safeUrl('https://news.google.com/rss/articles/CBMi-test', 'google_news'), 'https://news.google.com/rss/articles/CBMi-test');
   assert.throws(() => safeUrl('https://news.google.com.evil.test/rss/articles/1', 'google_news'));
+  assert.equal(safeUrl('https://www.threads.com/@gpu_dev/post/abc', 'threads'), 'https://www.threads.com/@gpu_dev/post/abc');
+  assert.throws(() => safeUrl('https://threads.com.evil.test/@gpu_dev/post/abc', 'threads'));
   assert.equal(validDate('2026-02-30'), false);
 });
 

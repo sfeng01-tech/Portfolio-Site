@@ -7,6 +7,7 @@ export const SOURCE_HOSTS = {
   arxiv: ['arxiv.org', 'rss.arxiv.org', 'export.arxiv.org'],
   hackernews: ['news.ycombinator.com'],
   google_news: ['news.google.com'],
+  threads: ['graph.threads.net', 'threads.com', 'www.threads.com', 'threads.net', 'www.threads.net'],
   rss: ['rocm.blogs.amd.com', 'developer.nvidia.com', 'huggingface.co', 'pytorch.org'],
 };
 

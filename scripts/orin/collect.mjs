@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { spawnSync } from 'node:child_process';
 import { allowedSourceUrl, dailyDate, selectItems } from './core.mjs';
-import { collectFeed, collectSocial, createRedditApi, createXApi } from './sources.mjs';
+import { collectFeed, collectSocial, createRedditApi, createThreadsApi, createXApi } from './sources.mjs';
 import { summarize } from './summarize.mjs';
 import { filterBrowserState, encodeBrowserStates, decodeBrowserStates } from './session-state.mjs';
 
@@ -84,6 +84,7 @@ async function main() {
     const browserStates = process.env.ORIN_BROWSER_STORAGE_STATE ? decodeBrowserStates(process.env.ORIN_BROWSER_STORAGE_STATE) : {};
     const redditApi = config.feeds.some(feed => feed.source === 'reddit') ? createRedditApi() : null;
     const xApi = config.feeds.some(feed => feed.source === 'twitter') ? createXApi() : null;
+    const threadsApi = config.feeds.some(feed => feed.source === 'threads') ? createThreadsApi() : null;
     const collected = [...(state.days?.[date] || [])], sourceStatus = [];
     const status = (source, url, value, message) => sourceStatus.push({ source, url, status: value, message: message.slice(0, 500), checkedAt: new Date().toISOString() });
     for (const feed of config.feeds) {
@@ -96,7 +97,7 @@ async function main() {
           if (!process.env.X_API_BEARER_TOKEN) throw new Error('X API is not configured; add the X_API_BEARER_TOKEN Actions secret');
           if (process.env.ORIN_X_API_ALREADY_USED === 'true') throw new Error(`X daily cap already used for ${date}; skipping this run`);
         }
-        const items = await collectFeed(feed, { redditApi, xApi }); collected.push(...items);
+        const items = await collectFeed(feed, { redditApi, xApi, threadsApi }); collected.push(...items);
         const sourceLabel = feed.source === 'reddit' ? 'entries observed through Reddit OAuth API' : feed.source === 'twitter' ? 'posts observed through X API v2 (daily cap: 50)' : 'feed entries observed';
         status(feed.source, feed.url, 'ok', `${items.length} ${sourceLabel}`);
       }

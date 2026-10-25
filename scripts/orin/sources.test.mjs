@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { collectFeed, createRedditApi, createXApi } from './sources.mjs';
+import { collectFeed, createRedditApi, createThreadsApi, createXApi } from './sources.mjs';
 
 const feed = { source: 'reddit', url: 'https://oauth.reddit.com/r/LocalLLaMA/top?t=day&limit=50' };
 
@@ -65,4 +65,23 @@ test('X API v2 searches at most 50 posts and maps public engagement', async () =
   assert.deepEqual(item.metrics, { likes: 12, reposts: 3, comments: 2 });
   const tooMany = createXApi({ bearerToken: 'test-token', fetchImpl: async () => { throw new Error('must not fetch'); } });
   await assert.rejects(() => tooMany({ source: 'twitter', url: url.replace('max_results=50', 'max_results=100') }), /daily read cap/);
+});
+
+test('Threads keyword search uses the user token and maps public posts', async () => {
+  const url = 'https://graph.threads.net/v1.0/keyword_search?q=ROCm&search_type=TOP&search_mode=KEYWORD&fields=id%2Ctext%2Cmedia_type%2Cpermalink%2Ctimestamp%2Cusername&limit=50';
+  const threadsApi = createThreadsApi({ accessToken: 'threads-user-token', fetchImpl: async (request, options) => {
+    assert.equal(new URL(request).searchParams.get('q'), 'ROCm');
+    assert.equal(new URL(request).searchParams.get('limit'), '50');
+    assert.equal(options.headers.Authorization, 'Bearer threads-user-token');
+    return new Response(JSON.stringify({ data: [{
+      id: '123', text: 'ROCm kernel update', username: 'gpu_dev',
+      permalink: 'https://www.threads.com/@gpu_dev/post/abc', timestamp: '2026-10-25T12:00:00Z',
+    }] }));
+  } });
+  const [item] = await collectFeed({ source: 'threads', url }, { threadsApi });
+  assert.equal(item.source, 'threads');
+  assert.equal(item.url, 'https://www.threads.com/@gpu_dev/post/abc');
+  assert.equal(item.author, 'gpu_dev');
+  const missing = createThreadsApi({ accessToken: '' });
+  await assert.rejects(() => missing({ source: 'threads', url }), /THREADS_ACCESS_TOKEN/);
 });

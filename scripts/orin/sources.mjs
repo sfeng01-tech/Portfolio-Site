@@ -136,7 +136,37 @@ export function createXApi({ bearerToken = process.env.X_API_BEARER_TOKEN, fetch
   };
 }
 
-export async function collectFeed(feed, { redditApi, xApi } = {}) {
+export function createThreadsApi({ accessToken = process.env.THREADS_ACCESS_TOKEN, fetchImpl = fetch } = {}) {
+  return async function collectThreads(feed) {
+    if (feed.source !== 'threads' || !allowedSourceUrl('threads', feed.url)) throw new Error('Threads source URL is outside the configured allowlist');
+    const url = new URL(feed.url);
+    if (url.hostname !== 'graph.threads.net' || !/^\/v\d+\.\d+\/keyword_search$/.test(url.pathname) || !url.searchParams.has('q')) throw new Error('Threads source must use the keyword search endpoint');
+    if (!accessToken) throw new Error('Threads API is not configured; set the THREADS_ACCESS_TOKEN Actions secret');
+    const limit = Number(url.searchParams.get('limit') || 25);
+    if (!Number.isInteger(limit) || limit < 1 || limit > 100) throw new Error('Threads search limit must be 1–100 posts');
+    const response = await fetchImpl(url, {
+      redirect: 'error', signal: AbortSignal.timeout(30_000),
+      headers: { Authorization: `Bearer ${accessToken}`, Accept: 'application/json' },
+    });
+    if (response.status === 429) throw new Error('Threads API rate limited this source; waiting until next scheduled run');
+    if (!response.ok) throw new Error(`Threads API returned HTTP ${response.status}; check token and keyword-search permission`);
+    const payload = JSON.parse(await boundedText(response, 1_000_000));
+    if (!Array.isArray(payload.data)) throw new Error('Threads API returned an invalid search result');
+    return payload.data.slice(0, limit).flatMap(post => {
+      try {
+        return [normalizeItem({
+          url: post.permalink,
+          title: String(post.text || '').slice(0, 160),
+          excerpt: post.text,
+          author: post.username,
+          publishedAt: post.timestamp,
+        }, 'threads')];
+      } catch { return []; }
+    });
+  };
+}
+
+export async function collectFeed(feed, { redditApi, xApi, threadsApi } = {}) {
   if (feed.source === 'twitter') {
     if (!xApi) throw new Error('X API is not configured; browser collection is disabled for the daily cap');
     return xApi(feed);
@@ -144,6 +174,10 @@ export async function collectFeed(feed, { redditApi, xApi } = {}) {
   if (feed.source === 'reddit') {
     if (!redditApi) throw new Error('Reddit OAuth is not configured; public RSS collection is disabled');
     return redditApi(feed);
+  }
+  if (feed.source === 'threads') {
+    if (!threadsApi) throw new Error('Threads API is not configured; set the THREADS_ACCESS_TOKEN Actions secret');
+    return threadsApi(feed);
   }
   if (!['arxiv', 'hackernews', 'google_news', 'reddit', 'rss'].includes(feed.source) || !allowedSourceUrl(feed.source, feed.url)) throw new Error('Feed URL is outside the configured source allowlist');
   const response = await fetch(feed.url, { redirect: 'error', signal: AbortSignal.timeout(30_000), headers: { 'User-Agent': 'ORIN-personal-digest/1.0', Accept: 'application/rss+xml, application/atom+xml, application/xml' } });

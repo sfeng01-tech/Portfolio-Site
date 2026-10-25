@@ -1,7 +1,7 @@
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { getAuthorizedUser, requireSameOrigin } from './githubAuth.js';
 
-export const ORIN_SOURCES = ['twitter', 'linkedin', 'reddit', 'arxiv', 'hackernews', 'google_news', 'rss'];
+export const ORIN_SOURCES = ['twitter', 'linkedin', 'reddit', 'arxiv', 'hackernews', 'google_news', 'threads', 'rss'];
 const fail = (message, status = 400) => Object.assign(new Error(message), { status });
 const string = (value, max, optional = false) => {
   if (optional && (value === undefined || value === null || value === '')) return '';
@@ -20,7 +20,7 @@ export function safeUrl(value, source) {
   if (url.protocol !== 'https:' || url.username || url.password || url.port
       || !hostname.includes('.') || hostname.endsWith('.local') || hostname.endsWith('.internal')
       || hostname === 'localhost' || /^[\d.]+$/.test(hostname) || hostname.includes(':')) throw fail('Invalid article URL');
-  const domains = { twitter: ['twitter.com', 'x.com'], linkedin: ['linkedin.com'], reddit: ['reddit.com', 'redd.it'], arxiv: ['arxiv.org'], hackernews: ['news.ycombinator.com'], google_news: ['news.google.com'] };
+  const domains = { twitter: ['twitter.com', 'x.com'], linkedin: ['linkedin.com'], reddit: ['reddit.com', 'redd.it'], arxiv: ['arxiv.org'], hackernews: ['news.ycombinator.com'], google_news: ['news.google.com'], threads: ['threads.com', 'threads.net'] };
   if (domains[source] && !domains[source].some(domain => hostname === domain || hostname.endsWith(`.${domain}`))) throw fail('URL does not match its source');
   url.hash = '';
   for (const key of [...url.searchParams.keys()]) if (/^(utm_|fbclid|gclid)/i.test(key)) url.searchParams.delete(key);
