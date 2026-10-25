@@ -1,5 +1,4 @@
-import { ORIN_DEMO_MODE, orinSql, privateResponse, requireOrinOwner, sendError, validDate } from '../../apps/portfolio/server/orin.js';
-import { getDemoDigest } from '../../apps/portfolio/server/orinDemo.js';
+import { orinSql, privateResponse, requireOrinOwner, sendError, validDate } from '../../apps/portfolio/server/orin.js';
 
 export default async function handler(req, res) {
   privateResponse(res);
@@ -7,10 +6,6 @@ export default async function handler(req, res) {
   try {
     await requireOrinOwner(req);
     if (req.query?.date !== undefined && !validDate(req.query.date)) return res.status(400).json({ error: 'Invalid date' });
-    if (ORIN_DEMO_MODE()) {
-      const date = req.query?.date;
-      return res.status(200).json(getDemoDigest(date));
-    }
     const sql = await orinSql();
     const days = await sql`SELECT day::text FROM orin_digests ORDER BY day DESC LIMIT 90`;
     const date = req.query?.date || days[0]?.day || null;

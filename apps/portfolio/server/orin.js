@@ -2,8 +2,6 @@ import { createHash, timingSafeEqual } from 'node:crypto';
 import { getAuthorizedOrinUser, requireSameOrigin } from './githubAuth.js';
 
 export const ORIN_SOURCES = ['twitter', 'linkedin', 'reddit', 'arxiv', 'hackernews', 'google_news', 'threads', 'huggingface', 'alphaxiv', 'substack', 'rss'];
-export const ORIN_DEMO_MODE = () => process.env.ORIN_DEMO_MODE === 'true';
-export const demoOrinUser = () => ({ token: 'demo', user: { login: 'demo', name: 'ORIN Demo', avatar_url: '', html_url: '' } });
 const fail = (message, status = 400) => Object.assign(new Error(message), { status });
 const string = (value, max, optional = false) => {
   if (optional && (value === undefined || value === null || value === '')) return '';
@@ -140,7 +138,6 @@ export function requireIngestToken(req) {
   if (actualBuffer.length !== expectedBuffer.length || !timingSafeEqual(actualBuffer, expectedBuffer)) throw fail('Not authenticated', 401);
 }
 export async function requireOrinOwner(req, write = false) {
-  if (ORIN_DEMO_MODE()) return demoOrinUser();
   let auth;
   try { auth = await getAuthorizedOrinUser(req); } catch { throw fail('Unable to verify GitHub session', 502); }
   if (!auth) throw fail('Not authenticated', 401);

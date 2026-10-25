@@ -1,5 +1,4 @@
-import { ORIN_DEMO_MODE, orinSql, privateResponse, requireIngestToken, requireOrinOwner, sendError, validateCategory } from '../../apps/portfolio/server/orin.js';
-import { getDemoCategories } from '../../apps/portfolio/server/orinDemo.js';
+import { orinSql, privateResponse, requireIngestToken, requireOrinOwner, sendError, validateCategory } from '../../apps/portfolio/server/orin.js';
 
 // Editable category taxonomy backing the ORIN brain segments and the model
 // classifier. The collector reads it with the ingestion token; the owner
@@ -10,7 +9,6 @@ export default async function handler(req, res) {
   try {
     if (req.method === 'GET') {
       try { requireIngestToken(req); } catch { await requireOrinOwner(req); }
-      if (ORIN_DEMO_MODE()) return res.status(200).json({ categories: getDemoCategories() });
       const sql = await orinSql();
       const rows = await sql`SELECT c.label AS label, (SELECT count(*) FROM orin_items i WHERE i.item->>'category' = c.label)::int AS items FROM orin_categories c ORDER BY c.label`;
       return res.status(200).json({ categories: rows });
