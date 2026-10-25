@@ -106,10 +106,14 @@ export function selectItems(items, config, seen = {}, date, now = new Date()) {
 export function validateDigest(raw, items) {
   if (!raw || typeof raw.title !== 'string' || !raw.title.trim() || typeof raw.summary !== 'string' || !raw.summary.trim() || !Array.isArray(raw.groups) || !raw.groups.length || raw.groups.length > 30) throw new Error('Invalid model digest');
   const allowed = new Set(items.map(item => item.url));
-  const groups = raw.groups.map(group => {
-    if (typeof group.title !== 'string' || !group.title.trim() || typeof group.summary !== 'string' || !group.summary.trim() || !Array.isArray(group.urls) || !group.urls.length || group.urls.some(url => !allowed.has(url))) throw new Error('Model introduced missing or unknown sources');
-    return { title: group.title.slice(0, 200), summary: group.summary.slice(0, 4000), urls: [...new Set(group.urls)] };
+  const groups = raw.groups.flatMap(group => {
+    if (typeof group.title !== 'string' || !group.title.trim() || typeof group.summary !== 'string' || !group.summary.trim() || !Array.isArray(group.urls) || !group.urls.length) throw new Error('Invalid model digest group');
+    // Keep only exact input URLs. Long redirect-style RSS links can be mangled
+    // by a model; discard those citations instead of failing the entire digest.
+    const urls = [...new Set(group.urls.filter(url => allowed.has(url)))];
+    return urls.length ? [{ title: group.title.slice(0, 200), summary: group.summary.slice(0, 4000), urls }] : [];
   });
+  if (!groups.length) throw new Error('Model digest has no valid source citations');
   return { title: raw.title.slice(0, 200), summary: raw.summary.slice(0, 6000), groups };
 }
 

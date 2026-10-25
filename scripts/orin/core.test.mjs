@@ -22,9 +22,9 @@ test('selection filters irrelevant, stale and previous-day items but permits sam
 
 test('model output may only cite supplied URLs', () => {
   const items = [{ url: 'https://arxiv.org/abs/1' }];
-  assert.throws(() => validateDigest({ title: 'Digest', summary: 'Summary', groups: [{ title: 'GPU', summary: 'Summary', urls: ['https://evil.test/'] }] }, items), /unknown sources/);
-  const raw = { title: 'Digest', summary: 'Summary', groups: [{ title: 'GPU', summary: 'Summary', urls: [items[0].url] }] };
-  assert.deepEqual(validateDigest(raw, items), raw);
+  assert.throws(() => validateDigest({ title: 'Digest', summary: 'Summary', groups: [{ title: 'GPU', summary: 'Summary', urls: ['https://evil.test/'] }] }, items), /no valid source citations/);
+  const raw = { title: 'Digest', summary: 'Summary', groups: [{ title: 'GPU', summary: 'Summary', urls: [items[0].url, 'https://evil.test/'] }] };
+  assert.deepEqual(validateDigest(raw, items), { ...raw, groups: [{ ...raw.groups[0], urls: [items[0].url] }] });
 });
 
 test('feed parsing uses HN discussion provenance and rejects XML entities', () => {
