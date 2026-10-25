@@ -60,3 +60,8 @@
 @media(max-width:600px) { .orin-shell {padding:0 22px;} .orin-header {gap:9px;} .orin-private {font-size:8px;margin-right:0;} .orin-intro {padding-top:45px;} .orin-intro h1 {font-size:65px;} .orin-gate h2 {font-size:27px;} .orin-gate {padding-inline:18px;} .orin-toolbar {flex-wrap:wrap;} .orin-tabs {flex:1;} .orin-tabs button {padding-inline:10px;} .orin-date {order:3;width:100%;} .orin-item h3 {font-size:20px;} .orin-item-bottom {flex-wrap:wrap;} .orin-footer {flex-direction:column;} }
 .orin-gate .button-primary:disabled { opacity:.5; cursor:not-allowed; }
 .orin-metrics { display:flex; flex-wrap:wrap; gap:14px; font:9px monospace; color:var(--muted); margin-top:12px; }
+
+.orin-ranking { font-size: .85rem; opacity: .8; }
+.orin-ranking span { font-weight: 600; margin-right: .35rem; }
+.orin-item-actions { flex-wrap: wrap; }
+.orin-item-actions button[aria-pressed="true"] { color: var(--accent, #678b70); }

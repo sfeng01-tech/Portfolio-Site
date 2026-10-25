@@ -119,3 +119,14 @@ test('expanded daily collection accepts 40 source checks and rejects overflow', 
   assert.equal(payload.sourceStatus.length, 40);
   assert.throws(() => validateIngest({ date: '2026-10-25', items: [], sourceStatus: Array(41).fill(status) }), /Invalid source status/);
 });
+
+
+test('ranking metadata is bounded and paper identity is derived from the link', () => {
+  const ranking = {method:'llm',score:90,tracks:['Quantization'],reason:'Memory-efficient inference.',discovery:false};
+  const payload=validateIngest({date:'2026-10-25',items:[{...entry,ranking,paperId:'arxiv:fake'}]});
+  assert.equal(payload.items[0].paperId,'arxiv:2601.12345');
+  assert.equal(payload.items[0].ranking.score,90);
+  assert.throws(()=>validateIngest({date:'2026-10-25',items:[{...entry,ranking:{...ranking,score:101}}]}));
+  const suppressed=suppressPreviousItems(payload,[],['arxiv:2601.12345']);
+  assert.equal(suppressed.items.length,0);
+});

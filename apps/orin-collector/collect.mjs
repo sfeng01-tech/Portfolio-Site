@@ -7,6 +7,9 @@ import { spawnSync } from 'node:child_process';
 import { allowedSourceUrl, dailyDate, selectItems } from './core.mjs';
 import { collectFeed, collectSocial, createRedditApi, createThreadsApi, createXApi } from './sources.mjs';
 import { summarize } from './summarize.mjs';
+import { rankItems, freshCandidates, rankingConfig } from './ranking.mjs';
+import { paperIdentity } from './core.mjs';
+import { boundedText } from './sources.mjs';
 import { filterBrowserState, encodeBrowserStates, decodeBrowserStates } from './session-state.mjs';
 
 const home = path.dirname(fileURLToPath(import.meta.url));
@@ -32,6 +35,7 @@ function validateConfig(config) {
   if (!(config.maxAgeHours > 0 && config.maxAgeHours <= 168) || !(config.maxRunUsd > 0 && config.maxRunUsd <= 1)) throw new Error('Invalid freshness or run budget');
   if (!Array.isArray(config.feeds) || !Array.isArray(config.social) || config.feeds.length + config.social.length > 40) throw new Error('At most 40 configured sources');
   dailyDate(config.timezone);
+  rankingConfig(config);
   return config;
 }
 
@@ -110,7 +114,8 @@ async function main() {
         collected.push(...result.items); status(source.source, source.urls[0], result.status, result.message);
       } catch { status(source.source, source.urls?.[0] || '', 'error', 'Browser collection failed; inspect dedicated session and installed browser before next run'); }
     }
-    const items = selectItems(collected, config, state.seen, date);
+    const candidates = freshCandidates(collected, config, state.seen, date);
+    let items = selectItems(candidates, config, {}, date);
     const payload = { date, items, sourceStatus };
     // Dry-run never reads a key, calls a model, publishes, or advances dedup state.
     if (values['dry-run']) {
@@ -123,7 +128,7 @@ async function main() {
     const token = process.env.ORIN_INGEST_TOKEN;
     const endpointUrl = endpoint ? new URL(endpoint) : null;
     if (!endpointUrl || (endpointUrl.protocol !== 'https:' && !(endpointUrl.protocol === 'http:' && ['localhost', '127.0.0.1'].includes(endpointUrl.hostname))) || endpointUrl.pathname !== '/api/orin/ingest' || endpointUrl.username || endpointUrl.password || !token || token.length < 32) throw new Error('Set HTTPS ORIN_INGEST_URL ending /api/orin/ingest and ORIN_INGEST_TOKEN (32+ characters)');
-    if (!values['no-model'] && items.length) {
+    if (!values['no-model'] && candidates.length) {
       let apiKey = process.env.OPENROUTER_API_KEY;
       if (!apiKey && values['keychain-openrouter']) {
         if (process.platform !== 'darwin') throw new Error('Keychain is only available on macOS; configure runner environment secret');
@@ -131,7 +136,20 @@ async function main() {
         if (result.status !== 0) throw new Error('Unable to read OpenRouter key from Keychain');
         apiKey = result.stdout.trim();
       }
-      payload.digest = await summarize(items, config, apiKey, date);
+      let examples = [];
+      try {
+        const response = await fetch(new URL('/api/orin/preferences', endpointUrl), { redirect: 'error', signal: AbortSignal.timeout(15_000), headers: { Authorization: `Bearer ${token}` } });
+        if (!response.ok) throw new Error('Preferences unavailable');
+        const preferences = JSON.parse(await boundedText(response, 100_000));
+        if (!Array.isArray(preferences.examples)) throw new Error('Invalid preferences');
+        examples = preferences.examples;
+      } catch { console.info('Personal feedback unavailable this run; ranking uses configured interests.'); }
+      const ranked = await rankItems(candidates, config, { apiKey, examples, date });
+      items = ranked.items;
+      payload.items = items;
+      payload.rankingStatus = ranked.status;
+      console.info(`${ranked.status.message}; reserved ranking budget $${ranked.reservedUsd.toFixed(4)}`);
+      if (items.length) payload.digest = await summarize(items, { ...config, maxRunUsd: config.maxRunUsd - ranked.reservedUsd }, apiKey, date);
     }
     await saveJson(path.join(stateDir, 'pending.json'), payload);
     const response = await fetch(endpoint, { method: 'POST', redirect: 'error', signal: AbortSignal.timeout(60_000), headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
@@ -139,7 +157,7 @@ async function main() {
     const result = await response.json();
     if (!Number.isInteger(result.count) || result.date !== date) throw new Error('Ingest acknowledgment was invalid; local state not advanced');
     state.seen ||= {}; state.days ||= {};
-    for (const item of items) state.seen[item.url] = date;
+    for (const item of items) { state.seen[item.url] = date; state.seen[paperIdentity(item.url)] = date; }
     state.days[date] = items;
     const cutoff = new Date(Date.now() - 45 * 86400000).toISOString().slice(0, 10);
     state.seen = Object.fromEntries(Object.entries(state.seen).filter(([, seenDate]) => seenDate >= cutoff));
