@@ -30,7 +30,7 @@ async function resolveApiKey({ keychainOpenrouter }) {
 async function main() {
   const databaseUrl = process.env.ORIN_DATABASE_URL;
   if (!databaseUrl) throw new Error('Set ORIN_DATABASE_URL; the script touches only category fields');
-  const apiKey = await resolveApiKey(values);
+  const apiKey = await resolveApiKey({ keychainOpenrouter: values['keychain-openrouter'] });
   const limit = Math.min(Math.max(Number.parseInt(values.limit, 10) || 400, 1), 2000);
   const batchSize = Math.min(Math.max(Number.parseInt(values.batch, 10) || CATEGORY_DEFAULTS.batchSize, 5), 60);
   const model = values.model || CATEGORY_DEFAULTS.model;
@@ -46,6 +46,10 @@ async function main() {
   for (let index = 0; index < pending.length; index += batchSize) {
     const batch = pending.slice(index, index + batchSize);
     const assignments = await categorizeBatch(batch, categories, { apiKey, model });
+    if (values['dry-run']) {
+      const titles = new Map(batch.map(item => [item.id, item.title]));
+      for (const row of assignments) console.info(`  ${titles.get(row.id) || row.id} → ${row.category}`);
+    }
     if (!values['dry-run']) {
       await sql.transaction(assignments.map(row => sql`UPDATE orin_items SET item = jsonb_set(jsonb_set(item, '{category}', to_jsonb(${row.category}::text), true), '{categorySource}', '"model"'::jsonb, true), updated_at = now() WHERE id = ${row.id} AND item->>'category' IS NULL`));
     }
