@@ -12,13 +12,25 @@ const { values } = parseArgs({ options: {
   batch: { type: 'string', default: '30' },
   model: { type: 'string' },
   'dry-run': { type: 'boolean' },
+  'keychain-openrouter': { type: 'boolean' },
 } });
+
+async function resolveApiKey({ keychainOpenrouter }) {
+  if (process.env.OPENROUTER_API_KEY) return process.env.OPENROUTER_API_KEY;
+  if (!keychainOpenrouter) throw new Error('Set OPENROUTER_API_KEY or pass --keychain-openrouter to read it from the macOS Keychain');
+  if (process.platform !== 'darwin') throw new Error('Keychain is only available on macOS; export OPENROUTER_API_KEY instead');
+  const { spawnSync } = await import('node:child_process');
+  const result = spawnSync('/usr/bin/security', ['find-generic-password', '-s', 'openrouter-api-key', '-w'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
+  if (result.status !== 0) throw new Error('Unable to read OpenRouter key from Keychain');
+  const key = result.stdout.trim();
+  if (!key) throw new Error('Keychain entry openrouter-api-key is empty');
+  return key;
+}
 
 async function main() {
   const databaseUrl = process.env.ORIN_DATABASE_URL;
-  const apiKey = process.env.OPENROUTER_API_KEY;
   if (!databaseUrl) throw new Error('Set ORIN_DATABASE_URL; the script touches only category fields');
-  if (!apiKey) throw new Error('Set OPENROUTER_API_KEY');
+  const apiKey = await resolveApiKey(values);
   const limit = Math.min(Math.max(Number.parseInt(values.limit, 10) || 400, 1), 2000);
   const batchSize = Math.min(Math.max(Number.parseInt(values.batch, 10) || CATEGORY_DEFAULTS.batchSize, 5), 60);
   const model = values.model || CATEGORY_DEFAULTS.model;
