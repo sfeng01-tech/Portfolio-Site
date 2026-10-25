@@ -9,6 +9,7 @@ const HomePage = () => {
         profile={portfolioData.profile}
         skills={portfolioData.skills}
         achievements={portfolioData.achievements}
+        projects={portfolioData.projects}
       />
     </div>
   );

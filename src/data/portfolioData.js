@@ -103,6 +103,7 @@ export const portfolioData = {
   ],
 
   achievements: [
+    "CVP Spotlight Award, Q3 2026 — For contributions towards ROCm software bringup on the latest Instinct accelerators.",
     "Owned end-to-end development of 8 critical LLM optimization features in 10 weeks, reducing model execution time by 60%",
     "Defined and streamlined the technical execution plan to deliver a custom LLM serving backend in a 3× shorter timeline",
     "Contributed to MLPerf Inference v5.0 submission for SDXL, achieving 97% of the target performance.",

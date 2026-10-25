@@ -1,108 +1,40 @@
-import React, { useState, useEffect } from "react";
-import { Link, NavLink, useLocation } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import React, { useEffect, useRef, useState } from 'react';
+import { Link, NavLink, useLocation } from 'react-router-dom';
+import { ArrowUpRight, Menu, X } from 'lucide-react';
+import ThemeToggle from './ThemeToggle';
 
-const Navigation = () => {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+const navLinks = [
+  ['About', '/'], ['Experience', '/experience'], ['Projects', '/projects'],
+  ['Open Source', '/open-source'], ['Publications', '/publications'],
+  ['Talks', '/talks'], ['Blog', '/blog'],
+];
+
+export default function Navigation() {
+  const [open, setOpen] = useState(false);
   const location = useLocation();
-
+  const toggle = useRef(null);
+  useEffect(() => { setOpen(false); }, [location.pathname]);
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+    if (!open) return;
+    const onKey = (event) => {
+      if (event.key === 'Escape') { setOpen(false); toggle.current?.focus(); }
     };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  // Close mobile menu when route changes
-  useEffect(() => {
-    setIsMobileMenuOpen(false);
-  }, [location]);
-
-  const navLinks = [
-    { name: "About", path: "/" },
-    { name: "Experience", path: "/experience" },
-    { name: "Projects", path: "/projects" },
-    { name: "Open Source", path: "/open-source" },
-    { name: "Publications", path: "/publications" },
-    { name: "Talks", path: "/talks" },
-    { name: "Blog", path: "/blog" },
-    // { name: "Reading", path: "/books" },
-    // { name: "Photography", path: "/photography" },
-    { name: "Contact", path: "/contact" },
-  ];
-
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [open]);
   return (
-    <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled
-          ? "bg-dark-bg/95 backdrop-blur-sm border-b border-dark-border"
-          : "bg-dark-bg/80 backdrop-blur-sm border-b border-dark-border"
-      }`}
-    >
-      <div className="container-width">
-        <div className="flex items-center justify-between h-20">
-          <Link
-            to="/"
-            className="text-xl font-bold text-dark-text-primary hover:text-white transition-colors"
-          >
-            Portfolio
-          </Link>
-
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            {navLinks.map((link) => (
-              <NavLink
-                key={link.name}
-                to={link.path}
-                className={({ isActive }) =>
-                  `text-sm font-medium transition-colors ${
-                    isActive
-                      ? "text-dark-text-primary"
-                      : "text-dark-text-secondary hover:text-dark-text-primary"
-                  }`
-                }
-              >
-                {link.name}
-              </NavLink>
-            ))}
-          </div>
-
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden text-dark-text-primary"
-          >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+    <header className="site-header">
+      <a href="#main-content" className="skip-link">Skip to content</a>
+      <nav className="nav-shell" aria-label="Main navigation">
+        <Link to="/" className="brand" aria-label="Sahil Faizal home"><span className="brand-mark">sf<span>.</span></span><span className="brand-name">Sahil Faizal</span></Link>
+        <div className="desktop-links">
+          {navLinks.map(([name, path]) => <NavLink key={path} to={path} end={path === '/'} className={({ isActive }) => `nav-link ${isActive ? 'is-active' : ''}`}>{name}</NavLink>)}
         </div>
-
-        {/* Mobile Navigation */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden bg-dark-surface border-t border-dark-border">
-            <div className="py-4 space-y-1">
-              {navLinks.map((link) => (
-                <NavLink
-                  key={link.name}
-                  to={link.path}
-                  className={({ isActive }) =>
-                    `block px-4 py-3 transition-colors ${
-                      isActive
-                        ? "text-dark-text-primary bg-dark-border"
-                        : "text-dark-text-secondary hover:text-dark-text-primary hover:bg-dark-border"
-                    }`
-                  }
-                >
-                  {link.name}
-                </NavLink>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    </nav>
+        <Link className="nav-contact" to="/contact">Let’s talk <ArrowUpRight size={15} /></Link>
+        <ThemeToggle />
+        <button ref={toggle} className="menu-toggle" aria-label={open ? 'Close navigation' : 'Open navigation'} aria-expanded={open} aria-controls="mobile-navigation" onClick={() => setOpen(!open)}>{open ? <X size={22} /> : <Menu size={22} />}</button>
+        {open && <div className="mobile-links" id="mobile-navigation">{[...navLinks, ['Contact', '/contact']].map(([name, path]) => <NavLink key={path} end={path === '/'} to={path} className={({ isActive }) => `nav-link ${isActive ? 'is-active' : ''}`}>{name}</NavLink>)}</div>}
+      </nav>
+    </header>
   );
-};
-
-export default Navigation;
+}

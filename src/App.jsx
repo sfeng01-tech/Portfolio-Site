@@ -41,69 +41,69 @@ function App() {
             <Route path="/" element={
               <>
                 <Navigation />
-                <main><HomePage /></main>
+                <main id="main-content" tabIndex={-1}><HomePage /></main>
               </>
             } />
             <Route path="/experience" element={
               <>
                 <Navigation />
-                <main><ExperiencePage /></main>
+                <main id="main-content" tabIndex={-1}><ExperiencePage /></main>
               </>
             } />
             <Route path="/projects" element={
               <>
                 <Navigation />
-                <main><ProjectsPage /></main>
+                <main id="main-content" tabIndex={-1}><ProjectsPage /></main>
               </>
             } />
             <Route path="/open-source" element={
               <>
                 <Navigation />
-                <main><OpenSourcePage /></main>
+                <main id="main-content" tabIndex={-1}><OpenSourcePage /></main>
               </>
             } />
             <Route path="/publications" element={
               <>
                 <Navigation />
-                <main><PublicationsPage /></main>
+                <main id="main-content" tabIndex={-1}><PublicationsPage /></main>
               </>
             } />
             <Route path="/talks" element={
               <>
                 <Navigation />
-                <main><TalksPage /></main>
+                <main id="main-content" tabIndex={-1}><TalksPage /></main>
               </>
             } />
             <Route path="/blog" element={
               <>
                 <Navigation />
-                <main><BlogPage /></main>
+                <main id="main-content" tabIndex={-1}><BlogPage /></main>
               </>
             } />
             <Route path="/blog/:slug" element={
               <>
                 <Navigation />
-                <main><BlogDetailPage /></main>
+                <main id="main-content" tabIndex={-1}><BlogDetailPage /></main>
               </>
             } />
             {/* Reading and photography are temporarily disabled.
             <Route path="/books" element={
               <>
                 <Navigation />
-                <main><BooksPage /></main>
+                <main id="main-content" tabIndex={-1}><BooksPage /></main>
               </>
             } />
             <Route path="/photography" element={
               <>
                 <Navigation />
-                <main><PhotographyPage /></main>
+                <main id="main-content" tabIndex={-1}><PhotographyPage /></main>
               </>
             } />
             */}
             <Route path="/contact" element={
               <>
                 <Navigation />
-                <main><ContactPage /></main>
+                <main id="main-content" tabIndex={-1}><ContactPage /></main>
               </>
             } />
 
