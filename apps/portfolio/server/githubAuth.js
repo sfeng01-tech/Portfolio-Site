@@ -6,10 +6,15 @@ export const REPOSITORY = {
 };
 
 const normalizeLogin = (login) => typeof login === 'string' ? login.trim().toLowerCase() : '';
+const portalAllowedUsers = new Set([
+  REPOSITORY.owner,
+  ...(process.env.PORTAL_GITHUB_ALLOWED_USERS || '').split(',')
+].map(normalizeLogin).filter(Boolean));
 const orinAllowedUsers = new Set([
   REPOSITORY.owner,
   ...(process.env.ORIN_GITHUB_ALLOWED_USERS || '').split(',')
 ].map(normalizeLogin).filter(Boolean));
+export const isPortalAllowedUser = (login) => portalAllowedUsers.has(normalizeLogin(login));
 export const isOrinAllowedUser = (login) => orinAllowedUsers.has(normalizeLogin(login));
 
 export const TOKEN_COOKIE = 'portfolio_github_token';
@@ -89,7 +94,7 @@ export const getAuthorizedUser = async (req) => {
   if (!response.ok) return null;
 
   const user = await response.json();
-  if (user.login?.toLowerCase() !== REPOSITORY.owner.toLowerCase()) return null;
+  if (!isPortalAllowedUser(user.login)) return null;
 
   return { token, user };
 };

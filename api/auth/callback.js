@@ -2,7 +2,7 @@ import { timingSafeEqual } from 'node:crypto';
 import {
   STATE_COOKIE,
   TOKEN_COOKIE,
-  REPOSITORY,
+  isPortalAllowedUser,
   isOrinAllowedUser,
   getOrigin,
   githubFetch,
@@ -72,7 +72,7 @@ export default async function handler(req, res) {
     const user = await userResponse.json();
     const authorized = destination === '/orin'
       ? isOrinAllowedUser(user.login)
-      : user.login?.toLowerCase() === REPOSITORY.owner.toLowerCase();
+      : isPortalAllowedUser(user.login);
     if (!authorized) {
       return redirectWithError(res, 'not_repository_owner');
     }
