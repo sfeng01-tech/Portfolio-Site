@@ -30,7 +30,7 @@ function validateConfig(config) {
   if (!Array.isArray(config.topics) || !config.topics.length || config.topics.some(topic => typeof topic !== 'string' || !topic.trim() || topic.length > 100)) throw new Error('Config needs bounded, nonempty topic strings');
   if (!Number.isInteger(config.maxItems) || config.maxItems < 1 || config.maxItems > 100) throw new Error('maxItems must be 1–100');
   if (!(config.maxAgeHours > 0 && config.maxAgeHours <= 168) || !(config.maxRunUsd > 0 && config.maxRunUsd <= 1)) throw new Error('Invalid freshness or run budget');
-  if (!Array.isArray(config.feeds) || !Array.isArray(config.social) || config.feeds.length + config.social.length > 20) throw new Error('At most 20 configured sources');
+  if (!Array.isArray(config.feeds) || !Array.isArray(config.social) || config.feeds.length + config.social.length > 40) throw new Error('At most 40 configured sources');
   dailyDate(config.timezone);
   return config;
 }

@@ -22,6 +22,28 @@ To add a Substack publication, append `{ "source": "substack", "url": "https://P
 
 If GitHub Actions has an `ORIN_CONFIG` variable, add the configured feed entries to that JSON too: it overrides `config.example.json`. Deploy the updated backend before running the updated collector so ingestion accepts the new source names. No database migration or additional scheduler is needed.
 
+## Additional research, hardware and engineering sources
+
+The existing sources are retained alongside these additions:
+
+| Publication | Feed |
+| --- | --- |
+| LLMs Research | `https://llmsresearch.substack.com/feed` |
+| SemiAnalysis — Dylan Patel and team | `https://newsletter.semianalysis.com/feed` |
+| ModelCraft — Abi Aryan | `https://modelcraft.substack.com/feed` |
+| Machine Learning Frontiers — Samuel Flender | `https://mlfrontiers.substack.com/feed` |
+| Kernel Space — Dmitry Trifonov and contributors | `https://kernelspace.substack.com/feed` |
+| Tim Dettmers — quantization, GPUs and deep learning | `https://timdettmers.com/feed/` |
+| TheSequence | `https://thesequence.substack.com/feed` |
+
+These feeds require no extra credentials. Public feed content is collected, with article excerpts capped at 12,000 characters; paid articles may supply previews only. Substack responses have an 8 MB bound, including the larger Cameron Wolfe and SemiAnalysis feeds. Quantization, quantized models, GPU memory and semiconductors are included in the topic list. The existing freshness and relevance filters still apply.
+
+The existing X recent-search query now includes `from:_akhaliq` in its OR group. It shares the existing single daily request and 50-post cap with the topic search, so a particular author's posts are not guaranteed a daily slot. This uses the existing `X_API_BEARER_TOKEN`, with no second token or additional X request.
+
+Karpathy's [arXiv Sanity Preserver](https://github.com/karpathy/arxiv-sanity-preserver) points to [arXiv Sanity Lite](https://github.com/karpathy/arxiv-sanity-lite) as its rewrite. Neither live site responded during checks on October 25, 2026, and the published applications do not expose an RSS route. As a fallback, Orin now reads direct arXiv feeds for `cs.AI`, `cs.CL`, `cs.CV`, `cs.NE` and `stat.ML`, alongside existing `cs.LG` and `cs.DC`. These are arXiv entries, not arXiv Sanity rankings or personalized recommendations. Empty weekend feeds are valid checks.
+
+The collector and ingestion endpoint now support up to 40 source checks per run; default configuration has 32 including the two disabled browser sources. Deploy the updated backend before the expanded collector runs: earlier backends reject more than 20 source checks. `maxItems=60` and the existing model budget remain unchanged.
+
 ## GitHub Actions setup
 
 `.github/workflows/orin-digest.yml` runs daily at 14:17 UTC (07:17 PDT, 06:17 PST), plus manual dispatch. GitHub may delay scheduled jobs. It has read-only repository permissions, no pull-request trigger, a 15-minute timeout and one job at a time. Nothing purchases a server or creates a paid service.

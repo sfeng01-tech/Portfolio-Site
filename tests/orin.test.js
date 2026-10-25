@@ -112,3 +112,10 @@ test('research and Substack sources pass ingestion with matching provenance', ()
     assert.throws(() => safeUrl('https://substack.com.evil.test/p/gpu', source));
   }
 });
+
+test('expanded daily collection accepts 40 source checks and rejects overflow', () => {
+  const status = { source: 'rss', status: 'ok', message: 'Checked' };
+  const payload = validateIngest({ date: '2026-10-25', items: [], sourceStatus: Array(40).fill(status) });
+  assert.equal(payload.sourceStatus.length, 40);
+  assert.throws(() => validateIngest({ date: '2026-10-25', items: [], sourceStatus: Array(41).fill(status) }), /Invalid source status/);
+});

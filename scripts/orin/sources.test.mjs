@@ -124,7 +124,7 @@ test('paper sources reject unexpected endpoints and malformed responses without 
 });
 
 test('Substack supports publication feeds and explicit custom domains, rejecting unrelated links', async () => {
-  for (const host of ['example.substack.com', 'latent.space', 'magazine.sebastianraschka.com', 'cameronrwolfe.substack.com', 'www.interconnects.ai', 'newsletter.ruder.io', 'thegradientpub.substack.com']) {
+  for (const host of ['example.substack.com', 'latent.space', 'magazine.sebastianraschka.com', 'cameronrwolfe.substack.com', 'www.interconnects.ai', 'newsletter.ruder.io', 'thegradientpub.substack.com', 'newsletter.semianalysis.com']) {
     const items = await collectFeed({ source: 'substack', url: `https://${host}/feed` }, { fetchImpl: async () => new Response(`<rss><channel><item><title>GPU systems</title><link>https://${host}/p/gpu</link><description>AI research</description></item><item><title>Wrong host</title><link>https://evil.test/p/gpu</link><description>AI</description></item></channel></rss>`) });
     assert.equal(items.length, 1);
     assert.equal(items[0].source, 'substack');
@@ -137,4 +137,11 @@ test('long-form Substack feeds can exceed the ordinary feed response limit', asy
   const xml = `<rss><channel><item><title>GPU systems</title><link>https://cameronrwolfe.substack.com/p/gpu</link><description>${'Research '.repeat(350000)}</description></item></channel></rss>`;
   const [item] = await collectFeed({ source: 'substack', url: 'https://cameronrwolfe.substack.com/feed' }, { fetchImpl: async () => new Response(xml) });
   assert.equal(item.excerpt.length, 12000);
+});
+
+test('Tim Dettmers RSS preserves quantization and GPU article provenance', async () => {
+  const [item] = await collectFeed({ source: 'rss', url: 'https://timdettmers.com/feed/' }, { fetchImpl: async () => new Response('<rss><channel><item><title>LLM quantization on GPUs</title><link>https://timdettmers.com/2026/10/25/quantization/</link><description>GPU memory and quantization.</description><dc:creator>Tim Dettmers</dc:creator></item></channel></rss>') });
+  assert.equal(item.author, 'Tim Dettmers');
+  assert.equal(item.url, 'https://timdettmers.com/2026/10/25/quantization/');
+  await assert.rejects(() => collectFeed({ source: 'rss', url: 'https://timdettmers.com.evil.test/feed/' }), /allowlist/);
 });

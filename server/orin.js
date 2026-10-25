@@ -22,7 +22,7 @@ export function safeUrl(value, source) {
       || hostname === 'localhost' || /^[\d.]+$/.test(hostname) || hostname.includes(':')) throw fail('Invalid article URL');
   const domains = { huggingface: ['huggingface.co'], alphaxiv: ['alphaxiv.org'], twitter: ['twitter.com', 'x.com'], linkedin: ['linkedin.com'], reddit: ['reddit.com', 'redd.it'], arxiv: ['arxiv.org'], hackernews: ['news.ycombinator.com'], google_news: ['news.google.com'], threads: ['threads.com', 'threads.net'] };
   if (domains[source] && !domains[source].some(domain => hostname === domain || hostname.endsWith(`.${domain}`))) throw fail('URL does not match its source');
-  if (source === 'substack' && !/^[a-z0-9-]+\.substack\.com$/.test(hostname) && !['magazine.sebastianraschka.com', 'latent.space', 'www.latent.space', 'interconnects.ai', 'www.interconnects.ai', 'newsletter.ruder.io'].includes(hostname)) throw fail('URL does not match its source');
+  if (source === 'substack' && !/^[a-z0-9-]+\.substack\.com$/.test(hostname) && !['magazine.sebastianraschka.com', 'latent.space', 'www.latent.space', 'interconnects.ai', 'www.interconnects.ai', 'newsletter.ruder.io', 'newsletter.semianalysis.com'].includes(hostname)) throw fail('URL does not match its source');
   url.hash = '';
   for (const key of [...url.searchParams.keys()]) if (/^(utm_|fbclid|gclid)/i.test(key)) url.searchParams.delete(key);
   return url.toString();
@@ -62,7 +62,7 @@ export function validateIngest(body) {
       return { title: string(group.title, 200), summary: string(group.summary, 4000, true), urls };
     }) };
   }
-  if (body.sourceStatus !== undefined && (!Array.isArray(body.sourceStatus) || body.sourceStatus.length > 20)) throw fail('Invalid source status');
+  if (body.sourceStatus !== undefined && (!Array.isArray(body.sourceStatus) || body.sourceStatus.length > 40)) throw fail('Invalid source status');
   const sourceStatus = (body.sourceStatus || []).map(status => {
     if (!ORIN_SOURCES.includes(status.source) || !['ok', 'blocked', 'error', 'disabled'].includes(status.status)) throw fail('Invalid source status');
     return { source: status.source, status: status.status, message: string(status.message, 500, true), checkedAt: timestamp(status.checkedAt), ...(status.url ? { url: safeUrl(status.url) } : {}) };

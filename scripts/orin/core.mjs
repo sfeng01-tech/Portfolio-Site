@@ -10,8 +10,8 @@ export const SOURCE_HOSTS = {
   threads: ['graph.threads.net', 'threads.com', 'www.threads.com', 'threads.net', 'www.threads.net'],
   huggingface: ['huggingface.co'],
   alphaxiv: ['api.alphaxiv.org', 'alphaxiv.org', 'www.alphaxiv.org'],
-  substack: ['magazine.sebastianraschka.com', 'latent.space', 'www.latent.space', 'interconnects.ai', 'www.interconnects.ai', 'newsletter.ruder.io'],
-  rss: ['rocm.blogs.amd.com', 'developer.nvidia.com', 'huggingface.co', 'pytorch.org'],
+  substack: ['magazine.sebastianraschka.com', 'latent.space', 'www.latent.space', 'interconnects.ai', 'www.interconnects.ai', 'newsletter.ruder.io', 'newsletter.semianalysis.com'],
+  rss: ['rocm.blogs.amd.com', 'developer.nvidia.com', 'huggingface.co', 'pytorch.org', 'timdettmers.com'],
 };
 
 export function allowedSourceUrl(source, value) {
