@@ -8,7 +8,6 @@ import { allowedSourceUrl, dailyDate, selectItems } from './core.mjs';
 import { collectFeed, collectSocial, createRedditApi, createXApi } from './sources.mjs';
 import { summarize } from './summarize.mjs';
 import { filterBrowserState, encodeBrowserStates, decodeBrowserStates } from './session-state.mjs';
-import { reserveDailyXRead } from './x-budget.mjs';
 
 const home = path.dirname(fileURLToPath(import.meta.url));
 const { values } = parseArgs({ options: {
@@ -95,7 +94,7 @@ async function main() {
             continue;
           }
           if (!process.env.X_API_BEARER_TOKEN) throw new Error('X API is not configured; add the X_API_BEARER_TOKEN Actions secret');
-          await reserveDailyXRead(date);
+          if (process.env.ORIN_X_API_ALREADY_USED === 'true') throw new Error(`X daily cap already used for ${date}; skipping this run`);
         }
         const items = await collectFeed(feed, { redditApi, xApi }); collected.push(...items);
         const sourceLabel = feed.source === 'reddit' ? 'entries observed through Reddit OAuth API' : feed.source === 'twitter' ? 'posts observed through X API v2 (daily cap: 50)' : 'feed entries observed';

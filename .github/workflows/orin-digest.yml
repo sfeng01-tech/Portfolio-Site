@@ -8,7 +8,6 @@ on:
 
 permissions:
   contents: read
-  actions: write
 
 concurrency:
   group: orin-daily-digest
@@ -28,7 +27,6 @@ jobs:
       REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
       REDDIT_USERNAME: ${{ vars.REDDIT_USERNAME }}
       X_API_BEARER_TOKEN: ${{ secrets.X_API_BEARER_TOKEN }}
-      GH_TOKEN: ${{ github.token }}
       ORIN_CONFIG: ${{ vars.ORIN_CONFIG }}
     steps:
       - name: Check configuration
@@ -68,8 +66,30 @@ jobs:
           else
             cp config.example.json config.local.json
           fi
+      - name: Set Pacific cap date
+        if: env.X_API_BEARER_TOKEN != ''
+        id: x-cap-date
+        run: echo "date=$(TZ=America/Los_Angeles date +%F)" >> "$GITHUB_OUTPUT"
+      - name: Restore X daily cap marker
+        if: env.X_API_BEARER_TOKEN != ''
+        id: x-cap
+        uses: actions/cache/restore@v4
+        with:
+          path: .orin-x-cap
+          key: orin-x-cap-${{ steps.x-cap-date.outputs.date }}
+      - name: Reserve X daily cap
+        if: env.X_API_BEARER_TOKEN != '' && steps.x-cap.outputs.cache-hit != 'true'
+        run: mkdir -p .orin-x-cap && date -u +%FT%TZ > .orin-x-cap/reserved
+      - name: Save X daily cap marker
+        if: env.X_API_BEARER_TOKEN != '' && steps.x-cap.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: .orin-x-cap
+          key: orin-x-cap-${{ steps.x-cap-date.outputs.date }}
       - name: Collect, group and publish
         if: steps.ready.outputs.ready == 'true'
         working-directory: scripts/orin
+        env:
+          ORIN_X_API_ALREADY_USED: ${{ steps.x-cap.outputs.cache-hit == 'true' }}
         run: node collect.mjs --once
       # No profile, digest, credential or browser-state caches/artifacts are uploaded.
