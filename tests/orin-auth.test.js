@@ -15,6 +15,7 @@ test('ORIN OAuth destination is allowlisted and stored in an HttpOnly callback c
       login({ method: 'GET', query: { returnTo }, headers: { host: 'example.com', 'x-forwarded-proto': 'https' } }, res);
       assert.equal(res.statusCode, 302);
       assert.equal(new URL(res.headers.Location).hostname, 'github.com');
+      if (returnTo === '/orin') assert.equal(new URL(res.headers.Location).searchParams.get('scope'), 'read:user');
       assert.ok(res.headers['Set-Cookie'].some(cookie => cookie.startsWith(`portfolio_oauth_destination=${expected};`) && cookie.includes('HttpOnly') && cookie.includes('Secure') && cookie.includes('Path=/api/auth/callback')));
     }
   } finally {

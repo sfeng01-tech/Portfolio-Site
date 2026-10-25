@@ -17,14 +17,14 @@ export default function handler(req, res) {
   }
 
   const state = randomBytes(32).toString('base64url');
+  const destination = req.query?.returnTo === '/orin' ? '/orin' : '/admin';
   const parameters = new URLSearchParams({
     client_id: clientId,
     redirect_uri: `${getOrigin(req)}/api/auth/callback`,
-    scope: process.env.GITHUB_OAUTH_SCOPE || 'repo',
+    scope: destination === '/orin' ? 'read:user' : process.env.GITHUB_OAUTH_SCOPE || 'repo',
     state
   });
 
-  const destination = req.query?.returnTo === '/orin' ? '/orin' : '/admin';
   res.setHeader('Set-Cookie', [serializeCookie(req, STATE_COOKIE, state, {
     maxAge: 10 * 60,
     path: '/api/auth/callback'
