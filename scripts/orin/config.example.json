@@ -9,8 +9,8 @@
     { "source": "arxiv", "url": "https://rss.arxiv.org/rss/cs.LG" },
     { "source": "arxiv", "url": "https://rss.arxiv.org/rss/cs.DC" },
     { "source": "hackernews", "url": "https://news.ycombinator.com/rss" },
-    { "source": "reddit", "url": "https://www.reddit.com/r/LocalLLaMA/top/.rss?t=day" },
-    { "source": "reddit", "url": "https://www.reddit.com/r/MachineLearning/top/.rss?t=day" }
+    { "source": "reddit", "url": "https://oauth.reddit.com/r/LocalLLaMA/top?t=day&limit=50" },
+    { "source": "reddit", "url": "https://oauth.reddit.com/r/MachineLearning/top?t=day&limit=50" }
   ],
   "social": [
     { "source": "twitter", "enabled": false, "urls": ["https://x.com/search?q=ROCm%20OR%20GPU%20kernels%20OR%20LLM%20inference&f=live"] },

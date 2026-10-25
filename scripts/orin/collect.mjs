@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { spawnSync } from 'node:child_process';
 import { allowedSourceUrl, dailyDate, selectItems } from './core.mjs';
-import { collectFeed, collectSocial } from './sources.mjs';
+import { collectFeed, collectSocial, createRedditApi } from './sources.mjs';
 import { summarize } from './summarize.mjs';
 import { filterBrowserState, encodeBrowserStates, decodeBrowserStates } from './session-state.mjs';
 
@@ -82,10 +82,14 @@ async function main() {
     try { state = JSON.parse(await readFile(path.join(stateDir, 'state.json'), 'utf8')); }
     catch (error) { if (error.code !== 'ENOENT') throw error; }
     const browserStates = process.env.ORIN_BROWSER_STORAGE_STATE ? decodeBrowserStates(process.env.ORIN_BROWSER_STORAGE_STATE) : {};
+    const redditApi = config.feeds.some(feed => feed.source === 'reddit') ? createRedditApi() : null;
     const collected = [...(state.days?.[date] || [])], sourceStatus = [];
     const status = (source, url, value, message) => sourceStatus.push({ source, url, status: value, message: message.slice(0, 500), checkedAt: new Date().toISOString() });
     for (const feed of config.feeds) {
-      try { const items = await collectFeed(feed); collected.push(...items); status(feed.source, feed.url, 'ok', `${items.length} feed entries observed`); }
+      try {
+        const items = await collectFeed(feed, { redditApi }); collected.push(...items);
+        status(feed.source, feed.url, 'ok', `${items.length} ${feed.source === 'reddit' ? 'entries observed through Reddit OAuth API' : 'feed entries observed'}`);
+      }
       catch (error) { status(feed.source, feed.url, 'error', error.message); }
     }
     for (const source of config.social) {

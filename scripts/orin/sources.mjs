@@ -40,7 +40,68 @@ export function parseFeed(xml, source, now = new Date()) {
   });
 }
 
-export async function collectFeed(feed) {
+export function createRedditApi({ clientId = process.env.REDDIT_CLIENT_ID, clientSecret = process.env.REDDIT_CLIENT_SECRET, username = process.env.REDDIT_USERNAME, fetchImpl = fetch } = {}) {
+  let token;
+  let tokenExpiresAt = 0;
+  const userAgent = username && /^[A-Za-z0-9_-]{1,20}$/.test(username) ? `script:orin-daily-digest:v1.0 (by /u/${username})` : '';
+  async function getAccessToken() {
+    if (!clientId || !clientSecret || !userAgent) throw new Error('Reddit OAuth is not configured; set REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET, and a valid REDDIT_USERNAME');
+    if (token && Date.now() < tokenExpiresAt - 60_000) return token;
+    const response = await fetchImpl('https://www.reddit.com/api/v1/access_token', {
+      method: 'POST', redirect: 'error', signal: AbortSignal.timeout(30_000),
+      headers: {
+        Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}`,
+        'Content-Type': 'application/x-www-form-urlencoded', 'User-Agent': userAgent,
+      },
+      body: new URLSearchParams({ grant_type: 'client_credentials' }),
+    });
+    if (!response.ok) throw new Error(response.status === 429 ? 'Reddit OAuth rate limited; waiting until next scheduled run' : `Reddit OAuth token request returned HTTP ${response.status}`);
+    const body = JSON.parse(await boundedText(response, 100_000));
+    if (typeof body.access_token !== 'string' || !Number.isFinite(body.expires_in)) throw new Error('Reddit OAuth returned an invalid token response');
+    token = body.access_token;
+    tokenExpiresAt = Date.now() + body.expires_in * 1000;
+    return token;
+  }
+  return async function collectReddit(feed) {
+    if (feed.source !== 'reddit' || !allowedSourceUrl('reddit', feed.url)) throw new Error('Reddit API URL is outside the configured source allowlist');
+    const url = new URL(feed.url);
+    if (url.hostname !== 'oauth.reddit.com' || !/^\/r\/[A-Za-z0-9_]+\/(top|hot|new|rising)$/.test(url.pathname)) throw new Error('Reddit sources must use an allowlisted OAuth listing URL');
+    const response = await fetchImpl(url, {
+      redirect: 'error', signal: AbortSignal.timeout(30_000),
+      headers: { Authorization: `Bearer ${await getAccessToken()}`, 'User-Agent': userAgent, Accept: 'application/json' },
+    });
+    if (response.status === 429) {
+      const wait = response.headers.get('retry-after');
+      throw new Error(`Reddit rate limited this source${wait && /^\d+$/.test(wait) ? `; Retry-After ${wait}s` : ''}; waiting until next scheduled run`);
+    }
+    if (!response.ok) throw new Error(`Reddit listing returned HTTP ${response.status}`);
+    const payload = JSON.parse(await boundedText(response));
+    const rows = payload?.data?.children;
+    if (!Array.isArray(rows)) throw new Error('Reddit API returned an invalid listing');
+    return rows.slice(0, 100).flatMap(({ data }) => {
+      try {
+        if (!data || typeof data.permalink !== 'string' || !data.permalink.startsWith('/r/')) return [];
+        const created = Number(data.created_utc);
+        const score = Number(data.score);
+        const comments = Number(data.num_comments);
+        return [normalizeItem({
+          url: new URL(data.permalink, 'https://www.reddit.com').href,
+          title: data.title,
+          excerpt: data.selftext || data.title,
+          author: data.author,
+          publishedAt: Number.isFinite(created) ? new Date(created * 1000).toISOString() : undefined,
+          metrics: { ...(Number.isFinite(score) ? { score } : {}), ...(Number.isFinite(comments) ? { comments } : {}) },
+        }, 'reddit')];
+      } catch { return []; }
+    });
+  };
+}
+
+export async function collectFeed(feed, { redditApi } = {}) {
+  if (feed.source === 'reddit') {
+    if (!redditApi) throw new Error('Reddit OAuth is not configured; public RSS collection is disabled');
+    return redditApi(feed);
+  }
   if (!['arxiv', 'hackernews', 'reddit', 'rss'].includes(feed.source) || !allowedSourceUrl(feed.source, feed.url)) throw new Error('Feed URL is outside the configured source allowlist');
   const response = await fetch(feed.url, { redirect: 'error', signal: AbortSignal.timeout(30_000), headers: { 'User-Agent': 'ORIN-personal-digest/1.0', Accept: 'application/rss+xml, application/atom+xml, application/xml' } });
   if (!response.ok) throw new Error(response.status === 429 ? 'Source rate limited; waiting until next scheduled run' : `Feed returned HTTP ${response.status}`);

@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 export const SOURCE_HOSTS = {
   twitter: ['x.com', 'www.x.com', 'twitter.com', 'www.twitter.com'],
   linkedin: ['linkedin.com', 'www.linkedin.com'],
-  reddit: ['reddit.com', 'www.reddit.com', 'old.reddit.com'],
+  reddit: ['reddit.com', 'www.reddit.com', 'old.reddit.com', 'oauth.reddit.com'],
   arxiv: ['arxiv.org', 'rss.arxiv.org', 'export.arxiv.org'],
   hackernews: ['news.ycombinator.com'],
   rss: ['rocm.blogs.amd.com', 'developer.nvidia.com', 'huggingface.co', 'pytorch.org'],
