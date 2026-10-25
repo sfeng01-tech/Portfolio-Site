@@ -6,6 +6,7 @@ export const SOURCE_HOSTS = {
   reddit: ['reddit.com', 'www.reddit.com', 'old.reddit.com', 'oauth.reddit.com'],
   arxiv: ['arxiv.org', 'rss.arxiv.org', 'export.arxiv.org'],
   hackernews: ['news.ycombinator.com'],
+  google_news: ['news.google.com'],
   rss: ['rocm.blogs.amd.com', 'developer.nvidia.com', 'huggingface.co', 'pytorch.org'],
 };
 

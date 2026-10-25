@@ -5,6 +5,8 @@ import { parseFeed } from './sources.mjs';
 
 test('source boundary rejects lookalike hosts, credentials and non-HTTPS', () => {
   assert.equal(allowedSourceUrl('twitter', 'https://x.com/search?q=ROCm'), true);
+  assert.equal(allowedSourceUrl('google_news', 'https://news.google.com/rss/search?q=ROCm'), true);
+  assert.equal(allowedSourceUrl('google_news', 'https://news.google.com.evil.test/rss'), false);
   for (const url of ['https://x.com.evil.test/post', 'http://x.com/post', 'https://user:secret@x.com/post', 'https://x.com:444/post']) assert.equal(allowedSourceUrl('twitter', url), false);
   assert.equal(canonicalUrl('https://x.com/a/status/1?utm_source=test#x'), 'https://x.com/a/status/1');
 });
@@ -31,6 +33,14 @@ test('feed parsing uses HN discussion provenance and rejects XML entities', () =
   assert.equal(items.length, 1);
   assert.equal(items[0].url, 'https://news.ycombinator.com/item?id=123');
   assert.throws(() => parseFeed('<!DOCTYPE foo [<!ENTITY x "boom">]><rss/>', 'rss'), /unsupported XML/);
+});
+
+test('Google News RSS results are accepted as a distinct source', () => {
+  const xml = '<rss><channel><item><title>GPU inference breakthrough - Example News</title><link>https://news.google.com/rss/articles/CBMi-test</link><pubDate>Sun, 25 Oct 2026 18:00:00 GMT</pubDate><description>News about GPU inference.</description></item></channel></rss>';
+  const items = parseFeed(xml, 'google_news');
+  assert.equal(items.length, 1);
+  assert.equal(items[0].source, 'google_news');
+  assert.equal(items[0].url, 'https://news.google.com/rss/articles/CBMi-test');
 });
 
 test('digest date uses configured timezone across midnight UTC', () => {

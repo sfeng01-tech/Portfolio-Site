@@ -23,6 +23,8 @@ test('URLs reject unsafe schemes, credentials, local targets, and mismatched sou
   for (const url of ['javascript:alert(1)', 'http://arxiv.org/abs/1', 'https://localhost/a', 'https://127.0.0.1/a', 'https://a.local/x', 'https://user:pass@arxiv.org/a']) assert.throws(() => safeUrl(url));
   assert.throws(() => safeUrl('https://evil.example/x', 'twitter'));
   assert.equal(safeUrl('https://x.com/person/status/1', 'twitter'), 'https://x.com/person/status/1');
+  assert.equal(safeUrl('https://news.google.com/rss/articles/CBMi-test', 'google_news'), 'https://news.google.com/rss/articles/CBMi-test');
+  assert.throws(() => safeUrl('https://news.google.com.evil.test/rss/articles/1', 'google_news'));
   assert.equal(validDate('2026-02-30'), false);
 });
 
