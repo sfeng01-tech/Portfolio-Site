@@ -37,10 +37,10 @@ cp scripts/orin/config.example.json scripts/orin/config.local.json
 node scripts/orin/collect.mjs --login twitter
 node scripts/orin/collect.mjs --login linkedin
 node scripts/orin/collect.mjs --login reddit
-node scripts/orin/collect.mjs --export-sessions
+node scripts/orin/collect.mjs --sync-sessions --repo sfeng01-tech/Portfolio-Site
 ```
 
-Each login opens a dedicated ORIN profile. Sign in manually and close the window when done. `--export-sessions` writes `.state/browser-sessions.json` with permissions 0600. Paste that JSON into the `ORIN_BROWSER_STORAGE_STATE` repository secret privately; do not send it through chat or commit it. Some providers bind sessions to a device/IP; the cloud runner may reject an exported session, in which case leave the source disabled until a supported authorized connection is available. [Playwright authentication storage-state documentation](https://playwright.dev/docs/auth).
+Each login opens a dedicated ORIN profile. Sign in manually and close the window when done. `--sync-sessions` filters each profile to its source domains and uploads the combined state directly to `ORIN_BROWSER_STORAGE_STATE` through GitHub CLI stdin. It does not print the state or write a separate session export file. Third-party identity-provider cookies and origins are excluded. Large state is gzip-compressed before storage; the worker accepts raw JSON or a `gzip:`-prefixed secret. The optional `--export-sessions` command still writes a filtered `.state/browser-sessions.json` with permissions 0600 for manual setup; do not send that file through chat, upload it as an artifact, or commit it. Some providers bind sessions to a device/IP; the cloud runner may reject an exported session, in which case leave the source disabled until a supported authorized connection is available. [Playwright authentication storage-state documentation](https://playwright.dev/docs/auth).
 
 ## Local verification and operation
 

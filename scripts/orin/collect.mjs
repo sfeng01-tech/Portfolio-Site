@@ -7,6 +7,7 @@ import { spawnSync } from 'node:child_process';
 import { allowedSourceUrl, dailyDate, selectItems } from './core.mjs';
 import { collectFeed, collectSocial } from './sources.mjs';
 import { summarize } from './summarize.mjs';
+import { filterBrowserState, encodeBrowserStates, decodeBrowserStates } from './session-state.mjs';
 
 const home = path.dirname(fileURLToPath(import.meta.url));
 const { values } = parseArgs({ options: {
@@ -16,6 +17,8 @@ const { values } = parseArgs({ options: {
   'no-model': { type: 'boolean' }, 'keychain-openrouter': { type: 'boolean' },
   login: { type: 'string' },
   'export-sessions': { type: 'boolean' },
+  'sync-sessions': { type: 'boolean' },
+  repo: { type: 'string', default: 'sfeng01-tech/Portfolio-Site' },
 } });
 
 async function saveJson(file, value) {
@@ -43,12 +46,21 @@ async function main() {
   catch (error) { if (error.code === 'EEXIST') throw new Error('Another ORIN job holds run.lock; inspect process before removing a stale lock'); throw error; }
   try {
     await lock.writeFile(String(process.pid));
-    if (values['export-sessions']) {
+    if (values['export-sessions'] || values['sync-sessions']) {
       const { chromium } = await import('playwright');
       const states = {};
       for (const source of config.social.filter(row => row.enabled)) {
         const context = await chromium.launchPersistentContext(path.join(stateDir, `profile-${source.source}`), { headless: true });
-        try { states[source.source] = await context.storageState(); } finally { await context.close(); }
+        try { states[source.source] = filterBrowserState(source.source, await context.storageState()); } finally { await context.close(); }
+      }
+      if (values['sync-sessions']) {
+        if (!/^[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+$/.test(values.repo)) throw new Error('Invalid GitHub repository');
+        const encoded = encodeBrowserStates(states);
+        if (Buffer.byteLength(encoded) > 47_000) throw new Error('Session secret exceeds GitHub size limit; reduce stored source state before syncing');
+        const result = spawnSync('gh', ['secret', 'set', 'ORIN_BROWSER_STORAGE_STATE', '--repo', values.repo], { input: encoded, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] });
+        if (result.status !== 0) throw new Error('Unable to save browser session secret to GitHub; no session values were logged');
+        console.info(`Saved dedicated sessions for ${Object.keys(states).join(', ')} as a GitHub Actions secret. Third-party login state was excluded.`);
+        return;
       }
       await saveJson(path.join(stateDir, 'browser-sessions.json'), states);
       console.info('Exported private browser-sessions.json in runner state. Treat this file as an account credential; never commit or upload as a build artifact.');
@@ -69,11 +81,7 @@ async function main() {
     let state = { seen: {}, days: {} };
     try { state = JSON.parse(await readFile(path.join(stateDir, 'state.json'), 'utf8')); }
     catch (error) { if (error.code !== 'ENOENT') throw error; }
-    let browserStates = {};
-    try {
-      if (process.env.ORIN_BROWSER_STORAGE_STATE) browserStates = JSON.parse(process.env.ORIN_BROWSER_STORAGE_STATE);
-      if (!browserStates || typeof browserStates !== 'object' || Array.isArray(browserStates)) throw new Error();
-    } catch { throw new Error('ORIN_BROWSER_STORAGE_STATE must be a valid source-to-storage-state JSON object'); }
+    const browserStates = process.env.ORIN_BROWSER_STORAGE_STATE ? decodeBrowserStates(process.env.ORIN_BROWSER_STORAGE_STATE) : {};
     const collected = [...(state.days?.[date] || [])], sourceStatus = [];
     const status = (source, url, value, message) => sourceStatus.push({ source, url, status: value, message: message.slice(0, 500), checkedAt: new Date().toISOString() });
     for (const feed of config.feeds) {
