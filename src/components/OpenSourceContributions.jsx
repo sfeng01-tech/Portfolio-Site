@@ -107,42 +107,6 @@ const OpenSourceContributions = ({ contributions }) => {
           </div>
         </div>
 
-        <div>
-          <div className="flex items-center gap-3 mb-3">
-            <GitPullRequest size={22} className="text-dark-text-primary" />
-            <h3 className="text-2xl font-bold text-dark-text-primary">In Progress</h3>
-          </div>
-          <p className="text-dark-text-secondary mb-6 max-w-3xl">
-            Active upstream fixes and regression coverage currently under review.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {contributions.inProgress.map((item) => (
-              <article key={item.pullRequestUrl} className="bg-dark-surface border border-dark-border rounded-lg p-6 flex flex-col">
-              <div className="flex items-start justify-between gap-4 mb-5">
-                <GitPullRequest className="text-dark-text-primary" size={28} />
-                <span className="text-xs text-dark-text-muted border border-dark-border rounded-full px-2 py-1">
-                  Open PR
-                </span>
-              </div>
-              <p className="text-sm text-dark-text-muted mb-2">{item.repository}</p>
-              <h4 className="text-xl font-bold text-dark-text-primary mb-3">{item.title}</h4>
-              <p className="text-dark-text-secondary leading-relaxed mb-5 flex-grow">{item.description}</p>
-              <div className="pt-4 border-t border-dark-border flex flex-wrap gap-x-4 gap-y-2">
-                <a href={item.pullRequestUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-sm text-dark-text-secondary hover:text-dark-text-primary transition-colors">
-                  <GitPullRequest size={16} />
-                  Pull request
-                  <ExternalLink size={14} />
-                </a>
-                <a href={item.issueUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-sm text-dark-text-secondary hover:text-dark-text-primary transition-colors" title={item.issueTitle}>
-                  <FileText size={16} />
-                  Linked issue
-                  <ExternalLink size={14} />
-                </a>
-              </div>
-            </article>
-          ))}
-          </div>
-        </div>
       </div>
     </section>
   );

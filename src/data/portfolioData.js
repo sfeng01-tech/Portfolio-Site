@@ -422,6 +422,8 @@ export const portfolioData = {
 
   openSourceContributions: {
     profile: "https://github.com/sa-faizal",
+    summary:
+      "Selected merged work across GPU runtimes, LLM inference, concurrency, and sanitizer tooling, alongside release engineering for the IREE ecosystem.",
     releaseWork: [
       {
         version: "v3.7",
@@ -504,62 +506,60 @@ export const portfolioData = {
         ],
       },
     ],
-    inProgress: [
-      {
-        repository: "ml-explore/mlx-lm",
-        title: "Declare MLX norm convention in converted models",
-        pullRequestUrl: "https://github.com/ml-explore/mlx-lm/pull/1752",
-        issueTitle: "Record RMSNorm storage state in converted metadata",
-        issueUrl: "https://github.com/ml-explore/mlx-lm/issues/1445",
-        description:
-          "Declares the MLX norm convention in converted config and safetensor metadata, so downstream runtimes no longer need to infer whether RMSNorm weights require an architecture-specific offset.",
-      },
-      {
-        repository: "ml-explore/mlx-examples",
-        title: "Add Whisper beam-search decoding",
-        pullRequestUrl: "https://github.com/ml-explore/mlx-examples/pull/1439",
-        issueTitle: "Whisper numerical-parity tests fail with MLX 0.32.0 on Apple Silicon",
-        issueUrl: "https://github.com/ml-explore/mlx-examples/issues/1440",
-        description:
-          "Adds beam candidate expansion, ranking, cache reordering, CLI support, and regression coverage for MLX Whisper decoding. The related issue documents a separately reproducible numerical-parity regression with MLX 0.32.0.",
-      },
-      {
-        repository: "ml-explore/mlx-examples",
-        title: "Whisper: save converted weights as weights.safetensors",
-        pullRequestUrl: "https://github.com/ml-explore/mlx-examples/pull/1438",
-        issueTitle: "Whisper conversion output is incompatible with mlx-whisper's loader",
-        issueUrl: "https://github.com/ml-explore/mlx-examples/issues/1421",
-        description:
-          "Fixes a mismatch between the Whisper conversion artifact name and the released mlx-whisper loader, with regression coverage for serialization, loading, and conversion documentation.",
-      },
-      {
-        repository: "apple/coremltools",
-        title: "Add InstanceNorm3d alias-conversion regression coverage",
-        pullRequestUrl: "https://github.com/apple/coremltools/pull/2820",
-        issueTitle: "CoreML CPU InstanceNorm3d behavior with track_running_stats",
-        issueUrl: "https://github.com/apple/coremltools/issues/2666",
-        description:
-          "Adds TorchScript and torch.export regression coverage for InstanceNorm3d alias conversion, including both running-stat configurations.",
-      },
-    ],
     contributions: [
       {
-        repository: "iree-org/wave",
-        title: "Tensor Addition example notebook",
-        date: "2025-08-26",
-        url: "https://github.com/iree-org/wave/pull/195",
+        repository: "ROCm/hrx-system",
+        title: "Load GPU code objects with multiple metadata notes",
+        date: "2026-10-05",
+        url: "https://github.com/ROCm/hrx-system/pull/1232",
         description:
-          "Added a Tensor Addition example notebook to improve the Wave learning and experimentation experience.",
-        changes: "Merged pull request",
+          "Fixed the HSACO loader to combine kernel metadata from every AMDGPU note, allowing a previously failing 80-kernel hipBLASLt code object to load. Preserved kernel argument reflection and added regression coverage; validated FP32 and FP16 GEMMs against a CPU reference.",
+        changes: "GPU runtime · Metadata parsing",
       },
       {
-        repository: "iree-org/wave",
-        title: "Update ROCm 7 Docker installation for TheRock CI runner",
-        date: "2025-09-08",
-        url: "https://github.com/iree-org/wave/pull/263",
+        repository: "turboderp-org/exllamav3",
+        title: "Unblock LLM inference with pip-installed ROCm SDKs",
+        date: "2026-10-06",
+        url: "https://github.com/turboderp-org/exllamav3/pull/451",
         description:
-          "Updated the ROCm 7 Docker installation used by the MI355x TheRock CI runner.",
-        changes: "Merged pull request",
+          "Fixed ROCm SDK initialization and header discovery so ExLlamaV3's JIT extension can build with pip-installed SDK 10.0. Validated on Radeon 8060S with 503 passing GPU tests and Llama 3.2 1B / Qwen3 8B inference checks at prompt lengths up to 16K tokens.",
+        changes: "LLM inference · ROCm compatibility",
+      },
+      {
+        repository: "ROCm/rocm-systems",
+        title: "Simplify hipFile task ownership and test concurrency",
+        date: "2026-10-02",
+        url: "https://github.com/ROCm/rocm-systems/pull/12320",
+        description:
+          "Simplified task-state ownership and completion notification in hipFile's thread pool, removing a global publication mutex. Added four regression tests for publication, cancellation, destruction, and concurrent submitters; validated all 700 host unit tests with verified ThreadSanitizer instrumentation.",
+        changes: "Concurrency · Thread-pool lifecycle",
+      },
+      {
+        repository: "ROCm/rocm-systems",
+        title: "Fix a profiler shutdown callback race",
+        date: "2026-10-01",
+        url: "https://github.com/ROCm/rocm-systems/pull/11739",
+        description:
+          "Fixed a locally reproduced ThreadSanitizer race in rocprofiler-systems' flush worker by avoiding the stop-token callback lifetime path while preserving its timed wait. Extended regression coverage for repeated and immediate stop requests without disabling tests or adding sanitizer suppressions.",
+        changes: "GPU profiling · Thread safety",
+      },
+      {
+        repository: "ROCm/TheRock",
+        title: "Repair AddressSanitizer runtime discovery",
+        date: "2026-10-08",
+        url: "https://github.com/ROCm/TheRock/pull/8721",
+        description:
+          "Fixed sanitizer startup failures by exporting the runtime library directory and supporting both current and legacy ASan filenames. Resolved missing dependencies in rocPRIM, hipCUB, and rocThrust resource helpers on MI325 hardware, with configuration and dashboard checks passing on Linux and Windows.",
+        changes: "Build tooling · Sanitizer infrastructure",
+      },
+      {
+        repository: "ROCm/rocm-libraries",
+        title: "Fix an out-of-bounds read in rocSPARSE tests",
+        date: "2026-10-04",
+        url: "https://github.com/ROCm/rocm-libraries/pull/13044",
+        description:
+          "Corrected the BSR column-index copy size in rocSPARSE's conversion test helper, preventing host-buffer overreads when row and column index widths differ. All five existing mixed-index conversion cases passed on gfx942 hardware with host AddressSanitizer and leak detection enabled.",
+        changes: "Memory safety · Sparse matrix testing",
       },
     ],
   },
