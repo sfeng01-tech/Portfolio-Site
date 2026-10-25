@@ -2,38 +2,13 @@
 
 ORIN is a private route at `/orin`. The GitHub identity is checked on the server for every digest read and read/bookmark update. Only `GITHUB_REPOSITORY_OWNER` (default `sfeng01-tech`) can access data. The browser receives no database credentials, collector token, or OpenRouter key. Private API responses use `Cache-Control: private, no-store`.
 
-## Hosting requirement
+## Current hosting
 
-The current Render service is a **Static Site**, which cannot execute `/api/*` handlers. ORIN requires a Render **Web Service** (Node 20+) or a Vercel project running the Node handlers. For Render, build with `npm ci && npm run build` and start with `npm start` (`node server/http.js`). Preserve the existing static service until the web service and its custom domain are verified. Set environment variables on the web service and update the GitHub OAuth callback to that service's canonical domain. The optional `render-web.yaml` blueprint describes this migration; it does not automatically convert a Static Site.
+The public portfolio is served as a Render Static Site at `https://sahil-ai-portfolio.onrender.com`. ORIN's Node web service is `https://orin-sahil.onrender.com`; the static `/orin` entry redirects there. The Node adapter serves `dist` and the API handlers from the same origin, while Neon persists digests and GitHub OAuth restricts access to the repository owner. Unknown `/api/*` routes return JSON 404, not the SPA HTML.
 
-The Node adapter serves `dist` and the existing API handlers from one origin. Unknown `/api/*` routes return JSON 404, not the SPA HTML. In local development, run the API server alongside Vite with the configured API proxy. Plain static hosting can still show public pages and the ORIN sign-in shell, but cannot authenticate or store a private digest.
+The existing GitHub OAuth app, Render environment variables, Neon schema and Actions ingestion secrets are configured. The owner login and private digest were verified. GitHub Actions runs the daily collector independently from the Render web service. For local API preview, run `npm run build` and `npm run dev:server`, then visit `http://localhost:3000/orin`; Vite alone on port 5173 cannot authenticate or store a private digest.
 
-## Current hosting: Render static → Node API support
-
-The existing live URL is `https://sahil-ai-portfolio.onrender.com`. Its current Render service uses `runtime: static` in `render.yaml`. Static hosting does **not** execute the `api/` files: `/api/auth/session` currently returns the SPA HTML. Hiding portfolio sections works on that deployment; private ORIN requires the Node runtime below. A GitHub push alone cannot convert a Render Static Site into a Node Web Service.
-
-`render.yaml` is intentionally retained so the current static deployment keeps working. `render-node.yaml` is an optional blueprint for a **new** free Node web service, not a change to the existing service. Configure it in Render or create a Node Web Service manually with:
-
-- Repository: `sfeng01-tech/Portfolio-Site`, branch `main`.
-- Build: `npm ci && npm run build`.
-- Start: `npm start`.
-- Node: 22; health check: `/api/health`.
-- Free plan: use the dashboard's current free option; confirm availability before creating a service. Cold starts are expected.
-
-Render allocates the new service its own URL. Set the new origin everywhere below. Keeping the old hostname requires a deliberate hostname/service migration in Render; do not point the worker at the old static service. GitHub Actions runs the daily collector independently of whether the website service is sleeping.
-
-## Deployment setup
-
-1. Use the existing GitHub OAuth application's `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` as **server environment variables** on the Node service. Its authorization callback must be `https://YOUR_NODE_SERVICE_DOMAIN/api/auth/callback`. Set `APP_ORIGIN` to that exact origin. The existing owner-only admin OAuth/session is reused; ORIN sign-in returns to `/orin`.
-2. Create a free Neon Postgres database. Add its pooled connection string to the Node service as `ORIN_DATABASE_URL`. Run [`server/orin-schema.sql`](../server/orin-schema.sql) once in Neon's SQL editor. Do not put this URL in any `VITE_` variable. Never commit the connection string.
-3. Generate an independent random ingestion secret (`openssl rand -hex 32`). Add it as `ORIN_INGEST_TOKEN` to the Node service and the matching GitHub Actions secret. Never reuse the OAuth secret or OpenRouter key.
-4. Redeploy after environment configuration. `/api/auth/session` and `/api/orin/digest` must return JSON 401 when logged out, not HTML 200. For the owner, ORIN returns 503 until storage is configured, then an empty state until collection succeeds.
-5. Configure the GitHub Actions worker described in [`ORIN-SOURCES.md`](ORIN-SOURCES.md). Set the exact new ingestion URL `https://YOUR_NODE_SERVICE_DOMAIN/api/orin/ingest`, OpenRouter secret, and optional browser session secrets. No browser runs in the website server. Keep the schedule disabled until these are configured.
-6. Visit `/orin`, sign in with the repository owner (`sfeng01-tech`), manually dispatch one collection and verify a real digest before enabling daily runs.
-
-Local API preview: `npm run build` then `npm run dev:server`; visit `http://localhost:3000/orin`. Store local server settings in ignored `.env.local`. Vite on port 5173 previews layout only and cannot run these API handlers.
-
-A code deployment alone does not provision Neon, set OAuth secrets, authenticate social accounts or activate collection. Source failures appear explicitly in the digest. Login/challenge/rate-limit pages are reported rather than bypassed.
+Source failures appear explicitly in the digest. Login, verification and rate-limit pages are reported rather than bypassed.
 
 ## API contract
 
@@ -98,4 +73,4 @@ There is no automatic deletion policy. To remove old daily digests while preserv
 - Owner GitHub sign-in completed and the private digest rendered in Safari.
 - Initial Actions run succeeded: 3 items grouped into 3 threads for October 25, 2026.
 - `ORIN_ENABLED=true`: daily public-feed collection runs at 14:17 UTC (07:17 PDT / 06:17 PST).
-- arXiv and Hacker News collection are enabled. X, LinkedIn and Reddit remain disabled pending dedicated authenticated browser sessions; no existing Safari cookies are copied.
+- arXiv, Hacker News and Reddit public RSS collection are enabled. X and LinkedIn collection use dedicated browser sessions when the platforms accept the saved sessions; login challenges and rate limits are reported and never bypassed.

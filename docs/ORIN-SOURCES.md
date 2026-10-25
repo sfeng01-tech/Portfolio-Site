@@ -4,11 +4,11 @@ ORIN prioritizes AI systems, GPU kernels, ROCm, LLM training/inference, agents, 
 
 ## What runs now and what needs setup
 
-The workflow is prepared, not activated by this code alone: configure the application database, GitHub OAuth and worker secrets, then run the workflow manually. No social account has been accessed during implementation. Default collection uses public arXiv `cs.LG`/`cs.DC` feeds and the Hacker News front page RSS; social sources are disabled until you enable them and supply dedicated browser sessions. There is no sample content presented as a real digest.
+The workflow is configured with the application database, GitHub OAuth and worker secrets. Default collection uses public arXiv `cs.LG`/`cs.DC`, Hacker News RSS, and Reddit RSS from `r/LocalLLaMA` and `r/MachineLearning`. X and LinkedIn use dedicated browser sessions when enabled; sessions may expire or be rejected by cloud IPs. There is no sample content presented as a real digest.
 
-X, LinkedIn and Reddit use normal Playwright Chromium sessions with a maximum of three configured URLs per source, three viewport snapshots per page, sequential navigation and pauses. Login walls, verification challenges and HTTP 401/403/429 stop that source for the current run. There are no stealth plugins, proxies, CAPTCHA solvers or automatic rate-limit retries. A cloud IP may require fresh manual login or may remain blocked; ORIN reports the source status and continues available feeds. Browser polling has its own limits and is not a guaranteed substitute for an API.
+X, LinkedIn and optional Reddit browser collection use normal Playwright Chromium sessions with a maximum of three configured URLs per source, three viewport snapshots per page, sequential navigation and pauses. Login walls, verification challenges and HTTP 401/403/429 stop that source for the current run. There are no stealth plugins, proxies, CAPTCHA solvers or automatic rate-limit retries. A cloud IP may require fresh manual login or may remain blocked; ORIN reports the source status and continues available feeds. Reddit's daily digest uses public RSS, so a Reddit sign-in is not required.
 
-Only visible source excerpts are collected. Links always identify their provenance: social permalinks, arXiv abstracts and HN discussions. Full external articles/papers are not silently fetched. Research claims remain claims from supplied abstracts. Popularity is shown only when a numeric metric was actually observed (currently Reddit score/comments); missing metrics remain missing. Items are prioritized by topic matches and recency with source quotas. Observed engagement breaks relevance ties only among posts from the same source (log-scaled score/likes, reposts weighted twice, comments once); cross-platform raw counts are never compared, and missing metrics remain unknown; this is a relevant daily selection, not an exhaustive popularity ranking across entire platforms. Unknown publication dates remain unknown. Site markup changes may require selector maintenance.
+Only visible source excerpts are collected. Links always identify their provenance: social permalinks, Reddit RSS links, arXiv abstracts and HN discussions. Full external articles/papers are not silently fetched. Research claims remain claims from supplied abstracts. Popularity is shown only when a numeric metric was actually observed; missing metrics remain missing. Items are prioritized by topic matches and recency with source quotas. Observed engagement breaks relevance ties only among posts from the same source; cross-platform raw counts are never compared, and missing metrics remain unknown; this is a relevant daily selection, not an exhaustive popularity ranking across entire platforms. Unknown publication dates remain unknown. Site markup changes may require selector maintenance.
 
 ## GitHub Actions setup
 
@@ -23,7 +23,7 @@ Add repository **Actions secrets**:
 | `OPENROUTER_API_KEY` | Existing OpenRouter credential; never use a `VITE_` variable |
 | `ORIN_BROWSER_STORAGE_STATE` | Optional JSON object mapping `twitter`, `linkedin`, `reddit` to Playwright storage-state objects |
 
-Set repository **Actions variable** `ORIN_ENABLED` to `true` after setup to enable scheduled runs. Manual workflow dispatch is available even while the schedule is disabled, and still checks required secrets. Set variable `ORIN_CONFIG` to a JSON copy of `scripts/orin/config.example.json` with desired sources enabled. With no variable, the default public feeds run and social sources stay disabled. Disabled jobs or missing required secrets skip before dependency/browser installation. Do not turn on a browser source without its storage state; it will need login. Browser sessions are account credentials: use repository secrets, restrict workflow editing, and never attach them to logs, caches or artifacts. Sessions expire; renew manually when the digest reports a block. Because the runner receives source excerpts and sends them to OpenRouter, enable only material you want processed by that model/provider.
+Set repository **Actions variable** `ORIN_ENABLED` to `true` to enable scheduled runs. Manual workflow dispatch is available while the schedule is disabled and still checks required secrets. Set `ORIN_CONFIG` to a JSON copy of `scripts/orin/config.example.json` with desired sources enabled. Without that variable, the default public feeds run and social sources stay disabled. Disabled jobs or missing required secrets skip before dependency/browser installation. Do not turn on a browser source without its storage state; it will need login. Browser sessions are account credentials: use repository secrets, restrict workflow editing, and never attach them to logs, caches or artifacts. Sessions expire; renew manually when the digest reports a block. Because the runner receives source excerpts and sends them to OpenRouter, enable only material you want processed by that model/provider.
 
 This repository is private: standard GitHub-hosted runners consume the account's included plan minutes, then billable minutes. A 5–10 minute daily job would use roughly 150–300 minutes/month, but actual duration and browser installation overhead need measurement. Check your account allowance and spending limits. [GitHub billing documentation](https://docs.github.com/en/billing/concepts/product-billing/github-actions).
 
@@ -33,10 +33,9 @@ For setup from a trusted workstation:
 npm ci --prefix scripts/orin
 npm exec --prefix scripts/orin -- playwright install chromium
 cp scripts/orin/config.example.json scripts/orin/config.local.json
-# Set social enabled=true for desired sources in config.local.json.
+# Set social enabled=true for desired browser sources in config.local.json.
 node scripts/orin/collect.mjs --login twitter
 node scripts/orin/collect.mjs --login linkedin
-node scripts/orin/collect.mjs --login reddit
 node scripts/orin/collect.mjs --sync-sessions --repo sfeng01-tech/Portfolio-Site
 ```
 

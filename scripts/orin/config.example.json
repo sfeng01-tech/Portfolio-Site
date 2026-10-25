@@ -8,11 +8,12 @@
   "feeds": [
     { "source": "arxiv", "url": "https://rss.arxiv.org/rss/cs.LG" },
     { "source": "arxiv", "url": "https://rss.arxiv.org/rss/cs.DC" },
-    { "source": "hackernews", "url": "https://news.ycombinator.com/rss" }
+    { "source": "hackernews", "url": "https://news.ycombinator.com/rss" },
+    { "source": "reddit", "url": "https://www.reddit.com/r/LocalLLaMA/top/.rss?t=day" },
+    { "source": "reddit", "url": "https://www.reddit.com/r/MachineLearning/top/.rss?t=day" }
   ],
   "social": [
     { "source": "twitter", "enabled": false, "urls": ["https://x.com/search?q=ROCm%20OR%20GPU%20kernels%20OR%20LLM%20inference&f=live"] },
-    { "source": "linkedin", "enabled": false, "urls": ["https://www.linkedin.com/search/results/content/?keywords=ROCm%20GPU%20LLM"] },
-    { "source": "reddit", "enabled": false, "urls": ["https://www.reddit.com/r/LocalLLaMA/top/?t=day", "https://www.reddit.com/r/MachineLearning/top/?t=day"] }
+    { "source": "linkedin", "enabled": false, "urls": ["https://www.linkedin.com/search/results/content/?keywords=ROCm%20GPU%20LLM"] }
   ]
 }
