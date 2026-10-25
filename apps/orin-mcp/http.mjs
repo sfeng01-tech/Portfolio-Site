@@ -123,8 +123,9 @@ export function createMcpHttpApp({ store, token = process.env.ORIN_MCP_TOKEN, ma
   };
 }
 
-export function startMcpHttpServer({ store = createDefaultOrinStore(), token = process.env.ORIN_MCP_TOKEN, maxBodyBytes } = {}) {
-  const app = createMcpHttpApp({ store, token, maxBodyBytes });
+export async function startMcpHttpServer({ store = createDefaultOrinStore(), token = process.env.ORIN_MCP_TOKEN, maxBodyBytes } = {}) {
+  const orinStore = await store;
+  const app = createMcpHttpApp({ store: orinStore, token, maxBodyBytes });
   const server = http.createServer(app);
   const port = Number(process.env.PORT || 10000);
   server.listen(port, '0.0.0.0', () => console.log(`ORIN MCP HTTP server listening on port ${port}`));

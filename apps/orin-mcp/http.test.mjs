@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createMcpHttpApp } from './http.mjs';
+import { createMcpHttpApp, startMcpHttpServer } from './http.mjs';
 import { createOrinStore } from './server.mjs';
 
 const token = 'a'.repeat(40);
@@ -104,4 +104,12 @@ test('HTTP transport rejects unknown sessions and terminates sessions', async ()
     body: { jsonrpc: '2.0', id: 5, method: 'tools/list' }
   }), afterDelete);
   assert.equal(afterDelete.statusCode, 400);
+});
+
+test('HTTP startup surfaces store configuration errors through its promise', async () => {
+  const failingStore = Promise.reject(new Error('database unavailable'));
+  await assert.rejects(
+    startMcpHttpServer({ store: failingStore, token }),
+    /database unavailable/
+  );
 });
