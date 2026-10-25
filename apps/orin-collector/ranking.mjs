@@ -62,6 +62,24 @@ function messagesFor(items, config, examples) {
     { role: 'user', content: JSON.stringify({ topics: config.topics, feedback: examples, candidates: items.map(({ id, title, excerpt }) => ({ id, title, excerpt: excerpt.slice(0, 700) })) }) },
   ];
 }
+// Short per-request IDs reduce copying errors and token cost. Canonical IDs stay local.
+export function classificationRequest(items, config, examples = []) {
+  const modelItems = items.map((item, index) => ({ ...item, id: `p${index}` }));
+  const lookup = new Map(modelItems.map((item, index) => [item.id, items[index].id]));
+  const boundedSchema = structuredClone(schema);
+  boundedSchema.properties.items.items.properties.id.enum = modelItems.map(item => item.id);
+  return {
+    messages: messagesFor(modelItems, config, examples),
+    responseFormat: { type: 'json_schema', json_schema: { name: 'research_ranking', strict: true, schema: boundedSchema } },
+    decode: raw => {
+      // Bound display text locally: provider schema-length enforcement varies.
+      // IDs, coverage, scores and tracks still undergo strict validation.
+      const bounded = Array.isArray(raw?.items) ? { ...raw, items: raw.items.map(row => ({ ...row, reason: typeof row.reason === 'string' ? row.reason.trim().slice(0, 240) : row.reason })) } : raw;
+      return validateClassifications(bounded, modelItems).map(row => ({ ...row, id: lookup.get(row.id) }));
+    },
+  };
+}
+
 export function selectClassified(candidates, classifications, config, options = RANKING_DEFAULTS) {
   const rows = new Map(classifications.map(row => [row.id, row]));
   let available = candidates.filter(item => rows.get(item.id)?.score >= 35);
@@ -112,9 +130,9 @@ export async function rankItems(items, config, { apiKey, examples = [], seen = {
     while (shortlist.length) {
       plan = [];
       for (let i = 0; i < shortlist.length; i += 30) {
-        const batch = shortlist.slice(i, i + 30), messages = messagesFor(batch, config, feedback);
-        const inputBound = Buffer.byteLength(JSON.stringify({ messages, response_format: schema }));
-        plan.push({ batch, messages, inputBound, estimate: inputBound * rates[0] + maxTokens * rates[1] + rates[2] });
+        const batch = shortlist.slice(i, i + 30), request = classificationRequest(batch, config, feedback);
+        const inputBound = Buffer.byteLength(JSON.stringify({ messages: request.messages, response_format: request.responseFormat }));
+        plan.push({ batch, ...request, inputBound, estimate: inputBound * rates[0] + maxTokens * rates[1] + rates[2] });
       }
       if (plan.every(row => row.inputBound + maxTokens <= model.context_length) && plan.reduce((sum, row) => sum + row.estimate, 0) <= config.maxRunUsd * options.budgetFraction) break;
       shortlist = shortlist.slice(0, Math.max(0, shortlist.length - 10));
@@ -125,11 +143,11 @@ export async function rankItems(items, config, { apiKey, examples = [], seen = {
       reservedUsd += row.estimate; // Reserve even failed/invalid metered responses; never retry automatically.
       const response = await fetchImpl('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST', redirect: 'error', signal: AbortSignal.timeout(60_000), headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json', 'X-Title': 'ORIN research ranking' },
-        body: JSON.stringify({ model: options.model, messages: row.messages, temperature: 0, max_tokens: maxTokens, reasoning: { enabled: false }, response_format: { type: 'json_schema', json_schema: { name: 'research_ranking', strict: true, schema } }, provider: { require_parameters: true, sort: 'price', max_price: { prompt: rates[0] * 1e6, completion: rates[1] * 1e6 } } }),
+        body: JSON.stringify({ model: options.model, messages: row.messages, temperature: 0, max_tokens: maxTokens, reasoning: { enabled: false }, response_format: row.responseFormat, provider: { require_parameters: true, sort: 'price', max_price: { prompt: rates[0] * 1e6, completion: rates[1] * 1e6 } } }),
       });
       if (!response.ok) throw new Error(`Classifier HTTP ${response.status}`);
       const result = JSON.parse(await boundedText(response, 1_000_000));
-      classifications.push(...validateClassifications(JSON.parse(result.choices?.[0]?.message?.content), row.batch));
+      classifications.push(...row.decode(JSON.parse(result.choices?.[0]?.message?.content)));
     }
     return { items: selectClassified(shortlist, classifications, config, options), reservedUsd, status: { method: 'llm', model: options.model, classified: shortlist.length, candidates: candidates.length, feedbackExamples: feedback.length, message: `Classified ${shortlist.length} of ${candidates.length} fresh candidates` } };
   } catch {

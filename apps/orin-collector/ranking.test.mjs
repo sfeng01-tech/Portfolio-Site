@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { normalizeItem, paperIdentity } from './core.mjs';
-import { freshCandidates, rankItems, selectClassified, validateClassifications } from './ranking.mjs';
+import { classificationRequest, freshCandidates, rankItems, selectClassified, validateClassifications } from './ranking.mjs';
 const now = new Date('2026-10-25T12:00:00Z');
 const config = { topics: ['GPU'], maxAgeHours: 72, maxItems: 10, maxRunUsd: 0.05 };
 const item = (id, title = 'GPU research', source = 'arxiv') => normalizeItem({ url: source === 'arxiv' ? `https://arxiv.org/abs/2610.${String(id).padStart(5,'0')}` : `https://huggingface.co/papers/2610.${String(id).padStart(5,'0')}`, title, excerpt: 'Useful research.', publishedAt: now.toISOString() }, source, now);
@@ -33,7 +33,7 @@ test('LLM can select a semantically relevant paper with zero keyword matches; fe
     assert.equal(input.feedback.length,1);
     assert.equal(input.candidates.length,1);
     assert.equal(body.reasoning.enabled,false);
-    return new Response(JSON.stringify({choices:[{message:{content:JSON.stringify({items:[classification(novel,92,'Quantization')]})}}]}));
+    return new Response(JSON.stringify({choices:[{message:{content:JSON.stringify({items:[{...classification(novel,92,'Quantization'),id:input.candidates[0].id}]})}}]}));
   }});
   assert.equal(calls,2);
   assert.equal(result.items[0].ranking.score,92);
@@ -76,4 +76,16 @@ test('source quota and discovery slots survive semantic ranking', () => {
   assert.equal(result.filter(i=>i.source==='arxiv').length,10);
   const discovery=result.find(i=>i.source==='huggingface');
   assert.equal(discovery.ranking.discovery,true);
+});
+
+
+test('bounded schema uses short IDs and restores only validated canonical identities', () => {
+  const paper=item(1);
+  const request=classificationRequest([paper],config);
+  const input=JSON.parse(request.messages[1].content);
+  assert.equal(input.candidates[0].id,'p0');
+  assert.deepEqual(request.responseFormat.json_schema.schema.properties.items.items.properties.id.enum,['p0']);
+  assert.equal(request.decode({items:[{...classification(paper),id:'p0',reason:'x'.repeat(300)}]})[0].reason.length,240);
+  assert.equal(request.decode({items:[{...classification(paper),id:'p0'}]})[0].id,paper.id);
+  assert.throws(()=>request.decode({items:[{...classification(paper),id:'p1'}]}));
 });

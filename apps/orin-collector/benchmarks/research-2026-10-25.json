@@ -1,0 +1,643 @@
+{
+  "createdAt": "2026-10-25",
+  "labelAuthor": "Codex; provisional relevance judgments inferred from the user’s stated interests, not user-reviewed ground truth",
+  "rubric": {
+    "0": "Off-topic (<35)",
+    "1": "Adjacent discovery (35–49)",
+    "2": "Relevant (50–79)",
+    "3": "Directly useful (80–100)"
+  },
+  "limitations": [
+    "Purposive sample, not a random estimate of production accuracy.",
+    "Known historical systems papers may be easy or familiar to models.",
+    "Only title plus first 700 excerpt characters is sent, matching production.",
+    "Historical publication dates intentionally do not filter this fixed comparison.",
+    "Subjective reference grades were assigned before any model calls."
+  ],
+  "sources": [
+    "https://huggingface.co/api/daily_papers?limit=50",
+    "https://export.arxiv.org/api/query"
+  ],
+  "papers": [
+    {
+      "section": "outside",
+      "url": "https://arxiv.org/abs/2610.31441v1",
+      "title": "Gravitational Wave Diffractive Images Reveal the Structure of Astrophysical Objects",
+      "excerpt": "Scattering patterns encode the structure of extended objects, as demonstrated by charged particle scattering on atomic nuclei. Gravitational wave (GW) diffraction offers an analogous probe of otherwise invisible mass distributions. At linear order in the lens potential we derive expressions relating the central diffractive image contribution to a gravitationally lensed GW waveform to the Fourier transform of the projected lens density. For finite mass lenses this contribution takes the form of a point mass Born amplitude multiplied by a normalized mass form factor, analogous to that in nuclear scattering. As the frequency of GWs from a merging compact binary source evolves the signal samples this form factor across spatial scales, imprinting lens structure through interference with the primary image. Using full numerical wave optics calculations we quantify the observational reach for extended dark matter objects, primordial black holes halo-dressed by dark matter halos and superradiance clouds of ultralight bosons around black holes. For the considered source populations, five year observations with next generation detectors can distinguish extended lenses from point masses, probing dark matter fractions down to $\\mathcal{O}(10^{-5})$, and halo-dressed primordial black holes from matched bare black holes, probing primordial black hole dark matter fractions down to $\\mathcal{O}(10^{-6})$. For sufficiently close source-lens configurations, scalar superradiance clouds can produce distinguishable diffraction signatures for boson masses of approximately $10^{-17}-10^{-12}~\\mathrm{eV}$. These results provide a framework for characterizing extended dark matter and compact object astrophysical environments.",
+      "publishedAt": "2026-10-22T15:36:31Z",
+      "referenceGrade": 0,
+      "referenceReason": "Astronomy or pure mathematics without a visible AI systems connection.",
+      "exampleIndex": 53
+    },
+    {
+      "section": "systems",
+      "url": "https://arxiv.org/abs/2211.10438v7",
+      "title": "SmoothQuant: Accurate and Efficient Post-Training Quantization for Large Language Models",
+      "excerpt": "Large language models (LLMs) show excellent performance but are compute- and memory-intensive. Quantization can reduce memory and accelerate inference. However, existing methods cannot maintain accuracy and hardware efficiency at the same time. We propose SmoothQuant, a training-free, accuracy-preserving, and general-purpose post-training quantization (PTQ) solution to enable 8-bit weight, 8-bit activation (W8A8) quantization for LLMs. Based on the fact that weights are easy to quantize while activations are not, SmoothQuant smooths the activation outliers by offline migrating the quantization difficulty from activations to weights with a mathematically equivalent transformation. SmoothQuant enables an INT8 quantization of both weights and activations for all the matrix multiplications in LLMs, including OPT, BLOOM, GLM, MT-NLG, Llama-1/2, Falcon, Mistral, and Mixtral models. We demonstrate up to 1.56x speedup and 2x memory reduction for LLMs with negligible loss in accuracy. SmoothQuant enables serving 530B LLM within a single node. Our work offers a turn-key solution that reduces hardware costs and democratizes LLMs. Code is available at https://github.com/mit-han-lab/smoothquant.",
+      "publishedAt": "2022-11-18T18:59:33Z",
+      "referenceGrade": 3,
+      "referenceReason": "Direct GPU/LLM systems, training or agent infrastructure interest.",
+      "referenceTrack": "Quantization",
+      "exampleIndex": 12
+    },
+    {
+      "section": "outside",
+      "url": "https://arxiv.org/abs/2610.31289v1",
+      "title": "Cohomology of integral structure sheaves for open varieties",
+      "excerpt": "We study the cohomology of integral structure sheaves for two types of open rigid analytic varieties: complements of divisors in quasi-compact varieties, and partially proper spaces. As applications, we prove a strengthened form of the Hebbarkeitssatz (Riemann's extension theorem), involving the almost vanishing of $R^1\\lim$, and study pro-étale $G$-torsors on open varieties.",
+      "publishedAt": "2026-10-22T13:52:29Z",
+      "referenceGrade": 0,
+      "referenceReason": "Astronomy or pure mathematics without a visible AI systems connection.",
+      "exampleIndex": 55
+    },
+    {
+      "section": "current",
+      "url": "https://huggingface.co/papers/2610.31329",
+      "title": "WeVisOne-VL: Unified Visual Perception from Objects to Pixels",
+      "excerpt": "Existing vision-language models (VLMs) remain unreliable for fine-grained visual perception. In this report, we present WeVisOne-VL (WeChat Vision All-in-One), a powerful VLM that unifies object-level and pixel-level perception through structured next-token prediction. It supports multiple visual tasks including object detection, referring localization, counting, OCR, segmentation, and matting, enabling localization at any user-specific granularity, from points and boxes to masks and alpha mattes. Architecturally, we integrate a lightweight pixel decoder into the VLM via a special <OBJ> token to generate instance-level pixel outputs. We train the model with a three-stage curriculum SFT followed by mixed-task RL. Across over 30 benchmarks, WeVisOne-VL demonstrates leading performance on both object-level and pixel-level tasks, while maintaining robust rejection for object-absent queries. By releasing WeVisOne-VL to the open-source community, we hope to advance VLMs from broad visual understanding toward truly reliable perception systems for real-world deployment.",
+      "publishedAt": "2026-10-22T00:00:00.000Z",
+      "referenceGrade": 1,
+      "referenceReason": "General vision/robotics/ML application; adjacent discovery rather than a primary systems interest.",
+      "exampleIndex": 38
+    },
+    {
+      "section": "systems",
+      "url": "https://arxiv.org/abs/2312.07104v2",
+      "title": "SGLang: Efficient Execution of Structured Language Model Programs",
+      "excerpt": "Large language models (LLMs) are increasingly used for complex tasks that require multiple generation calls, advanced prompting techniques, control flow, and structured inputs/outputs. However, efficient systems are lacking for programming and executing these applications. We introduce SGLang, a system for efficient execution of complex language model programs. SGLang consists of a frontend language and a runtime. The frontend simplifies programming with primitives for generation and parallelism control. The runtime accelerates execution with novel optimizations like RadixAttention for KV cache reuse and compressed finite state machines for faster structured output decoding. Experiments show that SGLang achieves up to 6.4x higher throughput compared to state-of-the-art inference systems on various large language and multi-modal models on tasks including agent control, logical reasoning, few-shot learning benchmarks, JSON decoding, retrieval-augmented generation pipelines, and multi-turn chat. The code is publicly available at https://github.com/sgl-project/sglang",
+      "publishedAt": "2023-12-12T09:34:27Z",
+      "referenceGrade": 3,
+      "referenceReason": "Direct GPU/LLM systems, training or agent infrastructure interest.",
+      "referenceTrack": "Inference",
+      "exampleIndex": 5
+    },
+    {
+      "section": "systems",
+      "url": "https://arxiv.org/abs/2407.08608v2",
+      "title": "FlashAttention-3: Fast and Accurate Attention with Asynchrony and Low-precision",
+      "excerpt": "Attention, as a core layer of the ubiquitous Transformer architecture, is the bottleneck for large language models and long-context applications. FlashAttention elaborated an approach to speed up attention on GPUs through minimizing memory reads/writes. However, it has yet to take advantage of new capabilities present in recent hardware, with FlashAttention-2 achieving only 35% utilization on the H100 GPU. We develop three main techniques to speed up attention on Hopper GPUs: exploiting asynchrony of the Tensor Cores and TMA to (1) overlap overall computation and data movement via warp-specialization and (2) interleave block-wise matmul and softmax operations, and (3) block quantization and incoherent processing that leverages hardware support for FP8 low-precision. We demonstrate that our method, FlashAttention-3, achieves speedup on H100 GPUs by 1.5-2.0$\\times$ with FP16 reaching up to 740 TFLOPs/s (75% utilization), and with FP8 reaching close to 1.2 PFLOPs/s. We validate that FP8 FlashAttention-3 achieves 2.6$\\times$ lower numerical error than a baseline FP8 attention.",
+      "publishedAt": "2024-07-11T15:44:48Z",
+      "referenceGrade": 3,
+      "referenceReason": "Direct GPU/LLM systems, training or agent infrastructure interest.",
+      "referenceTrack": "GPU kernels",
+      "exampleIndex": 16
+    },
+    {
+      "section": "current",
+      "url": "https://huggingface.co/papers/2610.19705",
+      "title": "RouteWeaver: Weaving Mode Selection and Execution into Unified LLM Routing",
+      "excerpt": "LLM routing dynamically selects and coordinates heterogeneous language models across diverse tasks. However, existing approaches are largely built around a predefined execution paradigm, such as single-round, multi-round, or agentic routing, which fixes how model calls are organized and limits adaptation to different query needs. We propose RouteWeaver, a unified routing framework that integrates these routing modes within a single LLM policy, jointly learning which mode to use and how to select models within that mode. To jointly optimize mode selection and within-mode execution, we develop COMET-GRPO (COordinated Mode-Execution Training), which decouples the trajectory-level advantage into separate signals for mode selection and within-mode execution, enabling more targeted credit assignment to each decision level. We further introduce progressive exploration, which gradually shifts training from externally assigned modes to autonomous selection, so that the router first learns how to execute each mode before deciding when to use it. We evaluate RouteWeaver across mathematics, coding, knowledge, logical reasoning, and factual recall. RouteWeaver achieves an average accuracy of 61.4%, an 11.03% relative improvement over the strongest baseline, and outperforms all compared baselines in each of the five domains. Ablations show that both COMET-GRPO and progressive exploration are important for adaptive routing; without progressive exploration, the routing policy collapses entirely to single-round execution.",
+      "publishedAt": "2026-10-19T00:00:00.000Z",
+      "referenceGrade": 3,
+      "referenceReason": "Direct GPU/LLM systems, training or agent infrastructure interest.",
+      "exampleIndex": 43
+    },
+    {
+      "section": "outside",
+      "url": "https://arxiv.org/abs/2610.31469v1",
+      "title": "QUIJOTE scientific results - XII. Characterization of the polarized synchrotron emission at the power spectrum level in the QUIJOTE-MFI wide survey",
+      "excerpt": "We present an analysis of the polarized synchrotron emission at the power-spectrum level in the multipole range $30 < \\ell < 130$, using the recent QUIJOTE-MFI wide survey (10-20GHz) in combination with Planck and WMAP data. The EE and BB power spectra are well described by a simple power-law model, with no evidence for the need of additional parameters. The best-fit slopes are $α_{EE} = -3.24 \\pm 0.12$ and $α_{BB} = -3.81 \\pm 0.34$ for $|b|>20^\\circ$, hinting toward a steepening of the BB spectrum relative to EE at the $\\sim 1.6σ$ level. The synchrotron frequency spectral indices are found to be $β_s^{EE} = -3.26 \\pm 0.05$ and $β_s^{BB} = -3.25 \\pm 0.10$ for the same cut, in agreement with earlier real-space analyses. We find no evidence for spatial variations of $β_s$ across different Galactic latitude cuts, within current uncertainties. The synchrotron BB/EE power ratio is approximately 0.2 over the considered multipole range, lower than typical values for thermal dust, and consistent with previous measurements. We also measure a dust-synchrotron spatial correlation in the range 0.1-0.25 over $30 < \\ell < 130$. Using these results, we estimate the level of synchrotron contamination in future CMB B-mode measurements, finding an average power in the considered sky masks equivalent to $r \\sim 0.003$ at 90GHz and $r \\sim 0.0002$ at 150GHz for the relevant angular scales.",
+      "publishedAt": "2026-10-22T15:59:13Z",
+      "referenceGrade": 0,
+      "referenceReason": "Astronomy or pure mathematics without a visible AI systems connection.",
+      "exampleIndex": 50
+    },
+    {
+      "section": "outside",
+      "url": "https://arxiv.org/abs/2610.31181v1",
+      "title": "A cosmological intercept tension in local distance ladders",
+      "excerpt": "The Hubble tension motivates direct tests of the internal consistency of the local distance ladder. We perform forward and backward consistency checks between Type Ia supernovae in Cepheid host galaxies and the Hubble-flow supernova sample using Pantheon+ data. Within flat $Λ$CDM, we impose Planck-CMB priors on one sample, infer the supernova absolute-magnitude calibration, and propagate it to the other sample to recover the Hubble constant, which should match the input value if the second and third rungs of the distance ladder align perfectly. We examine the impact of host-galaxy peculiar velocities using redshift corrections based on the Manticore-Local reconstruction. These corrections shift the recovered $H_0$ from $74.30^{+1.18}_{-1.20}$ to $71.37^{+1.23}_{-1.18}$ $\\mathrm{km\\,s^{-1}Mpc^{-1}}$ in the forward analysis and from $60.83^{+0.98}_{-0.97}$ to $63.25^{+0.95}_{-0.93}$ $\\mathrm{km\\,s^{-1}Mpc^{-1}}$ in the backward analysis, bringing both results closer to the input CMB constraint. Comparing the cosmological intercepts of the magnitude-redshift relation inferred from two rungs of the distance ladder before and after peculiar-velocity corrections, we find that the significance of the discrepancy decreases from $6.8σ$ to $3.9σ$ in the forward check and from $7.3σ$ to $4.3σ$ in the backward check. Peculiar-velocity corrections therefore partially alleviate the intercept tension, while a residual discrepancy persists within the adopted framework. Our results highlight the importance of local velocity modeling and motivate further tests of sample selection and calibration systematics in assessing distance-ladder consistency.",
+      "publishedAt": "2026-10-22T12:33:06Z",
+      "referenceGrade": 0,
+      "referenceReason": "Astronomy or pure mathematics without a visible AI systems connection.",
+      "exampleIndex": 57
+    },
+    {
+      "section": "current",
+      "url": "https://huggingface.co/papers/2610.30043",
+      "title": "TARSphere: A Robot-Oriented Full-Stack Framework for Long-Horizon Embodied Agents in Evolving Physical and Social Environments",
+      "excerpt": "Robots must act under physical and social constraints while adapting to changes in their environment and human needs. Existing embodied-agent systems often focus on specified goals or abstract execution into symbolic actions, limiting evaluation in an evolving world. We introduce TARSphere, a robot-oriented full-stack framework for physically and socially grounded long-horizon embodied agents. TARSphere-Infra runs robot policies in a physics simulator with embodied NPCs and constrained dialogue. An event-driven finite-state machine (FSM) uses completed actions and delivered information to update task states and evaluate outcomes. TARSphere-Harness, its embodied brain harness, lets a frozen multimodal large language model (MLLM) act through multi-level executable skills, using observations, hierarchical memory, and execution feedback to revise its decisions. On this foundation, agent-in-the-loop curation aligns task semantics, causal dependencies, and scene geometry to construct TARSphere-Bench: 360 episodes across 30 indoor scenes. Five paired conditions assess perceptual robustness, disruption adaptation, task update, human coordination, and intent understanding for navigate-and-report and fetch-and-deliver tasks. Our evaluation of 8 MLLMs shows that general-purpose models can outperform embodied models, while task updates and human interaction remain difficult. Frequent collisions and falls further motivate evaluating execution safety alongside task success, even with a shared action interface and decision budget.",
+      "publishedAt": "2026-10-21T00:00:00.000Z",
+      "referenceGrade": 2,
+      "referenceReason": "Related engineering or agent research with a narrower application/security focus.",
+      "exampleIndex": 20
+    },
+    {
+      "section": "outside",
+      "url": "https://arxiv.org/abs/2610.31664v1",
+      "title": "Odd radio circle J1555+2726: Observational evidence for shock re-acceleration of fossil plasma",
+      "excerpt": "Context. Odd radio circles (ORCs) are peculiar extragalactic sources recently discovered. They are characterised by one or more bright rings extending on scales of hundreds of kiloparsecs, and are filled with fainter emission. A massive elliptical galaxy lies at the centre of ORCs. While their formation mechanism is debated, a shock is plausibly involved. Aims. We aim to constrain the nature of ORC J1555+2726 (ORC4) through the analysis of its morphological and spectral properties. Methods. We utilised Low Frequency ARray (LOFAR), upgraded Giant Metrewave Radio Telescope (uGMRT), and MeerKAT radio data at 50-1284 MHz to obtain images and spectral index maps at high resolution and sensitivity. Results. Both the resolution and observing frequency affect the observed morphology. In particular, the brightness contrast between the ring and the filling emission becomes progressively smoother from higher to lower frequencies. We measured an integrated spectrum of slope $α=1.06\\pm 0.03$, a radio power of $P_{\\rm 150}= (5.4\\pm 0.5)\\times 10^{25} \\; {\\rm W \\; Hz^{-1}}$ at 150 MHz, and a radial spectral flattening down to $α\\sim0.5$ at the ring location. However, we inferred a negative (convex) spectral curvature and a peculiar spectral shape in radio colour-colour diagrams, which imply spectral flattening towards high frequencies. These properties cannot be explained by shock acceleration of thermal particles and standard ageing. Conclusions. The observed features suggest that a mixture of electrons with different spectra coexist within ORC4 volume, likely associated with shock re-acceleration of a fossil relativistic reservoir. The ring emission is plausibly dominated by higher-energy electrons re-accelerated at the shock front, while lower-energy re-accelerated electrons are more uniformly distributed across the whole source (possibly ellipsoidal) volume.",
+      "publishedAt": "2026-10-22T17:59:32Z",
+      "referenceGrade": 0,
+      "referenceReason": "Astronomy or pure mathematics without a visible AI systems connection.",
+      "exampleIndex": 45
+    },
+    {
+      "section": "systems",
+      "url": "https://arxiv.org/abs/2305.14314v1",
+      "title": "QLoRA: Efficient Finetuning of Quantized LLMs",
+      "excerpt": "We present QLoRA, an efficient finetuning approach that reduces memory usage enough to finetune a 65B parameter model on a single 48GB GPU while preserving full 16-bit finetuning task performance. QLoRA backpropagates gradients through a frozen, 4-bit quantized pretrained language model into Low Rank Adapters~(LoRA). Our best model family, which we name Guanaco, outperforms all previous openly released models on the Vicuna benchmark, reaching 99.3% of the performance level of ChatGPT while only requiring 24 hours of finetuning on a single GPU. QLoRA introduces a number of innovations to save memory without sacrificing performance: (a) 4-bit NormalFloat (NF4), a new data type that is information theoretically optimal for normally distributed weights (b) double quantization to reduce the average memory footprint by quantizing the quantization constants, and (c) paged optimziers to manage memory spikes. We use QLoRA to finetune more than 1,000 models, providing a detailed analysis of instruction following and chatbot performance across 8 instruction datasets, multiple model types (LLaMA, T5), and model scales that would be infeasible to run with regular finetuning (e.g. 33B and 65B parameter models). Our results show that QLoRA finetuning on a small high-quality dataset leads to state-of-the-art results, even when using smaller models than the previous SoTA. We provide a detailed analysis of chatbot performance based on both human and GPT-4 evaluations showing that GPT-4 evaluations are a cheap and reasonable alternative to human evaluation. Furthermore, we find that current chatbot benchmarks are not trustworthy to accurately evaluate the performance levels of chatbots. A lemon-picked analysis demonstrates where Guanaco fails compared to ChatGPT. We release all of our models and code, including CUDA kernels for 4-bit training.",
+      "publishedAt": "2023-05-23T17:50:33Z",
+      "referenceGrade": 3,
+      "referenceReason": "Direct GPU/LLM systems, training or agent infrastructure interest.",
+      "referenceTrack": "Quantization",
+      "exampleIndex": 4
+    },
+    {
+      "section": "current",
+      "url": "https://huggingface.co/papers/2610.25376",
+      "title": "TILDE: Teacher-in-the-Loop Distillation from Embodied Foundation Models",
+      "excerpt": "Large-scale action pretraining equips Embodied Foundation Models (EFMs) with strong manipulation capabilities, with particular strengths in generalization and closed-loop robustness, but reproducing such pretraining requires substantial robot data and computation. To transfer these capabilities from pretrained EFMs to policies without action pretraining, we introduce TILDE (Teacher-In-the-Loop Distillation from EFMs), which synergizes on-policy distillation at student-induced states with learning from teacher-executed recovery trajectories. We further propose AutoDAgger, an autonomous data aggregation pipeline in which a robotic reward model is utilized to monitor task progress and trigger teacher intervention, thereby collecting recovery experience without human monitoring or manual control. AutoDAgger accelerates recovery-trajectory collection by more than 2times compared with the human-in-the-loop method. By unifying learning from demonstrations, on-policy teacher supervision, and teacher's corrective behavior, TILDE improves task performance by up to 4.1times over behavior cloning across three real-world tasks and supports effective cross-architecture distillation.",
+      "publishedAt": "2026-10-18T00:00:00.000Z",
+      "referenceGrade": 1,
+      "referenceReason": "General vision/robotics/ML application; adjacent discovery rather than a primary systems interest.",
+      "exampleIndex": 42
+    },
+    {
+      "section": "current",
+      "url": "https://huggingface.co/papers/2610.12586",
+      "title": "Realism VS Accuracy: Event Sequence Forecasting from a Generative Modeling Perspective",
+      "excerpt": "Event sequences are chains of random events, each described by heterogeneous (numerical and categorical) features. The problem of event sequence forecasting occurs in finance, healthcare, business process intelligence, and other fields. In this work, we study multi-horizon forecasting of event sequences as a conditional generative modeling problem. We evaluate forecasts not only for prediction accuracy, but also for distributional realism. To this end, we present a benchmark comprising metrics for both quality aspects, strong statistical baselines, recent models adapted from adjacent fields, and curated real-world datasets. Careful evaluation reveals that no method excels at both accuracy and realism, highlighting a fundamental trade-off between the two. Finally, we introduce Wasserstein BaryBooster, an algorithm that aggregates samples from a realism-strong diffusion model into a state-of-the-art predictor, demonstrating that distributional realism can be converted into prediction accuracy. Code is available at https://github.com/xaosina/event-sequence-forecasting.",
+      "publishedAt": "2026-10-08T00:00:00.000Z",
+      "referenceGrade": 1,
+      "referenceReason": "General vision/robotics/ML application; adjacent discovery rather than a primary systems interest.",
+      "exampleIndex": 33
+    },
+    {
+      "section": "current",
+      "url": "https://huggingface.co/papers/2610.22951",
+      "title": "MambaAct: Efficient Mamba Action Experts for Flow-Matching Vision-Language-Action Models",
+      "excerpt": "Vision-language-action (VLA) models have shown strong promise for generalist robotic manipulation, but their inference cost remains a major bottleneck for real-time control. This limitation is especially pronounced in flow-matching VLAs such as π_{0.5}, where the action expert is evaluated repeatedly during iterative denoising. We introduce MambaAct, an efficient Mamba action expert for flow-matching VLA policies. MambaAct retains the pretrained visual-language prefix encoder of π_{0.5}, while replacing its transformer-based action expert with a compact Mamba-based action expert. Within this expert, Mamba serves as the action mixer that models dependencies across the noisy continuous-action sequence. To preserve visual-language conditioning without repeated token-level cross-attention, MambaAct uses a lightweight Context Compressor to map Vision-language model (VLM) prefix tokens into a compact conditioning signal that gates and modulates each Mamba action block. MambaAct uses a 10times smaller action expert and reduces flow-matching denoising latency by 64.8% on LIBERO and 58.8% in real-world deployment, while improving mean LIBERO success by 1.08 percentage points across three independent fine-tuning seeds and maintaining gains on LIBERO-Plus and real-world benchmarks. Our code and model weights are publicly available at https://github.com/giakhuyendihoc/MambaAct.",
+      "publishedAt": "2026-10-16T00:00:00.000Z",
+      "referenceGrade": 2,
+      "referenceReason": "Related engineering or agent research with a narrower application/security focus.",
+      "exampleIndex": 34
+    },
+    {
+      "section": "systems",
+      "url": "https://arxiv.org/abs/1910.02054v3",
+      "title": "ZeRO: Memory Optimizations Toward Training Trillion Parameter Models",
+      "excerpt": "Large deep learning models offer significant accuracy gains, but training billions to trillions of parameters is challenging. Existing solutions such as data and model parallelisms exhibit fundamental limitations to fit these models into limited device memory, while obtaining computation, communication and development efficiency. We develop a novel solution, Zero Redundancy Optimizer (ZeRO), to optimize memory, vastly improving training speed while increasing the model size that can be efficiently trained. ZeRO eliminates memory redundancies in data- and model-parallel training while retaining low communication volume and high computational granularity, allowing us to scale the model size proportional to the number of devices with sustained high efficiency. Our analysis on memory requirements and communication volume demonstrates: ZeRO has the potential to scale beyond 1 Trillion parameters using today's hardware. We implement and evaluate ZeRO: it trains large models of over 100B parameter with super-linear speedup on 400 GPUs, achieving throughput of 15 Petaflops. This represents an 8x increase in model size and 10x increase in achievable performance over state-of-the-art. In terms of usability, ZeRO can train large models of up to 13B parameters (e.g., larger than Megatron GPT 8.3B and T5 11B) without requiring model parallelism which is harder for scientists to apply. Last but not the least, researchers have used the system breakthroughs of ZeRO to create the world's largest language model (Turing-NLG, 17B parameters) with record breaking accuracy.",
+      "publishedAt": "2019-10-04T17:29:39Z",
+      "referenceGrade": 3,
+      "referenceReason": "Direct GPU/LLM systems, training or agent infrastructure interest.",
+      "referenceTrack": "Training",
+      "exampleIndex": 13
+    },
+    {
+      "section": "systems",
+      "url": "https://arxiv.org/abs/2210.17323v2",
+      "title": "GPTQ: Accurate Post-Training Quantization for Generative Pre-trained Transformers",
+      "excerpt": "Generative Pre-trained Transformer models, known as GPT or OPT, set themselves apart through breakthrough performance across complex language modelling tasks, but also by their extremely high computational and storage costs. Specifically, due to their massive size, even inference for large, highly-accurate GPT models may require multiple performant GPUs, which limits the usability of such models. While there is emerging work on relieving this pressure via model compression, the applicability and performance of existing compression techniques is limited by the scale and complexity of GPT models. In this paper, we address this challenge, and propose GPTQ, a new one-shot weight quantization method based on approximate second-order information, that is both highly-accurate and highly-efficient. Specifically, GPTQ can quantize GPT models with 175 billion parameters in approximately four GPU hours, reducing the bitwidth down to 3 or 4 bits per weight, with negligible accuracy degradation relative to the uncompressed baseline. Our method more than doubles the compression gains relative to previously-proposed one-shot quantization methods, preserving accuracy, allowing us for the first time to execute an 175 billion-parameter model inside a single GPU for generative inference. Moreover, we also show that our method can still provide reasonable accuracy in the extreme quantization regime, in which weights are quantized to 2-bit or even ternary quantization levels. We show experimentally that these improvements can be leveraged for end-to-end inference speedups over FP16, of around 3.25x when using high-end GPUs (NVIDIA A100) and 4.5x when using more cost-effective ones (NVIDIA A6000). The implementation is available at https://github.com/IST-DASLab/gptq.",
+      "publishedAt": "2022-10-31T13:42:40Z",
+      "referenceGrade": 3,
+      "referenceReason": "Direct GPU/LLM systems, training or agent infrastructure interest.",
+      "referenceTrack": "Quantization",
+      "exampleIndex": 1
+    },
+    {
+      "section": "current",
+      "url": "https://huggingface.co/papers/2610.25835",
+      "title": "Diffusion Language Models Change Speed Across Tasks and Languages",
+      "excerpt": "Diffusion language models can write several tokens in one forward pass, and they decide during generation how many passes to spend. Two outputs of the same token length can therefore vary a lot in cost. To understand the underlying factors of this cost variation, we analyze two diffusion models across 10 tasks. We find that the number of forward passes per token depends heavily on the task. Text copied or lightly edited from the input is cheap, while open-ended writing is costly. In DiffusionGemma, generating a token for story writing requires more than three times as many forward passes as for grammar correction. Two output properties explain much of this gap: how much of it is new relative to the input, and how rare its words are within the task. The same holds within a single response when thinking is involved. The final answer is cheap when it repeats the model's reasoning trace and costly when it adds something new. In multilingual generation, we find that highly tokenized languages also require more passes per token, adding to the cost they already pay with more tokens. Finally, cost tracks correctness: on the same math problem, wrong answers take more passes per token than correct ones, and weighting candidate answers by decoding speed beats majority voting by up to 4.2 points at no extra cost. Taken together, our results show that diffusion's computational advantage depends on how much of the output is already determined, while its decoding effort offers a practical signal for making inference more efficient and reliable.",
+      "publishedAt": "2026-10-19T05:47:58.000Z",
+      "referenceGrade": 3,
+      "referenceReason": "Direct GPU/LLM systems, training or agent infrastructure interest.",
+      "exampleIndex": 23
+    },
+    {
+      "section": "systems",
+      "url": "https://arxiv.org/abs/2205.14135v2",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "excerpt": "Transformers are slow and memory-hungry on long sequences, since the time and memory complexity of self-attention are quadratic in sequence length. Approximate attention methods have attempted to address this problem by trading off model quality to reduce the compute complexity, but often do not achieve wall-clock speedup. We argue that a missing principle is making attention algorithms IO-aware -- accounting for reads and writes between levels of GPU memory. We propose FlashAttention, an IO-aware exact attention algorithm that uses tiling to reduce the number of memory reads/writes between GPU high bandwidth memory (HBM) and GPU on-chip SRAM. We analyze the IO complexity of FlashAttention, showing that it requires fewer HBM accesses than standard attention, and is optimal for a range of SRAM sizes. We also extend FlashAttention to block-sparse attention, yielding an approximate attention algorithm that is faster than any existing approximate attention method. FlashAttention trains Transformers faster than existing baselines: 15% end-to-end wall-clock speedup on BERT-large (seq. length 512) compared to the MLPerf 1.1 training speed record, 3$\\times$ speedup on GPT-2 (seq. length 1K), and 2.4$\\times$ speedup on long-range arena (seq. length 1K-4K). FlashAttention and block-sparse FlashAttention enable longer context in Transformers, yielding higher quality models (0.7 better perplexity on GPT-2 and 6.4 points of lift on long-document classification) and entirely new capabilities: the first Transformers to achieve better-than-chance performance on the Path-X challenge (seq. length 16K, 61.4% accuracy) and Path-256 (seq. length 64K, 63.1% accuracy).",
+      "publishedAt": "2022-05-27T17:53:09Z",
+      "referenceGrade": 3,
+      "referenceReason": "Direct GPU/LLM systems, training or agent infrastructure interest.",
+      "referenceTrack": "GPU kernels",
+      "exampleIndex": 19
+    },
+    {
+      "section": "systems",
+      "url": "https://arxiv.org/abs/2310.06770v3",
+      "title": "SWE-bench: Can Language Models Resolve Real-World GitHub Issues?",
+      "excerpt": "Language models have outpaced our ability to evaluate them effectively, but for their future development it is essential to study the frontier of their capabilities. We find real-world software engineering to be a rich, sustainable, and challenging testbed for evaluating the next generation of language models. To this end, we introduce SWE-bench, an evaluation framework consisting of $2,294$ software engineering problems drawn from real GitHub issues and corresponding pull requests across $12$ popular Python repositories. Given a codebase along with a description of an issue to be resolved, a language model is tasked with editing the codebase to address the issue. Resolving issues in SWE-bench frequently requires understanding and coordinating changes across multiple functions, classes, and even files simultaneously, calling for models to interact with execution environments, process extremely long contexts and perform complex reasoning that goes far beyond traditional code generation tasks. Our evaluations show that both state-of-the-art proprietary models and our fine-tuned model SWE-Llama can resolve only the simplest issues. The best-performing model, Claude 2, is able to solve a mere $1.96$% of the issues. Advances on SWE-bench represent steps towards LMs that are more practical, intelligent, and autonomous.",
+      "publishedAt": "2023-10-10T16:47:29Z",
+      "referenceGrade": 3,
+      "referenceReason": "Direct GPU/LLM systems, training or agent infrastructure interest.",
+      "referenceTrack": "Agents",
+      "exampleIndex": 6
+    },
+    {
+      "section": "systems",
+      "url": "https://arxiv.org/abs/2309.06180v1",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "excerpt": "High throughput serving of large language models (LLMs) requires batching sufficiently many requests at a time. However, existing systems struggle because the key-value cache (KV cache) memory for each request is huge and grows and shrinks dynamically. When managed inefficiently, this memory can be significantly wasted by fragmentation and redundant duplication, limiting the batch size. To address this problem, we propose PagedAttention, an attention algorithm inspired by the classical virtual memory and paging techniques in operating systems. On top of it, we build vLLM, an LLM serving system that achieves (1) near-zero waste in KV cache memory and (2) flexible sharing of KV cache within and across requests to further reduce memory usage. Our evaluations show that vLLM improves the throughput of popular LLMs by 2-4$\\times$ with the same level of latency compared to the state-of-the-art systems, such as FasterTransformer and Orca. The improvement is more pronounced with longer sequences, larger models, and more complex decoding algorithms. vLLM's source code is publicly available at https://github.com/vllm-project/vllm",
+      "publishedAt": "2023-09-12T12:50:04Z",
+      "referenceGrade": 3,
+      "referenceReason": "Direct GPU/LLM systems, training or agent infrastructure interest.",
+      "referenceTrack": "Inference",
+      "exampleIndex": 8
+    },
+    {
+      "section": "outside",
+      "url": "https://arxiv.org/abs/2610.31265v1",
+      "title": "Log blow-ups and global resolutions in rigid geometry",
+      "excerpt": "In this article, we study log blow-ups in the setting of log adic spaces. As in the theory of log schemes, we prove the existence of global resolutions of toric singularities for fs log adic spaces log smooth over a $p$-adic field, and the acyclicity of certain sheaves under log blow-ups. One new feature of (log) rigid analytic varieties is their integral structure sheaf: we prove that it is also almost acyclic under log blow-ups in the Kummer étale topology. We also supply some foundational results on log adic spaces.",
+      "publishedAt": "2026-10-22T13:38:48Z",
+      "referenceGrade": 0,
+      "referenceReason": "Astronomy or pure mathematics without a visible AI systems connection.",
+      "exampleIndex": 56
+    },
+    {
+      "section": "current",
+      "url": "https://huggingface.co/papers/2610.30468",
+      "title": "SplatLab: Autonomous Scientific Discovery for 3DGS Research",
+      "excerpt": "Reproducing a published 3DGS paper takes weeks of expert engineering before any extension can be proposed. Prior autonomous-research systems read papers, draft hypotheses, and write code, but are limited by short fixed templates, low executability, and weak traceability, and none has been demonstrated end-to-end in a live computer-vision subfield with intense activity. SplatLab is an autonomous research system for 3D Gaussian Splatting that addresses these limitations. Given a research prompt, a target-paper URL, or no input at all, it reproduces a published baseline, proposes an extension, trains and ablates across Mip-NeRF 360 and LLFF, writes the manuscript, and binds every reported number to a logged training run. Five design choices distinguish it: (i) candidates mutate plugins from a verified-reproduction backbone matched to published baselines; (ii) a cascade-weighted Elo tournament across eight islands scores candidates on measured GPU PSNR with verbal-gradient feedback; (iii) a standing falsifier subtracts Elo on failure, integrating stress-test survival into selection; (iv) every reported number is bound to a logged training run, and the run cannot terminate while any claim is unbacked; (v) a seven-category 3DGS taxonomy wraps EVOLVE-BLOCK markers in domain-aligned scaffolds transferable across 3DGS repositories. On PSNR-targeted runs, SplatLab's manuscripts beat their reproduced targets by +0.18 to +3.78 dB, including +3.78 dB on astrophotographic nebula rendering, for which no prior 3DGS method exists. The research cycle compresses from months of graduate-student time to days of mostly autonomous compute. Code, all manuscripts, experiment ledgers, and the cross-run paper store are available on the project page.",
+      "publishedAt": "2026-10-21T00:00:00.000Z",
+      "referenceGrade": 2,
+      "referenceReason": "Related engineering or agent research with a narrower application/security focus.",
+      "exampleIndex": 35
+    },
+    {
+      "section": "current",
+      "url": "https://huggingface.co/papers/2610.30753",
+      "title": "FilmFlow: Agentic System for 3D Virtual Film Cinematography",
+      "excerpt": "Complex camera motion is central to visual storytelling, yet translating cinematographic intent into controllable, executable camera trajectories remains challenging. We introduce FilmFlow, an agentic framework that converts natural-language instructions or reference videos into explicit camera trajectories for dynamic 3D environments. To generate these trajectories, a Director agent constructs executable camera plans by composing high-level motions from concurrent atomic operations that jointly control translation, rotation, and framing. The Director is supported by three specialized agents: an Interpreter that extracts scene-grounded cinematographic intent, a Scout that selects initial viewpoints, and a Critic that evaluates rendered results and provides visual feedback for iterative plan refinement. We also introduce CinemaBench, comprising 150 Blender scenes from self-created and licensed sources, with five camera instructions per scene for 750 text-directed tasks and 60 reference videos associated with a subset of scenes. CinemaBench supports evaluation of both text-directed camera generation and video reference-directed camera generation. Across a diverse set of evaluated baselines, FilmFlow achieves the strongest benchmark performance and the highest user preference, demonstrating effective spatial reasoning, temporal coordination, and visual composition for executable 3D cinematography.",
+      "publishedAt": "2026-10-22T00:00:00.000Z",
+      "referenceGrade": 1,
+      "referenceReason": "General vision/robotics/ML application; adjacent discovery rather than a primary systems interest.",
+      "exampleIndex": 31
+    },
+    {
+      "section": "outside",
+      "url": "https://arxiv.org/abs/2610.31175v1",
+      "title": "Robust paths to primordial $B$ modes in the presence of polarised point source contamination",
+      "excerpt": "A detection of primordial $B$ modes in the Cosmic Microwave Background (CMB) polarisation relies on a robust control and removal of contamination from astrophysical polarised foreground emission. We examine how much polarised extragalactic point sources may contaminate the cosmological signal in ground-based CMB experiments, propagating their impact through component separation to the final parameter constraints. We discuss masking and modelling strategies to ensure that the resulting constraints remain both accurate and precise under this source of contamination. We produce synthetic data containing polarised emission from extragalactic radio sources (ERSs) and dusty star-forming galaxies (DSFGs) following state-of-the-art models for both samples. We find that, while the DSFG contribution is likely too small to cause any significant bias to the cosmological or foreground parameters, the ERS contribution instead, if left unmasked, leads to a bias in the parameters describing the Galactic synchrotron and lensing $B$-mode components. For experiments targeting noise levels of order $σ_P\\simeq 1\\,μK\\,{\\rm arcmin}$, we find that masking all ERSs with fluxes above $\\sim$0.1 Jy, coupled with a relatively simple model to marginalise over residual point-source contamination, achieves a suitable balance that allows for the robust recovery of unbiased cosmological and foreground parameters at a negligible cost in parameter uncertainties.",
+      "publishedAt": "2026-10-22T12:29:26Z",
+      "referenceGrade": 0,
+      "referenceReason": "Astronomy or pure mathematics without a visible AI systems connection.",
+      "exampleIndex": 58
+    },
+    {
+      "section": "current",
+      "url": "https://huggingface.co/papers/2610.24383",
+      "title": "IF-MAP: Influence-Function-Inspired Agent Prioritization in Multi-Agent Systems",
+      "excerpt": "Improving every agent in an LLM-based multi-agent system can be prohibitively costly, making it important to identify which agent should be prioritized to achieve the greatest system-level gain with limited resources. Failure attribution can inform this decision, but an agent's responsibility for failures does not directly reveal the system-level gains achievable by improving it. We therefore introduce IF-MAP, an influence-function-inspired method for identifying agents with high potential for system-level improvement. For each agent, IF-MAP measures end-to-end loss changes under controlled semantic prompt perturbations, fits a regularized local response model in a low-dimensional prompt-embedding subspace, and uses the estimated response norm as a priority score. This black-box procedure requires no access to model parameters or gradients and produces agent priorities that can guide subsequent improvement effort. We evaluate IF-MAP across six multi-agent workflows spanning code generation, question answering, and mathematical reasoning, using the same priorities for prompt optimization and model upgrades. Optimizing the selected agents' prompts achieves a macro-average gain of 3.81 percentage points, compared with 1.85 for uniform agent selection. Across five target models, upgrading the selected agents yields macro-average gains of 7.62-16.42 percentage points, compared with 3.81-8.62 for uniform agent selection. Despite its probing overhead, IF-MAP reduces Qwen3-8B and DeepSeek-V3.2 token use by 74.2% and 35.2%, respectively, relative to optimizing every agent, and reduces target-model tokens by 63.6-64.9% relative to upgrading every agent. These results support the use of IF-MAP to identify promising agents and direct improvement effort toward greater end-to-end performance gains.",
+      "publishedAt": "2026-10-17T00:00:00.000Z",
+      "referenceGrade": 3,
+      "referenceReason": "Direct GPU/LLM systems, training or agent infrastructure interest.",
+      "exampleIndex": 26
+    },
+    {
+      "section": "systems",
+      "url": "https://arxiv.org/abs/2305.18290v3",
+      "title": "Direct Preference Optimization: Your Language Model is Secretly a Reward Model",
+      "excerpt": "While large-scale unsupervised language models (LMs) learn broad world knowledge and some reasoning skills, achieving precise control of their behavior is difficult due to the completely unsupervised nature of their training. Existing methods for gaining such steerability collect human labels of the relative quality of model generations and fine-tune the unsupervised LM to align with these preferences, often with reinforcement learning from human feedback (RLHF). However, RLHF is a complex and often unstable procedure, first fitting a reward model that reflects the human preferences, and then fine-tuning the large unsupervised LM using reinforcement learning to maximize this estimated reward without drifting too far from the original model. In this paper we introduce a new parameterization of the reward model in RLHF that enables extraction of the corresponding optimal policy in closed form, allowing us to solve the standard RLHF problem with only a simple classification loss. The resulting algorithm, which we call Direct Preference Optimization (DPO), is stable, performant, and computationally lightweight, eliminating the need for sampling from the LM during fine-tuning or performing significant hyperparameter tuning. Our experiments show that DPO can fine-tune LMs to align with human preferences as well as or better than existing methods. Notably, fine-tuning with DPO exceeds PPO-based RLHF in ability to control sentiment of generations, and matches or improves response quality in summarization and single-turn dialogue while being substantially simpler to implement and train.",
+      "publishedAt": "2023-05-29T17:57:46Z",
+      "referenceGrade": 3,
+      "referenceReason": "Direct GPU/LLM systems, training or agent infrastructure interest.",
+      "referenceTrack": "Training",
+      "exampleIndex": 9
+    },
+    {
+      "section": "systems",
+      "url": "https://arxiv.org/abs/1909.08053v4",
+      "title": "Megatron-LM: Training Multi-Billion Parameter Language Models Using Model Parallelism",
+      "excerpt": "Recent work in language modeling demonstrates that training large transformer models advances the state of the art in Natural Language Processing applications. However, very large models can be quite difficult to train due to memory constraints. In this work, we present our techniques for training very large transformer models and implement a simple, efficient intra-layer model parallel approach that enables training transformer models with billions of parameters. Our approach does not require a new compiler or library changes, is orthogonal and complimentary to pipeline model parallelism, and can be fully implemented with the insertion of a few communication operations in native PyTorch. We illustrate this approach by converging transformer based models up to 8.3 billion parameters using 512 GPUs. We sustain 15.1 PetaFLOPs across the entire application with 76% scaling efficiency when compared to a strong single GPU baseline that sustains 39 TeraFLOPs, which is 30% of peak FLOPs. To demonstrate that large language models can further advance the state of the art (SOTA), we train an 8.3 billion parameter transformer language model similar to GPT-2 and a 3.9 billion parameter model similar to BERT. We show that careful attention to the placement of layer normalization in BERT-like models is critical to achieving increased performance as the model size grows. Using the GPT-2 model we achieve SOTA results on the WikiText103 (10.8 compared to SOTA perplexity of 15.8) and LAMBADA (66.5% compared to SOTA accuracy of 63.2%) datasets. Our BERT model achieves SOTA results on the RACE dataset (90.9% compared to SOTA accuracy of 89.4%).",
+      "publishedAt": "2019-09-17T19:42:54Z",
+      "referenceGrade": 3,
+      "referenceReason": "Direct GPU/LLM systems, training or agent infrastructure interest.",
+      "referenceTrack": "Training",
+      "exampleIndex": 2
+    },
+    {
+      "section": "current",
+      "url": "https://huggingface.co/papers/2610.31372",
+      "title": "RIDAR: Safeguarding Research Integrity in Autonomous Research Agents via Automated Detection and Runtime Intervention",
+      "excerpt": "Autonomous research agents are increasingly used to automate large portions of scientific research, yet they are prone to research integrity violations (RIVs): behaviors that compromise the validity, reproducibility, or faithfulness of the research process. We present RIDAR, a framework for automated RIV detection and runtime intervention. First, we introduce RIVT, a comprehensive taxonomy of 14 RIV types spanning the full research lifecycle. Building on RIVT, we present RIDAR-post-hoc, a framework to detect RIVs within agent trajectories. RIDAR-post-hoc achieves 85.2% F1 performance on RIV-Gold, a benchmark for RIV detection with 60 expert-annotated trajectories. Applying RIDAR-post-hoc to RIV-Wild, a dataset of 300 agent trajectories across 50 distinct research tasks, we detect 3,964 RIV instances in 99.7% of trajectories, revealing the prevalence of RIVs in current agents. Finally, we present RIDAR-runtime, a framework for dynamically detecting and correcting RIVs during agent runtime. RIDAR-runtime effectively reduces agent RIVs remaining at task completion by 36.8%. We will release our code and data to facilitate future research.",
+      "publishedAt": "2026-10-22T00:00:00.000Z",
+      "referenceGrade": 3,
+      "referenceReason": "Direct GPU/LLM systems, training or agent infrastructure interest.",
+      "exampleIndex": 32
+    },
+    {
+      "section": "current",
+      "url": "https://huggingface.co/papers/2610.30418",
+      "title": "Agent Mosaic: Recognizing Confidentiality Leaks in Agentic LLM Systems",
+      "excerpt": "Modern LLM agents can retrieve information from accessible documents, and then disclose a sensitive conclusion assembled from them. This mosaic effect creates a critical risk for agents operating over confidential data. We quantify its realization with 30 synthetic cybersecurity, medical, and military examples, yielding 10,800 final answers from three LLM agents in controlled simulation and 1,440 answers from live agents in two open-source harnesses. Even under benign queries designed to be answerable from one document, GPT-5.6-Sol, the best performing model tested, discloses forbidden composites in 7.08% of answers (95% CI: 3.75-10.67%) in simulation, with worse disclosure rates in live harnesses. Adding visible classification headers and explicit aggregation rules reduces pooled disclosure rates substantially, yet unsafe disclosures persist in 32.37% of simulated answers (95% CI: 28.33-36.19%) across all intents despite these safeguards. Furthermore, increased refusals do not guarantee confidentiality, since significant refusals reveal the prohibited conclusion regardless. These results point to a troubling conclusion: sensitive data leaks via mosaic-style events are an observed confidentiality failure mode in the evaluated settings at non-negligible rates. They motivate stronger controls on what agents may infer and disclose in sensitive data environments with mixed-clearance users.",
+      "publishedAt": "2026-10-21T00:00:00.000Z",
+      "referenceGrade": 2,
+      "referenceReason": "Related engineering or agent research with a narrower application/security focus.",
+      "exampleIndex": 27
+    },
+    {
+      "section": "current",
+      "url": "https://huggingface.co/papers/2610.27148",
+      "title": "Who Takes the Lead? Model Ability and Task-Conditioned Collaboration with Humans",
+      "excerpt": "As language-model agents grow more capable, they can carry more of a task without asking anyone for help. Falling reliance on a human partner is easy to read as a failure of collaboration when it may instead be a correct division of labor, and the rate of human involvement alone cannot tell the two apart. We study this systematically by placing an agent and a person under a shared objective while varying who holds the advantage: the human has a clear advantage, neither does, or the agent does. To obtain this control, we introduce a shared-control maze, in which an agent-controlled and a human-controlled avatar share the objective of reaching a common target in as few team turns as possible. The agent allocates each team turn between acting itself and handing the move to the person, and initial placement sets the human's shortest-path advantage while the task is otherwise unchanged. We evaluate GPT~5.6~Sol, Command~A+, Qwen~3.8~27B, and Command~R, first measuring solo capability with a single avatar and full-map observability, then running co-play with human participants across the three advantage conditions. Across the four models, stronger solo performance is associated with selective, route-conditioned human involvement: the models that solve the maze reliably on their own act for themselves almost without exception when the human holds no advantage, and involve the human on roughly 80% of initial decisions when the human route is shorter. Command R, the model with substantially weaker solo performance, shows no such selectivity.",
+      "publishedAt": "2026-10-19T00:00:00.000Z",
+      "referenceGrade": 2,
+      "referenceReason": "Related engineering or agent research with a narrower application/security focus.",
+      "exampleIndex": 30
+    },
+    {
+      "section": "current",
+      "url": "https://huggingface.co/papers/2610.23987",
+      "title": "What Generation Knows: Unlocking Fine-Grained Understanding in Unified Multimodal Models",
+      "excerpt": "Fine-grained visual understanding requires distinguishing subtle differences in local attributes and spatial relations, yet remains challenging for existing vision-language models. Unified multimodal models (UMMs) offer a new opportunity through generation pathways that preserve rich visual information complementary to understanding. However, existing generation-assisted understanding methods mainly rely on generative supervision or explicit generation and have not systematically explored direct use of native generation-side representations. To address this gap, we systematically analyze what generation-side representations offer for fine-grained understanding, finding that they are more sensitive to fine-grained semantic changes, capture task-relevant changes missed by understanding-side representations, and depend on correct spatial organization for this advantage. Guided by these findings, we design GAFU, a post-training framework that unlocks native generation-side information for fine-grained understanding. It compresses generation-side visual representations into compact \\(G\\) tokens that preserve fine-grained visual details, enabling task-conditioned retrieval by the understanding pathway. Experiments show that GAFU consistently outperforms SFT baselines trained on the same data across diverse visual understanding tasks and UMM architectures, with maximum relative improvements of 20.00\\%, 17.94\\%, and 8.62\\% on VStar-Bench, OmniSpatial, and VSR-Bench, respectively. Overall, GAFU converts complementary information from the generation pathway into gains in fine-grained visual understanding, providing an effective path toward synergy between generation and understanding in UMMs.",
+      "publishedAt": "2026-10-14T00:00:00.000Z",
+      "referenceGrade": 1,
+      "referenceReason": "General vision/robotics/ML application; adjacent discovery rather than a primary systems interest.",
+      "exampleIndex": 39
+    },
+    {
+      "section": "outside",
+      "url": "https://arxiv.org/abs/2610.31442v1",
+      "title": "Local heights for nef toric compactified divisors",
+      "excerpt": "We present a definition of a local height of nef toric divisors in the sense of Yuan and Zhang by approximating a height for canonical divisors and then using the local energy to extend to other metrics on the same geometric divisor.",
+      "publishedAt": "2026-10-22T15:37:23Z",
+      "referenceGrade": 0,
+      "referenceReason": "Astronomy or pure mathematics without a visible AI systems connection.",
+      "exampleIndex": 52
+    },
+    {
+      "section": "outside",
+      "url": "https://arxiv.org/abs/2610.31460v1",
+      "title": "Deep holes of full-length Reed--Solomon codes: uniform bounds and exact classifications",
+      "excerpt": "Let $u$ be a received word for the full-length Reed--Solomon code $\\operatorname{RS}_q(k)$, with interpolation polynomial $f_u$ of degree $k+m$. For each $m\\in\\{3,4,5,6,7\\}$, we classify all such deep holes over every finite field, without a field-size hypothesis. None occur for odd $m$ in this range. At $m=4$ and $m=6$, the only exceptions are, respectively, the Segre sextic and Frobenius-power families; these occur only in dimension two over fields of characteristic two. For arbitrary $m\\geqslant3$, we also establish two uniform bounds. If $\\sqrt q\\geqslant12(m+1)\\log(2m+2)$, no word of interpolation degree $k+m$ is a deep hole when $q$ is odd, $k\\geqslant3$, or $m$ is odd. If $q>16(m+2)^4$, we obtain the corresponding complete classification at every admissible $k$, including the explicit dimension-two exceptions. Our proofs use an agreement criterion expressed in complete homogeneous symmetric functions, agreement-count estimates, finite geometry, permutation-polynomial restrictions, and subset constructions for solving the resulting symmetric-function equations. The remaining finite cases are settled by finite computations with supplied certificates and deterministic verification programs.",
+      "publishedAt": "2026-10-22T15:53:11Z",
+      "referenceGrade": 0,
+      "referenceReason": "Astronomy or pure mathematics without a visible AI systems connection.",
+      "exampleIndex": 51
+    },
+    {
+      "section": "current",
+      "url": "https://huggingface.co/papers/2610.22722",
+      "title": "The LLM-Attacker: A Unified Red-Team Framework for Privacy Evaluation of Split and Distributed LLM Systems",
+      "excerpt": "Split language models keep input text on a client but send intermediate representations to a server. Attacks can reconstruct text from these messages. Comparing privacy evaluations is difficult when attackers see different messages, know different model weights or use different datasets and recovery measures. We present LLM-Attacker, a framework that records these choices and lets researchers check, compare and extend an evaluation. Compatible attacks reuse recorded messages, and their predictions are saved for independent scoring. The scoring rule requires a linked undefended reference before a defence can pass. Reports also identify attacks that remain untested. In a controlled GPT-2 experiment, adding gradients returned during training increased token recovery from 94.20% to 97.38% and exact-document recovery from 13.71% to 37.77%. The 95% interval for the token gain lay above the two-percentage-point threshold fixed before testing. This experiment is shared with a companion study; here, it tests how the evaluation responds to a change in attacker access. Further studies measure how corpus choice and compression defences affect recovery, compare an adapted published attack with its reference implementation, and test the measurement code. The framework reports implementation checks separately from measured attack effectiveness. Each privacy claim should state the attacker, dataset and scoring rule, report its controls and identify untested attacks.",
+      "publishedAt": "2026-10-15T00:00:00.000Z",
+      "referenceGrade": 2,
+      "referenceReason": "Related engineering or agent research with a narrower application/security focus.",
+      "exampleIndex": 21
+    },
+    {
+      "section": "outside",
+      "url": "https://arxiv.org/abs/2610.31173v1",
+      "title": "On the arithmetic Siegel--Weil formula for orthogonal Shimura varieties over a general totally real field",
+      "excerpt": "Let $\\mathrm{F}/\\mathbb{Q}_p$ be a finite extension with $p\\ne 2$, and let $V$ be a quadratic space over $\\mathrm{F}$ of dimension at least two admitting a self-dual lattice. We prove the local arithmetic Siegel-Weil formula for GSpin Rapoport-Zink spaces formulated by Li and Zhang. We use the global-to-local strategy of Mihatsch and Zhang and its application by Luo. Using a generalization of the prismatic realization functor of Imai, Kato, and Youcis, we construct and study derived special cycles on integral models of SO Shimura varieties and their Rapoport-Zink uniformizations. We derive the local intersection formula from the modularity of special cycles on the generic fiber. As a first application, we prove the corresponding semi-global arithmetic Siegel-Weil identity for orthogonal Shimura varieties over a totally real field $F\\ne\\mathbb{Q}$.",
+      "publishedAt": "2026-10-22T12:28:44Z",
+      "referenceGrade": 0,
+      "referenceReason": "Astronomy or pure mathematics without a visible AI systems connection.",
+      "exampleIndex": 59
+    },
+    {
+      "section": "systems",
+      "url": "https://arxiv.org/abs/2306.00978v6",
+      "title": "AWQ: Activation-aware Weight Quantization for LLM Compression and Acceleration",
+      "excerpt": "Large language models (LLMs) have transformed numerous AI applications. On-device LLM is becoming increasingly important: running LLMs locally on edge devices can reduce the cloud computing cost and protect users' privacy. However, the astronomical model size and the limited hardware resource pose significant deployment challenges. We propose Activation-aware Weight Quantization (AWQ), a hardware-friendly approach for LLM low-bit weight-only quantization. AWQ finds that not all weights in an LLM are equally important. Protecting only 1% salient weights can greatly reduce quantization error. To identify salient weight channels, we should refer to the activation distribution, not weights. To avoid the hardware-inefficient mix-precision quantization, we mathematically derive that scaling up the salient channels can reduce the quantization error. AWQ employs an equivalent transformation to scale the salient weight channels to protect them. The scale is determined by collecting the activation statistics offline. AWQ does not rely on any backpropagation or reconstruction, so it generalizes to different domains and modalities without overfitting the calibration set. AWQ outperforms existing work on various language modeling and domain-specific benchmarks (coding and math). Thanks to better generalization, it achieves excellent quantization performance for instruction-tuned LMs and, for the first time, multi-modal LMs. Alongside AWQ, we implement TinyChat, an efficient and flexible inference framework tailored for 4-bit on-device LLM/VLMs. With kernel fusion and platform-aware weight packing, TinyChat offers more than 3x speedup over the Huggingface FP16 implementation on both desktop and mobile GPUs. It also democratizes the deployment of the 70B Llama-2 model on mobile GPUs.",
+      "publishedAt": "2023-06-01T17:59:10Z",
+      "referenceGrade": 3,
+      "referenceReason": "Direct GPU/LLM systems, training or agent infrastructure interest.",
+      "referenceTrack": "Quantization",
+      "exampleIndex": 11
+    },
+    {
+      "section": "systems",
+      "url": "https://arxiv.org/abs/2307.08691v1",
+      "title": "FlashAttention-2: Faster Attention with Better Parallelism and Work Partitioning",
+      "excerpt": "Scaling Transformers to longer sequence lengths has been a major problem in the last several years, promising to improve performance in language modeling and high-resolution image understanding, as well as to unlock new applications in code, audio, and video generation. The attention layer is the main bottleneck in scaling to longer sequences, as its runtime and memory increase quadratically in the sequence length. FlashAttention exploits the asymmetric GPU memory hierarchy to bring significant memory saving (linear instead of quadratic) and runtime speedup (2-4$\\times$ compared to optimized baselines), with no approximation. However, FlashAttention is still not nearly as fast as optimized matrix-multiply (GEMM) operations, reaching only 25-40\\% of the theoretical maximum FLOPs/s. We observe that the inefficiency is due to suboptimal work partitioning between different thread blocks and warps on the GPU, causing either low-occupancy or unnecessary shared memory reads/writes. We propose FlashAttention-2, with better work partitioning to address these issues. In particular, we (1) tweak the algorithm to reduce the number of non-matmul FLOPs (2) parallelize the attention computation, even for a single head, across different thread blocks to increase occupancy, and (3) within each thread block, distribute the work between warps to reduce communication through shared memory. These yield around 2$\\times$ speedup compared to FlashAttention, reaching 50-73\\% of the theoretical maximum FLOPs/s on A100 and getting close to the efficiency of GEMM operations. We empirically validate that when used end-to-end to train GPT-style models, FlashAttention-2 reaches training speed of up to 225 TFLOPs/s per A100 GPU (72\\% model FLOPs utilization).",
+      "publishedAt": "2023-07-17T17:50:36Z",
+      "referenceGrade": 3,
+      "referenceReason": "Direct GPU/LLM systems, training or agent infrastructure interest.",
+      "referenceTrack": "GPU kernels",
+      "exampleIndex": 10
+    },
+    {
+      "section": "outside",
+      "url": "https://arxiv.org/abs/2610.31660v1",
+      "title": "Sound-Horizon-Agnostic Forecast for Constraints on $H_0$ and $Σm_ν$ from BAO, CMB Lensing, Supernovae and LSST-like Galaxy Lensing",
+      "excerpt": "We present a sound-horizon-agnostic forecast for constraints on the Hubble constant $H_0$ and the sum of the neutrino masses $Σm_ν$ from a combination of LSST-like galaxy weak lensing, Simons-Observatory-like CMB lensing, the completed DESI BAO program, and expanded supernova samples. Treating the sound horizon at baryon drag $r_d$ as a free parameter, the method provides a consistency test of $Λ$CDM without relying on the standard early-Universe calibration of $r_d$. The analysis incorporates realistic galaxy weak-lensing systematics, explicitly marginalizing over photometric-redshift calibration, multiplicative shear biases, intrinsic alignments, and baryonic feedback, and extends the CMB-lensing analysis to $L_{\\max}=5000$. For fixed $Σm_ν$, we forecast uncertainties of $σ(H_0)\\simeq 1.5$ km/s/Mpc with our least informative prior set, $σ(H_0)\\simeq 1.3$ km/s/Mpc with more restrictive priors, and $σ(H_0)\\simeq 0.7$ km/s/Mpc with an additional informative prior on the amplitude of primordial fluctuations $A_s$. Allowing $Σm_ν$ to vary weakens the $H_0$ constraints, while still yielding a forecast 95% CL upper limit of about 0.4 eV on $Σm_ν$. We also clarify the scope of the $r_d$-agnostic approach through validation tests using mock data from modified recombination and early dark energy models. The method recovers unbiased constraints on $H_0$ for the former but not the latter, highlighting its dependence on assumptions about early-Universe physics.",
+      "publishedAt": "2026-10-22T17:59:04Z",
+      "referenceGrade": 0,
+      "referenceReason": "Astronomy or pure mathematics without a visible AI systems connection.",
+      "exampleIndex": 46
+    },
+    {
+      "section": "outside",
+      "url": "https://arxiv.org/abs/2610.31626v1",
+      "title": "A Robust Estimator for the Lyman-$α$ Forest 1D Power Spectrum at High Redshift",
+      "excerpt": "The Lyman-$α$ (Ly$α$) forest flux power spectrum $P(k)$ is sensitive to a range of astrophysical and cosmological effects, including the thermal state of and large-scale fluctuations in the intergalactic medium and the nature of dark matter. Measuring $P(k)$ becomes increasingly challenging at high redshift, where fewer quasar spectra are available and higher Ly$α$ optical depths result in lower transmitted flux. In addition, observational effects and missing data complicate standard Fourier-transform estimators. Here, we validate a likelihood-based estimator for $P(k)$. The method constructs the pixel-level covariance matrix of the transmitted flux field using precomputed $k$-space integrals that account for instrumental resolution and pixelization, enabling direct maximum-likelihood inference of $P(k)$. We test the estimator using mock Ly$α$ forest spectra at $z \\geq 5$, including analytic Gaussian realizations generated from known power spectra and forward-modeled simulation spectra incorporating observational effects relevant to high-redshift quasar surveys, such as finite spectral resolution, pixel sampling, noise, and missing data. We compare the recovered power spectra with both the input spectra and standard Fourier-transform estimates. We find that the likelihood-based estimator recovers the input power spectrum across the tested scales well within expected error and remains robust to the observational effects considered. This work establishes a framework for measuring Ly$α$ forest clustering with a robust, nearly optimal power spectrum estimator, with particular focus on quantifying large-scale fluctuations that may arise from ultraviolet background fluctuations or the late stages of reionization.",
+      "publishedAt": "2026-10-22T17:45:40Z",
+      "referenceGrade": 0,
+      "referenceReason": "Astronomy or pure mathematics without a visible AI systems connection.",
+      "exampleIndex": 48
+    },
+    {
+      "section": "outside",
+      "url": "https://arxiv.org/abs/2610.31615v1",
+      "title": "Langlands-Shahidi gamma factors and local transfer in families",
+      "excerpt": "Let $G$ be a quasi-split $p$-adic group, defined over a non-archimedean local field of residue cardinality $q$, and $R$ be a $\\mathbb{Z}[\\sqrt{q}^{-1},μ_{4p^\\infty}]$-algebra. We generalize the constructions of Shahidi local coefficients and Langlands-Shahidi gamma factors to the setting of co-Whittaker $R$-representations. For classical $p$-adic groups, we prove there is a unique integral morphism of endomorphism rings of Gelfand--Graev representations, interpolating the (standard) local generic transfer to a general linear group. This yields a local transfer morphism in families, which allows us to deduce properties of the local $\\ell$-adic generic transfer and congruences modulo primes $\\ell\\neq p$.",
+      "publishedAt": "2026-10-22T17:40:42Z",
+      "referenceGrade": 0,
+      "referenceReason": "Astronomy or pure mathematics without a visible AI systems connection.",
+      "exampleIndex": 49
+    },
+    {
+      "section": "current",
+      "url": "https://huggingface.co/papers/2610.31651",
+      "title": "BrickWright: Agentic Creation of Physically Feasible Brick Builds",
+      "excerpt": "Frontier coding agents are becoming increasingly adept at 3D modeling. Yet, they still face challenges when building objects meant to be assembled in the physical world, often creating invalid assemblies with floating, colliding, or disconnected parts. We argue that providing agents with tools for assembling builds and verifying their physical feasibility is sufficient for them to produce physically valid assemblies that still adhere to input prompts. Focusing on the domain of LEGO brick builds, we present BrickWright, a framework for generating physically feasible brick builds from text or image prompts using pre-trained agents, where a build is physically feasible if it uses only real parts, has no colliding or floating parts, and forms a connected structure if possible. BrickWright guides agents to create builds by writing code with BrickLayer, a Python toolkit with two main components: an ergonomic brick assembly API that halves inference cost compared to working in raw LDraw, and a validator that provides feedback on physical feasibility. Whereas baseline agents achieve physical validity rates ranging from only 9% (GPT-6 Luna) to 69% (GPT-6 Astra), BrickWright-guided agents achieve 100% validity on a sample of 512 prompts, while improving prompt adherence for lightweight agents and maintaining it for stronger agents. Additionally, they outperform specialized models on the text-to-brick task. Code is available on our project page: https://avalovelace1.github.io/brickwright/",
+      "publishedAt": "2026-10-22T00:00:00.000Z",
+      "referenceGrade": 2,
+      "referenceReason": "Related engineering or agent research with a narrower application/security focus.",
+      "exampleIndex": 29
+    },
+    {
+      "section": "current",
+      "url": "https://huggingface.co/papers/2610.30949",
+      "title": "IQuest-Q1: Advancing Foundation Capabilities for Agentic CLI Systems",
+      "excerpt": "We present IQuest-Q1, a sparse Mixture-of-Experts (MoE) agentic foundation model with 320B total parameters (15B activated). IQuest-Q1 is developed through a three-stage process: (1) stable and efficient pre-training, combining Stable SplitNorm, Muon, and muP with a two-stage curriculum whose second stage increases the coding-data mixture, preserving a wide stability margin between safe and optimal learning rates; (2) fine-grained mid-training, expanding the data mixture across domains and formats and progressively extending the context; and (3) multi-scaffold with multi-version post-training, combining SFT, domain-specialized RL, and MOPD across various scaffolds to integrate complementary training signals and strengthen agentic coding capabilities. Furthermore, model merging combines different experts and checkpoints from different stages while mitigating conflicts among their parameter updates. The resulting IQuest-Q1 demonstrates capabilities in both coding and general tasks. We release IQuest-Q1 as an open-source model to support community research and development.",
+      "publishedAt": "2026-10-22T00:00:00.000Z",
+      "referenceGrade": 3,
+      "referenceReason": "Direct GPU/LLM systems, training or agent infrastructure interest.",
+      "exampleIndex": 37
+    },
+    {
+      "section": "current",
+      "url": "https://huggingface.co/papers/2610.04184",
+      "title": "EvalResearchBench: Can AI Agents Build Their Own Feedback for Recursive Self-Improvement?",
+      "excerpt": "Recursive self-improvement (RSI) relies on evaluation feedback to assess progress and guide further research, yet repeatedly running complex benchmarks is costly and slows iteration. Human experts reduce this cost by selecting benchmark subsets or designing compact suites. We ask whether AI agents can automate this design process and introduce EvalResearchBench (ERB), a benchmark for autonomous evaluation research. Given target materials, development references, candidate APIs, and fixed time and API budgets, an agent called the researcher selects or synthesizes tasks, implements graders, and revises them in pilot tests before freezing an executable evaluator for coding, co-work, and reasoning. We study 9 researchers and 13 candidate models and compare each frozen evaluator with 14 target benchmarks on score concordance and pairwise agreement. The best evaluators order about 75\\% of candidate pairs as the targets do, below the 91\\% ceiling set by disagreements among the targets. No researcher leads on every metric, and the best evaluator on development targets is not the best on sealed targets hidden from the researcher. A human-designed sample of public tasks remains a strong baseline, and the evaluator with the lowest recorded execution cost attains the highest pairwise agreement. Agents repair tasks and graders through pilot feedback, yet their evaluators can still truncate answers, exhaust the evaluation budget, or let a few questions dominate a domain score.",
+      "publishedAt": "2026-10-16T00:00:00.000Z",
+      "referenceGrade": 3,
+      "referenceReason": "Direct GPU/LLM systems, training or agent infrastructure interest.",
+      "exampleIndex": 22
+    },
+    {
+      "section": "systems",
+      "url": "https://arxiv.org/abs/2309.17453v4",
+      "title": "Efficient Streaming Language Models with Attention Sinks",
+      "excerpt": "Deploying Large Language Models (LLMs) in streaming applications such as multi-round dialogue, where long interactions are expected, is urgently needed but poses two major challenges. Firstly, during the decoding stage, caching previous tokens' Key and Value states (KV) consumes extensive memory. Secondly, popular LLMs cannot generalize to longer texts than the training sequence length. Window attention, where only the most recent KVs are cached, is a natural approach -- but we show that it fails when the text length surpasses the cache size. We observe an interesting phenomenon, namely attention sink, that keeping the KV of initial tokens will largely recover the performance of window attention. In this paper, we first demonstrate that the emergence of attention sink is due to the strong attention scores towards initial tokens as a \"sink\" even if they are not semantically important. Based on the above analysis, we introduce StreamingLLM, an efficient framework that enables LLMs trained with a finite length attention window to generalize to infinite sequence lengths without any fine-tuning. We show that StreamingLLM can enable Llama-2, MPT, Falcon, and Pythia to perform stable and efficient language modeling with up to 4 million tokens and more. In addition, we discover that adding a placeholder token as a dedicated attention sink during pre-training can further improve streaming deployment. In streaming settings, StreamingLLM outperforms the sliding window recomputation baseline by up to 22.2x speedup. Code and datasets are provided at https://github.com/mit-han-lab/streaming-llm.",
+      "publishedAt": "2023-09-29T17:59:56Z",
+      "referenceGrade": 3,
+      "referenceReason": "Direct GPU/LLM systems, training or agent infrastructure interest.",
+      "referenceTrack": "Inference",
+      "exampleIndex": 0
+    },
+    {
+      "section": "systems",
+      "url": "https://arxiv.org/abs/2308.08155v2",
+      "title": "AutoGen: Enabling Next-Gen LLM Applications via Multi-Agent Conversation",
+      "excerpt": "AutoGen is an open-source framework that allows developers to build LLM applications via multiple agents that can converse with each other to accomplish tasks. AutoGen agents are customizable, conversable, and can operate in various modes that employ combinations of LLMs, human inputs, and tools. Using AutoGen, developers can also flexibly define agent interaction behaviors. Both natural language and computer code can be used to program flexible conversation patterns for different applications. AutoGen serves as a generic infrastructure to build diverse applications of various complexities and LLM capacities. Empirical studies demonstrate the effectiveness of the framework in many example applications, with domains ranging from mathematics, coding, question answering, operations research, online decision-making, entertainment, etc.",
+      "publishedAt": "2023-08-16T05:57:52Z",
+      "referenceGrade": 3,
+      "referenceReason": "Direct GPU/LLM systems, training or agent infrastructure interest.",
+      "referenceTrack": "Agents",
+      "exampleIndex": 15
+    },
+    {
+      "section": "systems",
+      "url": "https://arxiv.org/abs/2110.02861v2",
+      "title": "8-bit Optimizers via Block-wise Quantization",
+      "excerpt": "Stateful optimizers maintain gradient statistics over time, e.g., the exponentially smoothed sum (SGD with momentum) or squared sum (Adam) of past gradient values. This state can be used to accelerate optimization compared to plain stochastic gradient descent but uses memory that might otherwise be allocated to model parameters, thereby limiting the maximum size of models trained in practice. In this paper, we develop the first optimizers that use 8-bit statistics while maintaining the performance levels of using 32-bit optimizer states. To overcome the resulting computational, quantization, and stability challenges, we develop block-wise dynamic quantization. Block-wise quantization divides input tensors into smaller blocks that are independently quantized. Each block is processed in parallel across cores, yielding faster optimization and high precision quantization. To maintain stability and performance, we combine block-wise quantization with two additional changes: (1) dynamic quantization, a form of non-linear optimization that is precise for both large and small magnitude values, and (2) a stable embedding layer to reduce gradient variance that comes from the highly non-uniform distribution of input tokens in language models. As a result, our 8-bit optimizers maintain 32-bit performance with a small fraction of the memory footprint on a range of tasks, including 1.5B parameter language modeling, GLUE finetuning, ImageNet classification, WMT'14 machine translation, MoCo v2 contrastive ImageNet pretraining+finetuning, and RoBERTa pretraining, without changes to the original optimizer hyperparameters. We open-source our 8-bit optimizers as a drop-in replacement that only requires a two-line code change.",
+      "publishedAt": "2021-10-06T15:43:20Z",
+      "referenceGrade": 3,
+      "referenceReason": "Direct GPU/LLM systems, training or agent infrastructure interest.",
+      "referenceTrack": "Quantization",
+      "exampleIndex": 14
+    },
+    {
+      "section": "outside",
+      "url": "https://arxiv.org/abs/2610.31631v1",
+      "title": "Nonvanishing of 2-primary Kolyvagin classes via simultaneous quadratic twists",
+      "excerpt": "Let $E/\\mathbf{Q}$ be an elliptic curve, let $K=\\mathbf{Q}(\\sqrt{D})$ satisfy the Heegner hypothesis with $D<-4$, and fix a modular parametrization $\\varphi$ with $\\varphi(\\infty)=O$. Under surjectivity modulo $2^L$, with $L\\ge 2$, and a cohomological exclusion condition at level $4$, we construct a finite set of primes $T$ such that, writing $d_T=\\prod_{q\\in T}(-q)$ and $n_T=\\prod_{q\\in T}q$, the $2$-Selmer dimensions of $E^{d_T}$ and $E^{d_TD}$ are $0$ and $1$. The support size is bounded in terms of the initial Selmer dimensions, independently of $L$. Inspired by the work of Tian and Tian--Yuan--Zhang on congruent numbers, we construct a point $Q_T$ on the terminal twist and identify its Kummer class with the standard mod-$2$ Kolyvagin class. Using the low-corank $2$-converse and the $2$-primary Birch--Swinnerton-Dyer formula, we prove that its index $m_T$ in the full Mordell--Weil lattice satisfies $v_2(m_T)=v_2(c_\\varphi)+\\mathfrak{i}(E,K)$. The optimal Manin constant theorem supplies a $2$-indivisible parametrization $\\varphi_0$, for which $κ^{\\mathrm{std}}_{n_T,1}(\\varphi_0)\\ne 0$ if and only if $\\mathfrak{i}(E,K)=0$. When the intrinsic index vanishes, the minimum terminal support size is $R=\\min\\{d_2(E),d_2(E^D)\\}$, and the normalized standard classes have order $2^M$ for $1\\le M\\le L$. Full $2$-adic Galois image then gives strong nonvanishing.",
+      "publishedAt": "2026-10-22T17:48:19Z",
+      "referenceGrade": 0,
+      "referenceReason": "Astronomy or pure mathematics without a visible AI systems connection.",
+      "exampleIndex": 47
+    },
+    {
+      "section": "current",
+      "url": "https://huggingface.co/papers/2610.24385",
+      "title": "Bridging Exploration and Persona: Information-Directed Dueling for Test-Time Agent Personalization",
+      "excerpt": "Effective test-time personalization requires LLM agents to adapt to query-dependent user preferences from lightweight interaction. We study persona selection with binary comparisons between candidate responses as the online signal. We present ID-TAP, a scalable, IDS-inspired neural dueling-bandit framework for large discrete persona spaces. ID-TAP combines a query-conditioned neural utility model with a lightweight Bradley-Terry explorer, and transfers comparison evidence across related queries through similarity-weighted warm starts. The neural model shares statistical strength across queries while preserving query-specific scores, and efficient BT updates score hypothetical challengers. Across seven user-conditioned generation benchmarks under reference- and model-based preference simulators, ID-TAP achieves the strongest aggregate performance among the evaluated baselines within a fixed ten-round comparison budget. These results support information-directed challenger selection as an effective design for test-time persona adaptation.",
+      "publishedAt": "2026-10-17T00:00:00.000Z",
+      "referenceGrade": 2,
+      "referenceReason": "Related engineering or agent research with a narrower application/security focus.",
+      "exampleIndex": 25
+    },
+    {
+      "section": "current",
+      "url": "https://huggingface.co/papers/2610.26233",
+      "title": "Heartbeat Thinking: Speculative Reasoning and Tool Execution While Listening in Realtime Voice Agents",
+      "excerpt": "Tool-using voice agents often leave users waiting after speech ends, even when actionable information arrives earlier in the request. Speculative approaches begin work during speech, but chunk-bounded or interrupt-on-update generation can truncate a tool call before its arguments are complete. This couples computation time to speech updates, limiting useful work completed in advance. We introduce Heartbeat Thinking, which handles updated input through new Thinker invocations while allowing ongoing invocations and dispatched tools to finish. Periodic invocations read the latest partial transcript and a shared record of completed reasoning and tool results. These results help resolve missing arguments and initiate dependent calls, allowing preparation to progress across speech updates. Across SpeechFCEval, FDBench v3, and AudioCRAG, Heartbeat improves aggregate speculative tool coverage or retrieval reuse over a SHANKS-style windowed baseline, with benchmark-dependent effects on final task quality. On FDBench v3, it increases tool coverage by 16 percentage points and reduces mean final-response latency by 36.4\\%. The results show that heartbeat thinking paradigm preserving ongoing computation during speech can turn listening time into reusable preparation for faster and more capable voice-agent responses.",
+      "publishedAt": "2026-10-19T00:00:00.000Z",
+      "referenceGrade": 3,
+      "referenceReason": "Direct GPU/LLM systems, training or agent infrastructure interest.",
+      "exampleIndex": 44
+    },
+    {
+      "section": "outside",
+      "url": "https://arxiv.org/abs/2610.31402v1",
+      "title": "Landau-Siegel zeros over a base field and effective Brauer-Siegel",
+      "excerpt": "Let k be a number field. We prove that for every quadratic extension F/k, every real zero beta of L(s, chi_{F/k}) satisfies (1 - beta) log d_F >= c(k) with an effective constant c(k) > 0, and we deduce (through a reduction of Stark) that the Brauer-Siegel theorem holds effectively and uniformly over all Galois extensions K of k, in the form h_K R_K >= c(k) d_K^{1/2} / ((2 pi)^{[K:Q]} log d_K). Stark's effective cases of the Brauer-Siegel theorem were the fields without quadratic subfields, since the quadratic subfields carried the ineffectivity of Siegel's theorem; over a base field k, the first result removes it. Both rely on a uniform bound for Chebotarev sums. Let K/k be a Galois extension with group G, and suppose S is a subset of G containing the identity. For any prime p of k, let delta_p be the proportion of the primes of K above p whose Frobenius lies in S. Then the sum over Np <= X of delta_p log Np / Np is at most (|S|/|G| + epsilon) log X + O(1), uniformly in K, as soon as X >= d_K^C with C depending only on epsilon and the degree [K:Q]. The proof is Kerr's form of the OpenAI argument, simple vanishing at the points (iota theta)_{iota in S}, with theta in a box in O_K, and Masser's zero estimate. The field enters only through Masser's invariant of the lattice of points, which we compute to be [K:Q]/|S| by averaging over the Galois group of the normal closure. Over Q, the determinant method of Green, Barreto, and Kominers gives sharper Chebotarev bounds, and we explain the comparison.",
+      "publishedAt": "2026-10-22T15:04:53Z",
+      "referenceGrade": 0,
+      "referenceReason": "Astronomy or pure mathematics without a visible AI systems connection.",
+      "exampleIndex": 54
+    },
+    {
+      "section": "systems",
+      "url": "https://arxiv.org/abs/2208.07339v2",
+      "title": "LLM.int8(): 8-bit Matrix Multiplication for Transformers at Scale",
+      "excerpt": "Large language models have been widely adopted but require significant GPU memory for inference. We develop a procedure for Int8 matrix multiplication for feed-forward and attention projection layers in transformers, which cut the memory needed for inference by half while retaining full precision performance. With our method, a 175B parameter 16/32-bit checkpoint can be loaded, converted to Int8, and used immediately without performance degradation. This is made possible by understanding and working around properties of highly systematic emergent features in transformer language models that dominate attention and transformer predictive performance. To cope with these features, we develop a two-part quantization procedure, LLM.int8(). We first use vector-wise quantization with separate normalization constants for each inner product in the matrix multiplication, to quantize most of the features. However, for the emergent outliers, we also include a new mixed-precision decomposition scheme, which isolates the outlier feature dimensions into a 16-bit matrix multiplication while still more than 99.9% of values are multiplied in 8-bit. Using LLM.int8(), we show empirically it is possible to perform inference in LLMs with up to 175B parameters without any performance degradation. This result makes such models much more accessible, for example making it possible to use OPT-175B/BLOOM on a single server with consumer GPUs. We open-source our software.",
+      "publishedAt": "2022-08-15T17:08:50Z",
+      "referenceGrade": 3,
+      "referenceReason": "Direct GPU/LLM systems, training or agent infrastructure interest.",
+      "referenceTrack": "Quantization",
+      "exampleIndex": 7
+    },
+    {
+      "section": "systems",
+      "url": "https://arxiv.org/abs/2303.06865v2",
+      "title": "FlexGen: High-Throughput Generative Inference of Large Language Models with a Single GPU",
+      "excerpt": "The high computational and memory requirements of large language model (LLM) inference make it feasible only with multiple high-end accelerators. Motivated by the emerging demand for latency-insensitive tasks with batched processing, this paper initiates the study of high-throughput LLM inference using limited resources, such as a single commodity GPU. We present FlexGen, a high-throughput generation engine for running LLMs with limited GPU memory. FlexGen can be flexibly configured under various hardware resource constraints by aggregating memory and computation from the GPU, CPU, and disk. By solving a linear programming problem, it searches for efficient patterns to store and access tensors. FlexGen further compresses the weights and the attention cache to 4 bits with negligible accuracy loss. These techniques enable FlexGen to have a larger space of batch size choices and thus significantly increase maximum throughput. As a result, when running OPT-175B on a single 16GB GPU, FlexGen achieves significantly higher throughput compared to state-of-the-art offloading systems, reaching a generation throughput of 1 token/s for the first time with an effective batch size of 144. On the HELM benchmark, FlexGen can benchmark a 30B model with a 16GB GPU on 7 representative sub-scenarios in 21 hours. The code is available at https://github.com/FMInference/FlexGen",
+      "publishedAt": "2023-03-13T05:19:28Z",
+      "referenceGrade": 3,
+      "referenceReason": "Direct GPU/LLM systems, training or agent infrastructure interest.",
+      "referenceTrack": "Inference",
+      "exampleIndex": 18
+    },
+    {
+      "section": "current",
+      "url": "https://huggingface.co/papers/2610.28950",
+      "title": "HyperDrone: Simulation-to-Reality Transfer at Millions of Frames per Second",
+      "excerpt": "We present HyperDrone, an extremely fast quadrotor simulator focused on high-performance batch rendering that is more than 20x faster than existing state-of-the-art batch quadrotor simulators. HyperDrone combines highly optimized multirotor dynamics with HyperLux, a new ray-tracing engine that supports Nvidia OptiX, Vulkan, Apple Metal and WebGPU backends that takes full advantage of modern ray-tracing hardware, capable of running both components entirely on the GPU. HyperLux renders RGB, depth, semantic/instance segmentation, surface normals and optical flow observations at configurable levels of fidelity, including reflections, realistic lighting, motion blur, anti-aliasing, and Physically Based Rendering (PBR). Even in the highest-fidelity settings, HyperLux achieves millions of Frames Per Second (FPS) on consumer-grade GPUs while rendering realistic 3D scenes. We demonstrate the merits of HyperDrone by training a vision-based yaw-control policy purely in simulation and transferring it to a real small-scale quadrotor (Crazyflie) with a camera, running completely onboard.",
+      "publishedAt": "2026-10-20T00:00:00.000Z",
+      "referenceGrade": 2,
+      "referenceReason": "Related engineering or agent research with a narrower application/security focus.",
+      "exampleIndex": 28
+    },
+    {
+      "section": "current",
+      "url": "https://huggingface.co/papers/2610.27712",
+      "title": "RLSplat: Resource-Linear Budget Control for Feed-forward 3D Gaussian Splatting",
+      "excerpt": "Feed-forward 3D Gaussian Splatting (FF3DGS) reconstructs 3D scenes from images in a single forward pass, making it well-suited to applications that must operate within limited resource budgets. To further improve its practicality, recent budget-controllable FF3DGS methods allow the number of Gaussians to be adjusted at inference, so that the output meets a given storage limit or rendering-latency constraint. However, these methods overlook the cost of inference itself: to produce a representation with the target number of Gaussians, they first predict a dense set of Gaussians and then prune or select from it, requiring nearly constant latency and peak memory regardless of the budget. We therefore propose RLSplat, a resource-linear budget-controllable FF3DGS framework whose representation size, inference latency, and peak memory all decrease linearly as the Gaussian budget is reduced. Instead of pruning or selection, RLSplat learns a Gaussian allocation policy that distributes the budget across local scene regions, so that exactly the requested number of Gaussians is generated. These Gaussians are then refined through resource-linear Gaussian decoding, in which each Gaussian attends only to nearby Gaussians found via an efficient hierarchical neighbor search, so that the decoding cost decreases linearly with fewer Gaussians. In zero-shot evaluation, RLSplat outperforms prior budget-controllable methods at every budget, surpassing the strongest baseline even with 4times fewer Gaussians, while running up to 4.1times faster with 9.6times less peak memory at low budgets.",
+      "publishedAt": "2026-10-20T00:00:00.000Z",
+      "referenceGrade": 2,
+      "referenceReason": "Related engineering or agent research with a narrower application/security focus.",
+      "exampleIndex": 41
+    },
+    {
+      "section": "current",
+      "url": "https://huggingface.co/papers/2610.31576",
+      "title": "What Makes a Good Unmasking Policy? A Controlled Study of Learned Unmasking in Diffusion Language Models",
+      "excerpt": "Masked diffusion language models generate tokens in parallel, but their efficiency depends on which predictions are committed. Learned unmasking policies improve the speed--accuracy trade-off, yet differ in supervision, inputs, and capacity, obscuring which choices matter. We view supervised policies as distilling a decoding procedure through a teacher and examine independently what the teacher labels as committable, on which states the policy imitates it, what the policy observes, and how much the number of function evaluations (NFE) must decrease to offset policy overhead. We find that labeling predictions matching the final output is overly permissive at low NFE, and hidden states are weak alone but can complement confidence. About a 10% NFE reduction suffices to offset policy overhead for policies up to 7.5M parameters across tested settings. We therefore train a policy on trajectory-contraction targets, which accept only commitments staying on a reference trajectory, using confidence and hidden states. On LLaDA-8B-Instruct, the resulting 856K-parameter policy achieves the best accuracy--NFE frontier and highest throughput on GSM8K, is competitive at moderate targets on MATH-500 and HumanEval, and largely transfers to Dream-7B-Instruct.",
+      "publishedAt": "2026-10-22T00:00:00.000Z",
+      "referenceGrade": 3,
+      "referenceReason": "Direct GPU/LLM systems, training or agent infrastructure interest.",
+      "exampleIndex": 40
+    },
+    {
+      "section": "systems",
+      "url": "https://arxiv.org/abs/2210.03629v3",
+      "title": "ReAct: Synergizing Reasoning and Acting in Language Models",
+      "excerpt": "While large language models (LLMs) have demonstrated impressive capabilities across tasks in language understanding and interactive decision making, their abilities for reasoning (e.g. chain-of-thought prompting) and acting (e.g. action plan generation) have primarily been studied as separate topics. In this paper, we explore the use of LLMs to generate both reasoning traces and task-specific actions in an interleaved manner, allowing for greater synergy between the two: reasoning traces help the model induce, track, and update action plans as well as handle exceptions, while actions allow it to interface with external sources, such as knowledge bases or environments, to gather additional information. We apply our approach, named ReAct, to a diverse set of language and decision making tasks and demonstrate its effectiveness over state-of-the-art baselines, as well as improved human interpretability and trustworthiness over methods without reasoning or acting components. Concretely, on question answering (HotpotQA) and fact verification (Fever), ReAct overcomes issues of hallucination and error propagation prevalent in chain-of-thought reasoning by interacting with a simple Wikipedia API, and generates human-like task-solving trajectories that are more interpretable than baselines without reasoning traces. On two interactive decision making benchmarks (ALFWorld and WebShop), ReAct outperforms imitation and reinforcement learning methods by an absolute success rate of 34% and 10% respectively, while being prompted with only one or two in-context examples. Project site with code: https://react-lm.github.io",
+      "publishedAt": "2022-10-06T01:00:32Z",
+      "referenceGrade": 3,
+      "referenceReason": "Direct GPU/LLM systems, training or agent infrastructure interest.",
+      "referenceTrack": "Agents",
+      "exampleIndex": 3
+    },
+    {
+      "section": "current",
+      "url": "https://huggingface.co/papers/2610.20091",
+      "title": "RTAformer: Relation-Transition-Aware Transformer for Video Scene Graph Generation",
+      "excerpt": "Video scene graph generation (VidSGG) aims to capture objects and their evolving relationships in videos. This requires accounting for both the persistence of object identities and abrupt changes in relationships. Existing methods aggregate information across frames to exploit temporal context, but an emphasis on consistency can obscure these changes. As a result, a model may retain its previous prediction even after the underlying relation has changed. We refer to this failure mode as relational semantic inertia. To address this issue, we propose Relation-Transition-Aware Transformer (RTAformer), a one-stage framework that separately models entity persistence and relation changes. It injects calibrated differences between adjacent-frame relation queries to guide predicate updates, while cross-frame instance alignment during training helps reduce cross-frame representational drift. Experiments on Action Genome show improvements in recall and mean recall over existing methods, with ablation studies supporting the contributions of the proposed components and comparisons using matched backbones showing larger gains on relation-transition frames than on non-transition frames.",
+      "publishedAt": "2026-10-14T00:00:00.000Z",
+      "referenceGrade": 1,
+      "referenceReason": "General vision/robotics/ML application; adjacent discovery rather than a primary systems interest.",
+      "exampleIndex": 36
+    },
+    {
+      "section": "systems",
+      "url": "https://arxiv.org/abs/2306.03078v1",
+      "title": "SpQR: A Sparse-Quantized Representation for Near-Lossless LLM Weight Compression",
+      "excerpt": "Recent advances in large language model (LLM) pretraining have led to high-quality LLMs with impressive abilities. By compressing such LLMs via quantization to 3-4 bits per parameter, they can fit into memory-limited devices such as laptops and mobile phones, enabling personalized use. However, quantization down to 3-4 bits per parameter usually leads to moderate-to-high accuracy losses, especially for smaller models in the 1-10B parameter range, which are well-suited for edge deployments. To address this accuracy issue, we introduce the Sparse-Quantized Representation (SpQR), a new compressed format and quantization technique which enables for the first time near-lossless compression of LLMs across model scales, while reaching similar compression levels to previous methods. SpQR works by identifying and isolating outlier weights, which cause particularly-large quantization errors, and storing them in higher precision, while compressing all other weights to 3-4 bits, and achieves relative accuracy losses of less than 1% in perplexity for highly-accurate LLaMA and Falcon LLMs. This makes it possible to run 33B parameter LLM on a single 24 GB consumer GPU without any performance degradation at 15% speedup thus making powerful LLMs available to consumer without any downsides. SpQR comes with efficient algorithms for both encoding weights into its format, as well as decoding them efficiently at runtime. Specifically, we provide an efficient GPU inference algorithm for SpQR which yields faster inference than 16-bit baselines at similar accuracy, while enabling memory compression gains of more than 4x.",
+      "publishedAt": "2023-06-05T17:53:28Z",
+      "referenceGrade": 3,
+      "referenceReason": "Direct GPU/LLM systems, training or agent infrastructure interest.",
+      "referenceTrack": "Quantization",
+      "exampleIndex": 17
+    },
+    {
+      "section": "current",
+      "url": "https://huggingface.co/papers/2610.31198",
+      "title": "Different Tasks, Different Timesteps: Temporal Task-Aware Quantization for Diffusion Language Models",
+      "excerpt": "Diffusion Language Models (DLMs) introduce unique quantization challenges due to their iterative denoising process. In this work, we reveal that quantization sensitivity is both taskand time-dependent, with different downstream tasks exhibiting distinct precision requirements across denoising steps. We further show that these patterns can be predicted without groundtruth labels or task-specific evaluation metrics. Building on these findings, we introduce T 2Quant, a task and time-aware mixedprecision quantization framework that uses a label-free sensitivity signal to optimally allocate activation precision across denoising steps under a fixed bit-width budget. Extensive experiments across three DLMs and six benchmarks demonstrate that T 2Quant consistently improves the average accuracy of existing quantization methods, achieving gains of up to 6.7 percentage points under the same budget.",
+      "publishedAt": "2026-10-22T00:00:00.000Z",
+      "referenceGrade": 3,
+      "referenceReason": "Direct GPU/LLM systems, training or agent infrastructure interest.",
+      "exampleIndex": 24
+    }
+  ]
+}

@@ -78,6 +78,19 @@ node apps/orin-collector/evaluate-ranking.mjs --keychain-openrouter
 
 The same existing OpenRouter key is used for both stages. If `ORIN_CONFIG` overrides the example config in GitHub Actions, include `ranking` there too. Deploy the updated backend before using the feedback UI and collector.
 
+## Comparing classifier models
+
+A reproducible comparison of Gemini 2.5 Flash Lite, DeepSeek V4.1 Flash 1017 and MiMo V2.6 Flash on 60 real papers is saved in [the comparison report](../apps/orin-collector/benchmarks/REPORT.md). Reference labels were assigned by Codex before the requests and remain provisional until the user reviews them. The report preserves failed/experimental passes and separates observed charges (including cache discounts) from normalized uncached estimates. MiMo is the most promising next model to trial on that sample; the configured Gemini model is unchanged.
+
+The comparison exposed canonical-ID copying errors and overly long explanations. Classification now sends short batch-local IDs with an enum, bounds display reasons locally, then strictly validates IDs, coverage, scores and tracks before restoring canonical IDs. No freshness, source or spending limits were relaxed.
+
+```sh
+node apps/orin-collector/compare-models.mjs --plan-only
+node apps/orin-collector/compare-models.mjs --keychain-openrouter --output /tmp/orin-comparison.json
+```
+
+A comparison is opt-in and metered. The script sends the exact same candidates to each model, includes a separate hypothetical-feedback arm, records usage and latency, and never silently retries or substitutes a fallback model. Each plan has a $0.10 conservative guard; this is not an account-wide cap. It does not publish a digest or change `ORIN_CONFIG`.
+
 ## GitHub Actions setup
 
 `.github/workflows/orin-digest.yml` runs daily at 14:17 UTC (07:17 PDT, 06:17 PST), plus manual dispatch. GitHub may delay scheduled jobs. It has read-only repository permissions, no pull-request trigger, a 15-minute timeout and one job at a time. Nothing purchases a server or creates a paid service.

@@ -1,0 +1,4127 @@
+{
+  "startedAt": "2026-10-25T21:31:11.591Z",
+  "finishedAt": "2026-10-25T21:31:45.432Z",
+  "datasetSha256": "d372b37dd8b46b2dbc7a4e64dd9723bc30fdfbe9afae9f74b5966e076105d3e1",
+  "dataset": "research-2026-10-25.json",
+  "realPapers": 60,
+  "conservativeReservationUsd": 0.0406317,
+  "productionModelChanged": false,
+  "requestFormat": "short IDs, ID enum and local text bounds; strict validation of coverage/scores/tracks",
+  "limitations": [
+    "Purposive sample, not a random estimate of production accuracy.",
+    "Known historical systems papers may be easy or familiar to models.",
+    "Only title plus first 700 excerpt characters is sent, matching production.",
+    "Historical publication dates intentionally do not filter this fixed comparison.",
+    "Subjective reference grades were assigned before any model calls.",
+    "One run per condition; latency/reliability are observations, not uptime estimates.",
+    "Feedback arm is a hypothetical scenario, not actual user preference.",
+    "Metrics require both baseline batches to validate; there is no silent fallback or automatic retry."
+  ],
+  "results": [
+    {
+      "model": "google/gemini-2.5-flash-lite",
+      "rates": {
+        "input": 1e-07,
+        "output": 4e-07,
+        "request": 0
+      },
+      "requests": [
+        {
+          "arm": "baseline",
+          "candidateIds": [
+            "b1219d8c9b4462e1199f42829ac739d25b03a2405c00674fe9642a2e7cc74ca1",
+            "ee9d31c850a7946cbf64900c1375833183bd6a2c00b4986387fd86deed2f4cae",
+            "46338e0323e06c9b44619c58fb6c7b6efd2a1a91daf123dba3eb93d73787ab25",
+            "0f4bc2a13348e254780cb3a2528c1382e8ccb9d8fdc3a1fca37f85bb2d355c21",
+            "afbacd5e0045d8232579a246b80b3589c5d3743901d8825a55d450d6024c2997",
+            "c2b7a7b49c2bc7e302291b4df2e8a35905e62921efb5b4eb06d956bd6bed0a8e",
+            "ee43c225dce6c2ae3014f6d399b6d1b3b679707f65ac9b451d006ed517c61974",
+            "4909682e2d4e9a114752acf6c104c7389cba62762c3b84debdad3dae61e5a950",
+            "43aeab49c2eaa86751aab502cc880e9add904dde421bfea8efb9e459d721aed9",
+            "3d6ef10015483e0e9175dd6754269e48f4ad037cbb3f7cea17323df06de5c1cb",
+            "cbdb878863b40aafad9e2a06ef92ad59d4d07b3c79dfa76dad45f3d6d24d6037",
+            "d4f0d35e223ee6f46801ef06e6b3c10471e6f168abeb77c95a12df411601951f",
+            "6ca5287de0d74b377d24997894fe55c73885b6ef353a8feab5afbe0bacdbd914",
+            "942e3ea89fdc85a04e9cffbc167ec05cd883d31a7d30ef94ef7e3f31585b8fd4",
+            "6ca65ee0fc1290167207673e1e18b18c015cbc4cc1016c5bf94221860c0ff824",
+            "b11e194368fd12be33361569ccf202d3842990d8023acccc28b14c7d45331c12",
+            "5617db0b7e5487bb4e2ab70ac2a31b7adc7adac74d67ac6bdea8153187167098",
+            "795e6cc9cfc64a6890d0bbc08899991640293ac86185b7c0871479b9333919d6",
+            "fa3c452c8de8030abae1eeb94f535e8f9a88cd4f80af6cd6ae07203a57e5684e",
+            "d1f914c03e522b9ba0ba6ffb5398b7ac93121d1ac16eb2e61c782c0753920476",
+            "7f7ceba21cdb840ed3db949101e38305083c06462274ca75a19fceda4803f04d",
+            "d5991e5f551d3c37a7c12751839232bf5a30243fb4be98ae391e2d6780148ff8",
+            "3e7f85612b5cc4954c16a9670a065c6dbbd3d079100c9b1d2d2bb2e7572533f9",
+            "ecbfa6ed58f055fc6a4939b7d240c17d28d6da0037479e6df50d608cd57b6c47",
+            "9ecca5506ed1df1c5dbc0410ba92687d0d72fde9736ee26d618f7fa0f00d6f37",
+            "2d78b29ed767d2c8b9cd1812518f8e54277a947223c3a97b3c1b762b5ec25adc",
+            "08355e237614d5e2e1b99c8272a0749fb46fc5037b31e3b145f8429360c3764a",
+            "88042784e26b0c1485dc767e54610feb9182c159a69515070cd5a6b11be0f148",
+            "9d92781dd386d16b2cc9d222164deafdd083e779aed13547ec2e6c3bf7616775",
+            "ea2dedc9331b93b5188e1590ea47d12aa47ae024160c955a9d7f284b79573f58"
+          ],
+          "reservedUsd": 0.0042766,
+          "httpStatus": 200,
+          "provider": "Google AI Studio",
+          "responseId": "gen-1792963871-lI3EwV6Rhs4HpOgY0q9k",
+          "servedModel": "google/gemini-2.5-flash-lite",
+          "usage": {
+            "prompt_tokens": 5021,
+            "completion_tokens": 1889,
+            "total_tokens": 6910,
+            "cost": 0.0012577,
+            "is_byok": false,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "audio_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost_details": {
+              "upstream_inference_cost": 0.0012577,
+              "upstream_inference_prompt_cost": 0.0005021,
+              "upstream_inference_completions_cost": 0.0007556
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "image_tokens": 0,
+              "audio_tokens": 0
+            }
+          },
+          "finishReason": "stop",
+          "rawOutput": {
+            "items": [
+              {
+                "id": "p1",
+                "score": 95,
+                "tracks": [
+                  "Quantization",
+                  "Inference",
+                  "AI hardware"
+                ],
+                "reason": "Focuses on accurate and efficient post-training quantization (W8A8) for LLMs, directly addressing memory and acceleration for inference."
+              },
+              {
+                "id": "p11",
+                "score": 92,
+                "tracks": [
+                  "Quantization",
+                  "Training",
+                  "Inference"
+                ],
+                "reason": "Introduces QLoRA for efficient finetuning of quantized LLMs, significantly reducing memory usage for training and preserving performance."
+              },
+              {
+                "id": "p16",
+                "score": 90,
+                "tracks": [
+                  "Quantization",
+                  "Inference"
+                ],
+                "reason": "Proposes GPTQ, a one-shot weight quantization method for GPT models to reduce computational and storage costs for inference."
+              },
+              {
+                "id": "p5",
+                "score": 88,
+                "tracks": [
+                  "GPU kernels",
+                  "Inference",
+                  "AI hardware"
+                ],
+                "reason": "Develops techniques like asynchrony and low-precision for faster attention on GPUs, crucial for LLM inference and long-context applications."
+              },
+              {
+                "id": "p18",
+                "score": 85,
+                "tracks": [
+                  "GPU kernels",
+                  "Inference"
+                ],
+                "reason": "Presents FlashAttention, an IO-aware exact attention algorithm that reduces memory reads/writes for faster Transformer inference on GPUs."
+              },
+              {
+                "id": "p20",
+                "score": 85,
+                "tracks": [
+                  "Inference",
+                  "GPU kernels",
+                  "AI hardware"
+                ],
+                "reason": "Introduces PagedAttention and vLLM for efficient KV cache memory management in LLM serving, enabling higher throughput."
+              },
+              {
+                "id": "p4",
+                "score": 82,
+                "tracks": [
+                  "Inference",
+                  "Agents",
+                  "AI hardware"
+                ],
+                "reason": "SGLang provides a system for efficient execution of complex LLM programs with optimizations like RadixAttention for KV cache reuse."
+              },
+              {
+                "id": "p15",
+                "score": 80,
+                "tracks": [
+                  "Training",
+                  "GPU kernels"
+                ],
+                "reason": "ZeRO optimizer significantly improves memory efficiency for training trillion-parameter models by eliminating redundancies in data- and model-parallelism."
+              },
+              {
+                "id": "p27",
+                "score": 78,
+                "tracks": [
+                  "Training",
+                  "GPU kernels"
+                ],
+                "reason": "Megatron-LM presents techniques for training multi-billion parameter models using efficient intra-layer model parallelism."
+              },
+              {
+                "id": "p14",
+                "score": 75,
+                "tracks": [
+                  "Inference",
+                  "AI hardware"
+                ],
+                "reason": "MambaAct proposes an efficient Mamba-based action expert for flow-matching VLA models, reducing inference cost for robotic control."
+              },
+              {
+                "id": "p26",
+                "score": 70,
+                "tracks": [
+                  "Training",
+                  "Agents"
+                ],
+                "reason": "Direct Preference Optimization offers a stable alternative to RLHF for aligning LLM behavior with human preferences."
+              },
+              {
+                "id": "p19",
+                "score": 65,
+                "tracks": [
+                  "Agents",
+                  "Research"
+                ],
+                "reason": "SWE-bench is an evaluation framework for LLMs to resolve real-world software engineering issues from GitHub."
+              },
+              {
+                "id": "p9",
+                "score": 60,
+                "tracks": [
+                  "Agents",
+                  "Research"
+                ],
+                "reason": "TARSphere is a full-stack framework for embodied agents in evolving physical and social environments, focusing on long-horizon tasks."
+              },
+              {
+                "id": "p6",
+                "score": 55,
+                "tracks": [
+                  "Agents",
+                  "Inference"
+                ],
+                "reason": "RouteWeaver is a unified routing framework that integrates different LLM routing modes for dynamic task selection and coordination."
+              },
+              {
+                "id": "p25",
+                "score": 50,
+                "tracks": [
+                  "Agents",
+                  "Research"
+                ],
+                "reason": "IF-MAP is a method for prioritizing agent improvement in multi-agent systems based on influence functions."
+              },
+              {
+                "id": "p3",
+                "score": 45,
+                "tracks": [
+                  "Inference",
+                  "Agents"
+                ],
+                "reason": "WeVisOne-VL unifies object-level and pixel-level perception for vision-language models, supporting various visual tasks."
+              },
+              {
+                "id": "p22",
+                "score": 40,
+                "tracks": [
+                  "Agents",
+                  "Research"
+                ],
+                "reason": "SplatLab is an autonomous research system for 3D Gaussian Splatting, capable of reproducing and extending research."
+              },
+              {
+                "id": "p23",
+                "score": 38,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "FilmFlow is an agentic framework for generating 3D virtual film cinematography camera trajectories from natural language."
+              },
+              {
+                "id": "p28",
+                "score": 35,
+                "tracks": [
+                  "Agents",
+                  "Research"
+                ],
+                "reason": "RIDAR provides automated detection and runtime intervention for research integrity violations in autonomous research agents."
+              },
+              {
+                "id": "p12",
+                "score": 35,
+                "tracks": [
+                  "Agents",
+                  "Training"
+                ],
+                "reason": "TILDE uses teacher-in-the-loop distillation to transfer capabilities from embodied foundation models to policies."
+              },
+              {
+                "id": "p17",
+                "score": 30,
+                "tracks": [
+                  "Inference"
+                ],
+                "reason": "Analyzes cost variations in diffusion language models, finding task dependency in forward passes per token."
+              },
+              {
+                "id": "p29",
+                "score": 25,
+                "tracks": [
+                  "Agents",
+                  "Inference"
+                ],
+                "reason": "Agent Mosaic recognizes confidentiality leaks in agentic LLM systems due to information assembly from multiple sources."
+              },
+              {
+                "id": "p0",
+                "score": 5,
+                "tracks": [
+                  "Research"
+                ],
+                "reason": "Discusses gravitational wave diffraction patterns for probing astrophysical object structures, unrelated to AI/ML interests."
+              },
+              {
+                "id": "p2",
+                "score": 5,
+                "tracks": [
+                  "Research"
+                ],
+                "reason": "Studies cohomology of integral structure sheaves for open varieties, a topic in abstract mathematics."
+              },
+              {
+                "id": "p7",
+                "score": 5,
+                "tracks": [
+                  "Research"
+                ],
+                "reason": "Analyzes polarized synchrotron emission in cosmic microwave background data, unrelated to AI/ML."
+              },
+              {
+                "id": "p8",
+                "score": 5,
+                "tracks": [
+                  "Research"
+                ],
+                "reason": "Examines cosmological intercept tension in local distance ladders, a topic in astrophysics."
+              },
+              {
+                "id": "p10",
+                "score": 5,
+                "tracks": [
+                  "Research"
+                ],
+                "reason": "Investigates odd radio circles and their formation mechanism, an astronomy topic."
+              },
+              {
+                "id": "p13",
+                "score": 5,
+                "tracks": [
+                  "Research"
+                ],
+                "reason": "Focuses on event sequence forecasting from a generative modeling perspective, not directly related to core interests."
+              },
+              {
+                "id": "p21",
+                "score": 5,
+                "tracks": [
+                  "Research"
+                ],
+                "reason": "Studies log blow-ups in rigid geometry, a highly theoretical mathematics topic."
+              },
+              {
+                "id": "p24",
+                "score": 5,
+                "tracks": [
+                  "Research"
+                ],
+                "reason": "Examines primordial B modes in CMB polarization and foreground contamination, an astrophysics topic."
+              }
+            ]
+          },
+          "classifications": [
+            {
+              "id": "ee9d31c850a7946cbf64900c1375833183bd6a2c00b4986387fd86deed2f4cae",
+              "score": 95,
+              "tracks": [
+                "Quantization",
+                "Inference",
+                "AI hardware"
+              ],
+              "reason": "Focuses on accurate and efficient post-training quantization (W8A8) for LLMs, directly addressing memory and acceleration for inference."
+            },
+            {
+              "id": "d4f0d35e223ee6f46801ef06e6b3c10471e6f168abeb77c95a12df411601951f",
+              "score": 92,
+              "tracks": [
+                "Quantization",
+                "Training",
+                "Inference"
+              ],
+              "reason": "Introduces QLoRA for efficient finetuning of quantized LLMs, significantly reducing memory usage for training and preserving performance."
+            },
+            {
+              "id": "5617db0b7e5487bb4e2ab70ac2a31b7adc7adac74d67ac6bdea8153187167098",
+              "score": 90,
+              "tracks": [
+                "Quantization",
+                "Inference"
+              ],
+              "reason": "Proposes GPTQ, a one-shot weight quantization method for GPT models to reduce computational and storage costs for inference."
+            },
+            {
+              "id": "c2b7a7b49c2bc7e302291b4df2e8a35905e62921efb5b4eb06d956bd6bed0a8e",
+              "score": 88,
+              "tracks": [
+                "GPU kernels",
+                "Inference",
+                "AI hardware"
+              ],
+              "reason": "Develops techniques like asynchrony and low-precision for faster attention on GPUs, crucial for LLM inference and long-context applications."
+            },
+            {
+              "id": "fa3c452c8de8030abae1eeb94f535e8f9a88cd4f80af6cd6ae07203a57e5684e",
+              "score": 85,
+              "tracks": [
+                "GPU kernels",
+                "Inference"
+              ],
+              "reason": "Presents FlashAttention, an IO-aware exact attention algorithm that reduces memory reads/writes for faster Transformer inference on GPUs."
+            },
+            {
+              "id": "7f7ceba21cdb840ed3db949101e38305083c06462274ca75a19fceda4803f04d",
+              "score": 85,
+              "tracks": [
+                "Inference",
+                "GPU kernels",
+                "AI hardware"
+              ],
+              "reason": "Introduces PagedAttention and vLLM for efficient KV cache memory management in LLM serving, enabling higher throughput."
+            },
+            {
+              "id": "afbacd5e0045d8232579a246b80b3589c5d3743901d8825a55d450d6024c2997",
+              "score": 82,
+              "tracks": [
+                "Inference",
+                "Agents",
+                "AI hardware"
+              ],
+              "reason": "SGLang provides a system for efficient execution of complex LLM programs with optimizations like RadixAttention for KV cache reuse."
+            },
+            {
+              "id": "b11e194368fd12be33361569ccf202d3842990d8023acccc28b14c7d45331c12",
+              "score": 80,
+              "tracks": [
+                "Training",
+                "GPU kernels"
+              ],
+              "reason": "ZeRO optimizer significantly improves memory efficiency for training trillion-parameter models by eliminating redundancies in data- and model-parallelism."
+            },
+            {
+              "id": "88042784e26b0c1485dc767e54610feb9182c159a69515070cd5a6b11be0f148",
+              "score": 78,
+              "tracks": [
+                "Training",
+                "GPU kernels"
+              ],
+              "reason": "Megatron-LM presents techniques for training multi-billion parameter models using efficient intra-layer model parallelism."
+            },
+            {
+              "id": "6ca65ee0fc1290167207673e1e18b18c015cbc4cc1016c5bf94221860c0ff824",
+              "score": 75,
+              "tracks": [
+                "Inference",
+                "AI hardware"
+              ],
+              "reason": "MambaAct proposes an efficient Mamba-based action expert for flow-matching VLA models, reducing inference cost for robotic control."
+            },
+            {
+              "id": "08355e237614d5e2e1b99c8272a0749fb46fc5037b31e3b145f8429360c3764a",
+              "score": 70,
+              "tracks": [
+                "Training",
+                "Agents"
+              ],
+              "reason": "Direct Preference Optimization offers a stable alternative to RLHF for aligning LLM behavior with human preferences."
+            },
+            {
+              "id": "d1f914c03e522b9ba0ba6ffb5398b7ac93121d1ac16eb2e61c782c0753920476",
+              "score": 65,
+              "tracks": [
+                "Agents",
+                "Research"
+              ],
+              "reason": "SWE-bench is an evaluation framework for LLMs to resolve real-world software engineering issues from GitHub."
+            },
+            {
+              "id": "3d6ef10015483e0e9175dd6754269e48f4ad037cbb3f7cea17323df06de5c1cb",
+              "score": 60,
+              "tracks": [
+                "Agents",
+                "Research"
+              ],
+              "reason": "TARSphere is a full-stack framework for embodied agents in evolving physical and social environments, focusing on long-horizon tasks."
+            },
+            {
+              "id": "ee43c225dce6c2ae3014f6d399b6d1b3b679707f65ac9b451d006ed517c61974",
+              "score": 55,
+              "tracks": [
+                "Agents",
+                "Inference"
+              ],
+              "reason": "RouteWeaver is a unified routing framework that integrates different LLM routing modes for dynamic task selection and coordination."
+            },
+            {
+              "id": "2d78b29ed767d2c8b9cd1812518f8e54277a947223c3a97b3c1b762b5ec25adc",
+              "score": 50,
+              "tracks": [
+                "Agents",
+                "Research"
+              ],
+              "reason": "IF-MAP is a method for prioritizing agent improvement in multi-agent systems based on influence functions."
+            },
+            {
+              "id": "0f4bc2a13348e254780cb3a2528c1382e8ccb9d8fdc3a1fca37f85bb2d355c21",
+              "score": 45,
+              "tracks": [
+                "Inference",
+                "Agents"
+              ],
+              "reason": "WeVisOne-VL unifies object-level and pixel-level perception for vision-language models, supporting various visual tasks."
+            },
+            {
+              "id": "3e7f85612b5cc4954c16a9670a065c6dbbd3d079100c9b1d2d2bb2e7572533f9",
+              "score": 40,
+              "tracks": [
+                "Agents",
+                "Research"
+              ],
+              "reason": "SplatLab is an autonomous research system for 3D Gaussian Splatting, capable of reproducing and extending research."
+            },
+            {
+              "id": "ecbfa6ed58f055fc6a4939b7d240c17d28d6da0037479e6df50d608cd57b6c47",
+              "score": 38,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "FilmFlow is an agentic framework for generating 3D virtual film cinematography camera trajectories from natural language."
+            },
+            {
+              "id": "9d92781dd386d16b2cc9d222164deafdd083e779aed13547ec2e6c3bf7616775",
+              "score": 35,
+              "tracks": [
+                "Agents",
+                "Research"
+              ],
+              "reason": "RIDAR provides automated detection and runtime intervention for research integrity violations in autonomous research agents."
+            },
+            {
+              "id": "6ca5287de0d74b377d24997894fe55c73885b6ef353a8feab5afbe0bacdbd914",
+              "score": 35,
+              "tracks": [
+                "Agents",
+                "Training"
+              ],
+              "reason": "TILDE uses teacher-in-the-loop distillation to transfer capabilities from embodied foundation models to policies."
+            },
+            {
+              "id": "795e6cc9cfc64a6890d0bbc08899991640293ac86185b7c0871479b9333919d6",
+              "score": 30,
+              "tracks": [
+                "Inference"
+              ],
+              "reason": "Analyzes cost variations in diffusion language models, finding task dependency in forward passes per token."
+            },
+            {
+              "id": "ea2dedc9331b93b5188e1590ea47d12aa47ae024160c955a9d7f284b79573f58",
+              "score": 25,
+              "tracks": [
+                "Agents",
+                "Inference"
+              ],
+              "reason": "Agent Mosaic recognizes confidentiality leaks in agentic LLM systems due to information assembly from multiple sources."
+            },
+            {
+              "id": "b1219d8c9b4462e1199f42829ac739d25b03a2405c00674fe9642a2e7cc74ca1",
+              "score": 5,
+              "tracks": [
+                "Research"
+              ],
+              "reason": "Discusses gravitational wave diffraction patterns for probing astrophysical object structures, unrelated to AI/ML interests."
+            },
+            {
+              "id": "46338e0323e06c9b44619c58fb6c7b6efd2a1a91daf123dba3eb93d73787ab25",
+              "score": 5,
+              "tracks": [
+                "Research"
+              ],
+              "reason": "Studies cohomology of integral structure sheaves for open varieties, a topic in abstract mathematics."
+            },
+            {
+              "id": "4909682e2d4e9a114752acf6c104c7389cba62762c3b84debdad3dae61e5a950",
+              "score": 5,
+              "tracks": [
+                "Research"
+              ],
+              "reason": "Analyzes polarized synchrotron emission in cosmic microwave background data, unrelated to AI/ML."
+            },
+            {
+              "id": "43aeab49c2eaa86751aab502cc880e9add904dde421bfea8efb9e459d721aed9",
+              "score": 5,
+              "tracks": [
+                "Research"
+              ],
+              "reason": "Examines cosmological intercept tension in local distance ladders, a topic in astrophysics."
+            },
+            {
+              "id": "cbdb878863b40aafad9e2a06ef92ad59d4d07b3c79dfa76dad45f3d6d24d6037",
+              "score": 5,
+              "tracks": [
+                "Research"
+              ],
+              "reason": "Investigates odd radio circles and their formation mechanism, an astronomy topic."
+            },
+            {
+              "id": "942e3ea89fdc85a04e9cffbc167ec05cd883d31a7d30ef94ef7e3f31585b8fd4",
+              "score": 5,
+              "tracks": [
+                "Research"
+              ],
+              "reason": "Focuses on event sequence forecasting from a generative modeling perspective, not directly related to core interests."
+            },
+            {
+              "id": "d5991e5f551d3c37a7c12751839232bf5a30243fb4be98ae391e2d6780148ff8",
+              "score": 5,
+              "tracks": [
+                "Research"
+              ],
+              "reason": "Studies log blow-ups in rigid geometry, a highly theoretical mathematics topic."
+            },
+            {
+              "id": "9ecca5506ed1df1c5dbc0410ba92687d0d72fde9736ee26d618f7fa0f00d6f37",
+              "score": 5,
+              "tracks": [
+                "Research"
+              ],
+              "reason": "Examines primordial B modes in CMB polarization and foreground contamination, an astrophysics topic."
+            }
+          ],
+          "valid": true,
+          "elapsedSeconds": 4.821844958
+        },
+        {
+          "arm": "baseline",
+          "candidateIds": [
+            "b06ea8f25becfdef6ce12477f821a3bd8e0c7e752327195ede6979d95c098c4d",
+            "ab4920427f7ebc4a9bb5eca95e77021d6859149f73133ef6deaf988a9375956e",
+            "2e8704fb685e7eb8ddc1499ee9e6d3b2c40477f5840ea719e398eefede982ae3",
+            "2874c021f0adc2bfd0b42f48c60aef4c5e729a1496fb5c2b6cb73420b2dfdd84",
+            "f94a58ccf5001214a4e7547014834d681dd48eb2f8a4d7ba989dd9dcc297457d",
+            "17dc7c4f8774a4dd16682c92c46aed735a1497591bca41139b9f4733f127a12a",
+            "e3512e0e791ac7017c43dcbb6e0ef0f25ebef5f81f919742ea1d24a233b191cc",
+            "14a67c84ba31fb02b00503e866e7f430c80fb0942b5409a6dffb7d6359e0addb",
+            "483050a68544832860fe1cff547280a24f5010e11cb5348d684812f16104c10a",
+            "33ecec960e556ef2fd4d3bb0e84709ee6e5852c9dbb8d6aadae892130fe0bbcd",
+            "87b841870323c30f75c99c7b90484f9992d40e4d8aaff88cc168a47245a4e4a9",
+            "6b066cadc7dd868a2628c1422012f46ca32462318406edec8ec69e376e165509",
+            "20820c722eba832284042b86beadd7002f68d194b3a69db7c44f533edc399840",
+            "e4c89735c3d69e361d01327c1ee1d3f177f9a887122b77dede339a4e615c0139",
+            "90411be9bacb229b2709d680cdf9f36e53988620703502ee86401b2c845803e0",
+            "faf00ea20b801ce34008bf5f4e6a33a17b73f6adbcf37a656e43525f6fd4adea",
+            "f625e7171c806720e3ff5ab4e67f4c8d0bd5b805b70774b4f72d880d1c202188",
+            "d3eb1e2aea7586e7bd9d8c6c636b82cc0e79f9ca8e53347727ea8103e2779d4f",
+            "1407dbaefafd7a40128936c14d1fa1774059b631448a43bc4461b2aa4621ec33",
+            "95d284d8ab51539dd39b1d7f7eab3900366af99c7ab20b91d56e918c1a9d1b98",
+            "124a6b23246d720a864a647dacda031c02d9e0142f996e8b796456f753ae4312",
+            "a20f137d501720448275f31206a72833a6155330ee06189778807d1e86a1dce4",
+            "962045ead73e68ce23a0003dd471dc28de043ce6b72136275f727ab40f318325",
+            "46ee1a4aebfa6b3d1e0d2e58b0f59a44282fe2f849576862da8d49845c3ce884",
+            "cf499b8ee1f0d1bc4d958b1f4cb24d1938de63eb1d1778a4ed8a34ae042fd72f",
+            "9c58847efa40580876478dd6e54396c26fb57e5f44d08450e494d1cddcb68521",
+            "ee4139797a3238d4ff7df2cd37ba2b3a120b9ddf32cf9315014bf6b3ec10095b",
+            "04d3426f77d797314c28137086cdfd1a6af6fbee3ec69ef90533d6ffd7cb6efb",
+            "070e7d53b4d378305bb4bc6deadb07bbac59a8357c45b7a3f74780a872c52b09",
+            "2ec5c308edd21ffafc2ca171d56dd7a914089089eeb04fcf98b667c8c90bb945"
+          ],
+          "reservedUsd": 0.004293099999999999,
+          "httpStatus": 200,
+          "provider": "Google AI Studio",
+          "responseId": "gen-1792963876-ZS66oVyts1NZryOhjKYu",
+          "servedModel": "google/gemini-2.5-flash-lite",
+          "usage": {
+            "prompt_tokens": 5222,
+            "completion_tokens": 2097,
+            "total_tokens": 7319,
+            "cost": 0.001361,
+            "is_byok": false,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "audio_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost_details": {
+              "upstream_inference_cost": 0.001361,
+              "upstream_inference_prompt_cost": 0.0005222,
+              "upstream_inference_completions_cost": 0.0008388
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "image_tokens": 0,
+              "audio_tokens": 0
+            }
+          },
+          "finishReason": "stop",
+          "rawOutput": {
+            "items": [
+              {
+                "id": "p0",
+                "score": 35,
+                "tracks": [
+                  "Agents",
+                  "Research"
+                ],
+                "reason": "This paper discusses agent collaboration with humans in a shared objective maze, focusing on task division rather than AI capabilities. It's adjacent to agent research but not directly on LLM or AI hardware."
+              },
+              {
+                "id": "p1",
+                "score": 35,
+                "tracks": [
+                  "Research"
+                ],
+                "reason": "This paper explores fine-grained visual understanding in unified multimodal models using generation pathways. It's related to AI research but doesn't directly align with the specified interests."
+              },
+              {
+                "id": "p2",
+                "score": 0,
+                "tracks": [
+                  "Research"
+                ],
+                "reason": "This paper is about local heights of nef toric divisors in algebraic geometry, which is outside the scope of the specified research interests."
+              },
+              {
+                "id": "p3",
+                "score": 0,
+                "tracks": [
+                  "Research"
+                ],
+                "reason": "This paper focuses on deep holes of Reed-Solomon codes in coding theory, which is not relevant to the specified research interests."
+              },
+              {
+                "id": "p4",
+                "score": 50,
+                "tracks": [
+                  "Agents",
+                  "Research"
+                ],
+                "reason": "This paper introduces a framework for evaluating the privacy of split and distributed LLM systems using an attacker agent. It's relevant to LLM security and agent evaluation."
+              },
+              {
+                "id": "p5",
+                "score": 0,
+                "tracks": [
+                  "Research"
+                ],
+                "reason": "This paper discusses arithmetic Siegel-Weil formulas for orthogonal Shimura varieties, a topic in number theory and algebraic geometry, not directly related to AI research interests."
+              },
+              {
+                "id": "p6",
+                "score": 90,
+                "tracks": [
+                  "Quantization",
+                  "AI hardware",
+                  "Research"
+                ],
+                "reason": "This paper proposes Activation-aware Weight Quantization (AWQ) for LLM compression and acceleration, directly addressing quantization and hardware efficiency for LLMs."
+              },
+              {
+                "id": "p7",
+                "score": 85,
+                "tracks": [
+                  "GPU kernels",
+                  "AI hardware",
+                  "Research"
+                ],
+                "reason": "This paper presents FlashAttention-2, focusing on faster attention mechanisms with better parallelism and work partitioning for GPUs, directly relevant to GPU kernels and AI hardware."
+              },
+              {
+                "id": "p8",
+                "score": 35,
+                "tracks": [
+                  "Research"
+                ],
+                "reason": "This paper forecasts cosmological parameters using astronomical data. While it involves computation, it's not directly related to the specified AI research interests."
+              },
+              {
+                "id": "p9",
+                "score": 35,
+                "tracks": [
+                  "Research"
+                ],
+                "reason": "This paper proposes a robust estimator for the Lyman-\u03b1 forest power spectrum. It's in astrophysics and cosmology, not directly related to AI research interests."
+              },
+              {
+                "id": "p10",
+                "score": 0,
+                "tracks": [
+                  "Research"
+                ],
+                "reason": "This paper is about Langlands-Shahidi gamma factors and local transfer in families, a topic in number theory and representation theory, not relevant to the specified interests."
+              },
+              {
+                "id": "p11",
+                "score": 60,
+                "tracks": [
+                  "Agents",
+                  "Research"
+                ],
+                "reason": "This paper presents BrickWright, a framework for agents to create physically feasible LEGO builds, focusing on agentic creation and physical validation."
+              },
+              {
+                "id": "p12",
+                "score": 70,
+                "tracks": [
+                  "Agents",
+                  "Training",
+                  "Research"
+                ],
+                "reason": "This paper introduces IQuest-Q1, a sparse Mixture-of-Experts (MoE) agentic foundation model, detailing its pre-training and fine-tuning process."
+              },
+              {
+                "id": "p13",
+                "score": 75,
+                "tracks": [
+                  "Agents",
+                  "Research"
+                ],
+                "reason": "This paper introduces EvalResearchBench for AI agents to build their own feedback for recursive self-improvement, focusing on agent evaluation and self-improvement."
+              },
+              {
+                "id": "p14",
+                "score": 80,
+                "tracks": [
+                  "Inference",
+                  "Research"
+                ],
+                "reason": "This paper proposes 'Attention Sinks' for efficient streaming LLM inference, addressing memory and generalization challenges in long interactions."
+              },
+              {
+                "id": "p15",
+                "score": 70,
+                "tracks": [
+                  "Agents",
+                  "Research"
+                ],
+                "reason": "This paper presents AutoGen, a framework for LLM applications using multi-agent conversation, focusing on agent interaction and LLM application development."
+              },
+              {
+                "id": "p16",
+                "score": 75,
+                "tracks": [
+                  "Quantization",
+                  "Training",
+                  "Research"
+                ],
+                "reason": "This paper proposes 8-bit optimizers via block-wise quantization for training large models, addressing memory limitations in optimizers."
+              },
+              {
+                "id": "p17",
+                "score": 0,
+                "tracks": [
+                  "Research"
+                ],
+                "reason": "This paper is about nonvanishing of 2-primary Kolyvagin classes in number theory, which is not relevant to the specified research interests."
+              },
+              {
+                "id": "p18",
+                "score": 65,
+                "tracks": [
+                  "Agents",
+                  "Research"
+                ],
+                "reason": "This paper presents ID-TAP for test-time agent personalization using dueling bandits and information-directed exploration for LLM agents."
+              },
+              {
+                "id": "p19",
+                "score": 60,
+                "tracks": [
+                  "Agents",
+                  "Research"
+                ],
+                "reason": "This paper introduces 'Heartbeat Thinking' for real-time voice agents, enabling speculative reasoning and tool execution while listening."
+              },
+              {
+                "id": "p20",
+                "score": 0,
+                "tracks": [
+                  "Research"
+                ],
+                "reason": "This paper discusses Landau-Siegel zeros and effective Brauer-Siegel theorem in number theory, which is outside the scope of the specified interests."
+              },
+              {
+                "id": "p21",
+                "score": 85,
+                "tracks": [
+                  "Quantization",
+                  "Inference",
+                  "Research"
+                ],
+                "reason": "This paper presents LLM.int8(), an 8-bit matrix multiplication method for transformers to reduce inference memory while retaining performance."
+              },
+              {
+                "id": "p22",
+                "score": 85,
+                "tracks": [
+                  "Inference",
+                  "AI hardware",
+                  "Research"
+                ],
+                "reason": "This paper introduces FlexGen for high-throughput generative inference of LLMs using limited resources like a single GPU."
+              },
+              {
+                "id": "p23",
+                "score": 40,
+                "tracks": [
+                  "AI hardware",
+                  "Research"
+                ],
+                "reason": "This paper presents HyperDrone, a fast quadrotor simulator using GPU ray-tracing. It's related to AI hardware but not directly LLM or training/inference."
+              },
+              {
+                "id": "p24",
+                "score": 40,
+                "tracks": [
+                  "AI hardware",
+                  "Research"
+                ],
+                "reason": "This paper discusses resource-linear budget control for 3D Gaussian Splatting, focusing on efficient rendering with limited resources."
+              },
+              {
+                "id": "p25",
+                "score": 50,
+                "tracks": [
+                  "Inference",
+                  "Research"
+                ],
+                "reason": "This paper studies learned unmasking policies in diffusion language models to improve speed-accuracy trade-offs during generation."
+              },
+              {
+                "id": "p26",
+                "score": 70,
+                "tracks": [
+                  "Agents",
+                  "Research"
+                ],
+                "reason": "This paper proposes ReAct, synergizing reasoning and acting in language models for improved task performance through interleaved generation."
+              },
+              {
+                "id": "p27",
+                "score": 45,
+                "tracks": [
+                  "Research"
+                ],
+                "reason": "This paper introduces RTAformer for video scene graph generation, focusing on modeling object persistence and relation changes in videos."
+              },
+              {
+                "id": "p28",
+                "score": 90,
+                "tracks": [
+                  "Quantization",
+                  "Inference",
+                  "AI hardware"
+                ],
+                "reason": "This paper presents SpQR, a Sparse-Quantized Representation for near-lossless LLM weight compression, enabling deployment on memory-limited devices."
+              },
+              {
+                "id": "p29",
+                "score": 85,
+                "tracks": [
+                  "Quantization",
+                  "Inference",
+                  "Research"
+                ],
+                "reason": "This paper introduces T2Quant, a task and time-aware mixed-precision quantization framework for Diffusion Language Models."
+              }
+            ]
+          },
+          "classifications": [
+            {
+              "id": "b06ea8f25becfdef6ce12477f821a3bd8e0c7e752327195ede6979d95c098c4d",
+              "score": 35,
+              "tracks": [
+                "Agents",
+                "Research"
+              ],
+              "reason": "This paper discusses agent collaboration with humans in a shared objective maze, focusing on task division rather than AI capabilities. It's adjacent to agent research but not directly on LLM or AI hardware."
+            },
+            {
+              "id": "ab4920427f7ebc4a9bb5eca95e77021d6859149f73133ef6deaf988a9375956e",
+              "score": 35,
+              "tracks": [
+                "Research"
+              ],
+              "reason": "This paper explores fine-grained visual understanding in unified multimodal models using generation pathways. It's related to AI research but doesn't directly align with the specified interests."
+            },
+            {
+              "id": "2e8704fb685e7eb8ddc1499ee9e6d3b2c40477f5840ea719e398eefede982ae3",
+              "score": 0,
+              "tracks": [
+                "Research"
+              ],
+              "reason": "This paper is about local heights of nef toric divisors in algebraic geometry, which is outside the scope of the specified research interests."
+            },
+            {
+              "id": "2874c021f0adc2bfd0b42f48c60aef4c5e729a1496fb5c2b6cb73420b2dfdd84",
+              "score": 0,
+              "tracks": [
+                "Research"
+              ],
+              "reason": "This paper focuses on deep holes of Reed-Solomon codes in coding theory, which is not relevant to the specified research interests."
+            },
+            {
+              "id": "f94a58ccf5001214a4e7547014834d681dd48eb2f8a4d7ba989dd9dcc297457d",
+              "score": 50,
+              "tracks": [
+                "Agents",
+                "Research"
+              ],
+              "reason": "This paper introduces a framework for evaluating the privacy of split and distributed LLM systems using an attacker agent. It's relevant to LLM security and agent evaluation."
+            },
+            {
+              "id": "17dc7c4f8774a4dd16682c92c46aed735a1497591bca41139b9f4733f127a12a",
+              "score": 0,
+              "tracks": [
+                "Research"
+              ],
+              "reason": "This paper discusses arithmetic Siegel-Weil formulas for orthogonal Shimura varieties, a topic in number theory and algebraic geometry, not directly related to AI research interests."
+            },
+            {
+              "id": "e3512e0e791ac7017c43dcbb6e0ef0f25ebef5f81f919742ea1d24a233b191cc",
+              "score": 90,
+              "tracks": [
+                "Quantization",
+                "AI hardware",
+                "Research"
+              ],
+              "reason": "This paper proposes Activation-aware Weight Quantization (AWQ) for LLM compression and acceleration, directly addressing quantization and hardware efficiency for LLMs."
+            },
+            {
+              "id": "14a67c84ba31fb02b00503e866e7f430c80fb0942b5409a6dffb7d6359e0addb",
+              "score": 85,
+              "tracks": [
+                "GPU kernels",
+                "AI hardware",
+                "Research"
+              ],
+              "reason": "This paper presents FlashAttention-2, focusing on faster attention mechanisms with better parallelism and work partitioning for GPUs, directly relevant to GPU kernels and AI hardware."
+            },
+            {
+              "id": "483050a68544832860fe1cff547280a24f5010e11cb5348d684812f16104c10a",
+              "score": 35,
+              "tracks": [
+                "Research"
+              ],
+              "reason": "This paper forecasts cosmological parameters using astronomical data. While it involves computation, it's not directly related to the specified AI research interests."
+            },
+            {
+              "id": "33ecec960e556ef2fd4d3bb0e84709ee6e5852c9dbb8d6aadae892130fe0bbcd",
+              "score": 35,
+              "tracks": [
+                "Research"
+              ],
+              "reason": "This paper proposes a robust estimator for the Lyman-\u03b1 forest power spectrum. It's in astrophysics and cosmology, not directly related to AI research interests."
+            },
+            {
+              "id": "87b841870323c30f75c99c7b90484f9992d40e4d8aaff88cc168a47245a4e4a9",
+              "score": 0,
+              "tracks": [
+                "Research"
+              ],
+              "reason": "This paper is about Langlands-Shahidi gamma factors and local transfer in families, a topic in number theory and representation theory, not relevant to the specified interests."
+            },
+            {
+              "id": "6b066cadc7dd868a2628c1422012f46ca32462318406edec8ec69e376e165509",
+              "score": 60,
+              "tracks": [
+                "Agents",
+                "Research"
+              ],
+              "reason": "This paper presents BrickWright, a framework for agents to create physically feasible LEGO builds, focusing on agentic creation and physical validation."
+            },
+            {
+              "id": "20820c722eba832284042b86beadd7002f68d194b3a69db7c44f533edc399840",
+              "score": 70,
+              "tracks": [
+                "Agents",
+                "Training",
+                "Research"
+              ],
+              "reason": "This paper introduces IQuest-Q1, a sparse Mixture-of-Experts (MoE) agentic foundation model, detailing its pre-training and fine-tuning process."
+            },
+            {
+              "id": "e4c89735c3d69e361d01327c1ee1d3f177f9a887122b77dede339a4e615c0139",
+              "score": 75,
+              "tracks": [
+                "Agents",
+                "Research"
+              ],
+              "reason": "This paper introduces EvalResearchBench for AI agents to build their own feedback for recursive self-improvement, focusing on agent evaluation and self-improvement."
+            },
+            {
+              "id": "90411be9bacb229b2709d680cdf9f36e53988620703502ee86401b2c845803e0",
+              "score": 80,
+              "tracks": [
+                "Inference",
+                "Research"
+              ],
+              "reason": "This paper proposes 'Attention Sinks' for efficient streaming LLM inference, addressing memory and generalization challenges in long interactions."
+            },
+            {
+              "id": "faf00ea20b801ce34008bf5f4e6a33a17b73f6adbcf37a656e43525f6fd4adea",
+              "score": 70,
+              "tracks": [
+                "Agents",
+                "Research"
+              ],
+              "reason": "This paper presents AutoGen, a framework for LLM applications using multi-agent conversation, focusing on agent interaction and LLM application development."
+            },
+            {
+              "id": "f625e7171c806720e3ff5ab4e67f4c8d0bd5b805b70774b4f72d880d1c202188",
+              "score": 75,
+              "tracks": [
+                "Quantization",
+                "Training",
+                "Research"
+              ],
+              "reason": "This paper proposes 8-bit optimizers via block-wise quantization for training large models, addressing memory limitations in optimizers."
+            },
+            {
+              "id": "d3eb1e2aea7586e7bd9d8c6c636b82cc0e79f9ca8e53347727ea8103e2779d4f",
+              "score": 0,
+              "tracks": [
+                "Research"
+              ],
+              "reason": "This paper is about nonvanishing of 2-primary Kolyvagin classes in number theory, which is not relevant to the specified research interests."
+            },
+            {
+              "id": "1407dbaefafd7a40128936c14d1fa1774059b631448a43bc4461b2aa4621ec33",
+              "score": 65,
+              "tracks": [
+                "Agents",
+                "Research"
+              ],
+              "reason": "This paper presents ID-TAP for test-time agent personalization using dueling bandits and information-directed exploration for LLM agents."
+            },
+            {
+              "id": "95d284d8ab51539dd39b1d7f7eab3900366af99c7ab20b91d56e918c1a9d1b98",
+              "score": 60,
+              "tracks": [
+                "Agents",
+                "Research"
+              ],
+              "reason": "This paper introduces 'Heartbeat Thinking' for real-time voice agents, enabling speculative reasoning and tool execution while listening."
+            },
+            {
+              "id": "124a6b23246d720a864a647dacda031c02d9e0142f996e8b796456f753ae4312",
+              "score": 0,
+              "tracks": [
+                "Research"
+              ],
+              "reason": "This paper discusses Landau-Siegel zeros and effective Brauer-Siegel theorem in number theory, which is outside the scope of the specified interests."
+            },
+            {
+              "id": "a20f137d501720448275f31206a72833a6155330ee06189778807d1e86a1dce4",
+              "score": 85,
+              "tracks": [
+                "Quantization",
+                "Inference",
+                "Research"
+              ],
+              "reason": "This paper presents LLM.int8(), an 8-bit matrix multiplication method for transformers to reduce inference memory while retaining performance."
+            },
+            {
+              "id": "962045ead73e68ce23a0003dd471dc28de043ce6b72136275f727ab40f318325",
+              "score": 85,
+              "tracks": [
+                "Inference",
+                "AI hardware",
+                "Research"
+              ],
+              "reason": "This paper introduces FlexGen for high-throughput generative inference of LLMs using limited resources like a single GPU."
+            },
+            {
+              "id": "46ee1a4aebfa6b3d1e0d2e58b0f59a44282fe2f849576862da8d49845c3ce884",
+              "score": 40,
+              "tracks": [
+                "AI hardware",
+                "Research"
+              ],
+              "reason": "This paper presents HyperDrone, a fast quadrotor simulator using GPU ray-tracing. It's related to AI hardware but not directly LLM or training/inference."
+            },
+            {
+              "id": "cf499b8ee1f0d1bc4d958b1f4cb24d1938de63eb1d1778a4ed8a34ae042fd72f",
+              "score": 40,
+              "tracks": [
+                "AI hardware",
+                "Research"
+              ],
+              "reason": "This paper discusses resource-linear budget control for 3D Gaussian Splatting, focusing on efficient rendering with limited resources."
+            },
+            {
+              "id": "9c58847efa40580876478dd6e54396c26fb57e5f44d08450e494d1cddcb68521",
+              "score": 50,
+              "tracks": [
+                "Inference",
+                "Research"
+              ],
+              "reason": "This paper studies learned unmasking policies in diffusion language models to improve speed-accuracy trade-offs during generation."
+            },
+            {
+              "id": "ee4139797a3238d4ff7df2cd37ba2b3a120b9ddf32cf9315014bf6b3ec10095b",
+              "score": 70,
+              "tracks": [
+                "Agents",
+                "Research"
+              ],
+              "reason": "This paper proposes ReAct, synergizing reasoning and acting in language models for improved task performance through interleaved generation."
+            },
+            {
+              "id": "04d3426f77d797314c28137086cdfd1a6af6fbee3ec69ef90533d6ffd7cb6efb",
+              "score": 45,
+              "tracks": [
+                "Research"
+              ],
+              "reason": "This paper introduces RTAformer for video scene graph generation, focusing on modeling object persistence and relation changes in videos."
+            },
+            {
+              "id": "070e7d53b4d378305bb4bc6deadb07bbac59a8357c45b7a3f74780a872c52b09",
+              "score": 90,
+              "tracks": [
+                "Quantization",
+                "Inference",
+                "AI hardware"
+              ],
+              "reason": "This paper presents SpQR, a Sparse-Quantized Representation for near-lossless LLM weight compression, enabling deployment on memory-limited devices."
+            },
+            {
+              "id": "2ec5c308edd21ffafc2ca171d56dd7a914089089eeb04fcf98b667c8c90bb945",
+              "score": 85,
+              "tracks": [
+                "Quantization",
+                "Inference",
+                "Research"
+              ],
+              "reason": "This paper introduces T2Quant, a task and time-aware mixed-precision quantization framework for Diffusion Language Models."
+            }
+          ],
+          "valid": true,
+          "elapsedSeconds": 5.279323334000001
+        },
+        {
+          "arm": "feedback",
+          "candidateIds": [
+            "c2b7a7b49c2bc7e302291b4df2e8a35905e62921efb5b4eb06d956bd6bed0a8e",
+            "d1f914c03e522b9ba0ba6ffb5398b7ac93121d1ac16eb2e61c782c0753920476",
+            "ee4139797a3238d4ff7df2cd37ba2b3a120b9ddf32cf9315014bf6b3ec10095b",
+            "5617db0b7e5487bb4e2ab70ac2a31b7adc7adac74d67ac6bdea8153187167098",
+            "3d6ef10015483e0e9175dd6754269e48f4ad037cbb3f7cea17323df06de5c1cb",
+            "e4c89735c3d69e361d01327c1ee1d3f177f9a887122b77dede339a4e615c0139",
+            "2ec5c308edd21ffafc2ca171d56dd7a914089089eeb04fcf98b667c8c90bb945",
+            "b06ea8f25becfdef6ce12477f821a3bd8e0c7e752327195ede6979d95c098c4d",
+            "3e7f85612b5cc4954c16a9670a065c6dbbd3d079100c9b1d2d2bb2e7572533f9",
+            "0f4bc2a13348e254780cb3a2528c1382e8ccb9d8fdc3a1fca37f85bb2d355c21"
+          ],
+          "reservedUsd": 0.0027308999999999996,
+          "httpStatus": 429,
+          "valid": false,
+          "error": "HTTP 429",
+          "elapsedSeconds": 0.15988875000000008
+        }
+      ],
+      "metrics": {
+        "validRequests": 2,
+        "totalRequests": 3,
+        "baselineSeconds": 10.101168292,
+        "baselineReportedCostUsd": 0.0026187,
+        "qualityAvailable": true,
+        "precision": 1,
+        "recall": 0.8205128205128205,
+        "binaryAccuracy": 0.8833333333333333,
+        "exactFourBandAgreement": 0.6333333333333333,
+        "ndcg15": 1,
+        "trackAccuracy": 1,
+        "offTopicPromoted": 0,
+        "referenceRelevant": 39,
+        "falsePositiveIds": [],
+        "missedIds": [
+          "3e7f85612b5cc4954c16a9670a065c6dbbd3d079100c9b1d2d2bb2e7572533f9",
+          "9d92781dd386d16b2cc9d222164deafdd083e779aed13547ec2e6c3bf7616775",
+          "795e6cc9cfc64a6890d0bbc08899991640293ac86185b7c0871479b9333919d6",
+          "ea2dedc9331b93b5188e1590ea47d12aa47ae024160c955a9d7f284b79573f58",
+          "b06ea8f25becfdef6ce12477f821a3bd8e0c7e752327195ede6979d95c098c4d",
+          "46ee1a4aebfa6b3d1e0d2e58b0f59a44282fe2f849576862da8d49845c3ce884",
+          "cf499b8ee1f0d1bc4d958b1f4cb24d1938de63eb1d1778a4ed8a34ae042fd72f"
+        ],
+        "baselineUncachedEstimateUsd": 0.0026187,
+        "cachedPromptTokens": 0
+      }
+    },
+    {
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "rates": {
+        "input": 1.5e-07,
+        "output": 6e-07,
+        "request": 0
+      },
+      "requests": [
+        {
+          "arm": "baseline",
+          "candidateIds": [
+            "b1219d8c9b4462e1199f42829ac739d25b03a2405c00674fe9642a2e7cc74ca1",
+            "ee9d31c850a7946cbf64900c1375833183bd6a2c00b4986387fd86deed2f4cae",
+            "46338e0323e06c9b44619c58fb6c7b6efd2a1a91daf123dba3eb93d73787ab25",
+            "0f4bc2a13348e254780cb3a2528c1382e8ccb9d8fdc3a1fca37f85bb2d355c21",
+            "afbacd5e0045d8232579a246b80b3589c5d3743901d8825a55d450d6024c2997",
+            "c2b7a7b49c2bc7e302291b4df2e8a35905e62921efb5b4eb06d956bd6bed0a8e",
+            "ee43c225dce6c2ae3014f6d399b6d1b3b679707f65ac9b451d006ed517c61974",
+            "4909682e2d4e9a114752acf6c104c7389cba62762c3b84debdad3dae61e5a950",
+            "43aeab49c2eaa86751aab502cc880e9add904dde421bfea8efb9e459d721aed9",
+            "3d6ef10015483e0e9175dd6754269e48f4ad037cbb3f7cea17323df06de5c1cb",
+            "cbdb878863b40aafad9e2a06ef92ad59d4d07b3c79dfa76dad45f3d6d24d6037",
+            "d4f0d35e223ee6f46801ef06e6b3c10471e6f168abeb77c95a12df411601951f",
+            "6ca5287de0d74b377d24997894fe55c73885b6ef353a8feab5afbe0bacdbd914",
+            "942e3ea89fdc85a04e9cffbc167ec05cd883d31a7d30ef94ef7e3f31585b8fd4",
+            "6ca65ee0fc1290167207673e1e18b18c015cbc4cc1016c5bf94221860c0ff824",
+            "b11e194368fd12be33361569ccf202d3842990d8023acccc28b14c7d45331c12",
+            "5617db0b7e5487bb4e2ab70ac2a31b7adc7adac74d67ac6bdea8153187167098",
+            "795e6cc9cfc64a6890d0bbc08899991640293ac86185b7c0871479b9333919d6",
+            "fa3c452c8de8030abae1eeb94f535e8f9a88cd4f80af6cd6ae07203a57e5684e",
+            "d1f914c03e522b9ba0ba6ffb5398b7ac93121d1ac16eb2e61c782c0753920476",
+            "7f7ceba21cdb840ed3db949101e38305083c06462274ca75a19fceda4803f04d",
+            "d5991e5f551d3c37a7c12751839232bf5a30243fb4be98ae391e2d6780148ff8",
+            "3e7f85612b5cc4954c16a9670a065c6dbbd3d079100c9b1d2d2bb2e7572533f9",
+            "ecbfa6ed58f055fc6a4939b7d240c17d28d6da0037479e6df50d608cd57b6c47",
+            "9ecca5506ed1df1c5dbc0410ba92687d0d72fde9736ee26d618f7fa0f00d6f37",
+            "2d78b29ed767d2c8b9cd1812518f8e54277a947223c3a97b3c1b762b5ec25adc",
+            "08355e237614d5e2e1b99c8272a0749fb46fc5037b31e3b145f8429360c3764a",
+            "88042784e26b0c1485dc767e54610feb9182c159a69515070cd5a6b11be0f148",
+            "9d92781dd386d16b2cc9d222164deafdd083e779aed13547ec2e6c3bf7616775",
+            "ea2dedc9331b93b5188e1590ea47d12aa47ae024160c955a9d7f284b79573f58"
+          ],
+          "reservedUsd": 0.006414899999999999,
+          "httpStatus": 200,
+          "provider": "Relace",
+          "responseId": "gen-1792963871-bDToTOSrpJ5iZ8MS64VL",
+          "servedModel": "deepseek/deepseek-v4.1-flash-1017",
+          "usage": {
+            "prompt_tokens": 5044,
+            "completion_tokens": 1134,
+            "total_tokens": 6178,
+            "cost": 0.000610576,
+            "is_byok": false,
+            "prompt_tokens_details": {
+              "cached_tokens": 4992,
+              "cache_write_tokens": 0,
+              "audio_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost_details": {
+              "upstream_inference_cost": 0.000610576,
+              "upstream_inference_prompt_cost": 4.3576e-05,
+              "upstream_inference_completions_cost": 0.000567
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "image_tokens": 0,
+              "audio_tokens": 0
+            }
+          },
+          "finishReason": "stop",
+          "rawOutput": {
+            "items": [
+              {
+                "id": "p0",
+                "score": 3,
+                "tracks": [
+                  "AI hardware"
+                ],
+                "reason": "Gravitational-wave lensing astrophysics; no connection to GPU, LLM, or systems topics."
+              },
+              {
+                "id": "p1",
+                "score": 88,
+                "tracks": [
+                  "Quantization",
+                  "GPU kernels"
+                ],
+                "reason": "W8A8 post-training quantization for LLMs, directly on quantization and inference efficiency."
+              },
+              {
+                "id": "p2",
+                "score": 2,
+                "tracks": [
+                  "AI hardware"
+                ],
+                "reason": "Pure rigid analytic geometry; unrelated to any listed interest."
+              },
+              {
+                "id": "p3",
+                "score": 52,
+                "tracks": [
+                  "Agents",
+                  "AI hardware"
+                ],
+                "reason": "VLM for visual perception; adjacent to multimodal models but not kernels, serving, or quantization."
+              },
+              {
+                "id": "p4",
+                "score": 95,
+                "tracks": [
+                  "Inference",
+                  "GPU kernels"
+                ],
+                "reason": "SGLang runtime with RadixAttention KV reuse and structured decoding; core LLM serving system."
+              },
+              {
+                "id": "p5",
+                "score": 97,
+                "tracks": [
+                  "GPU kernels",
+                  "Quantization"
+                ],
+                "reason": "Hopper GPU attention kernels with warp-specialization, TMA, and block quantization; directly useful."
+              },
+              {
+                "id": "p6",
+                "score": 60,
+                "tracks": [
+                  "Agents",
+                  "Inference"
+                ],
+                "reason": "LLM routing across models and modes; relevant to serving/agents but not kernel-level."
+              },
+              {
+                "id": "p7",
+                "score": 2,
+                "tracks": [
+                  "AI hardware"
+                ],
+                "reason": "CMB polarized synchrotron astrophysics; off topic."
+              },
+              {
+                "id": "p8",
+                "score": 2,
+                "tracks": [
+                  "AI hardware"
+                ],
+                "reason": "Cosmological distance ladder and Hubble tension; off topic."
+              },
+              {
+                "id": "p9",
+                "score": 40,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "Embodied agent framework with FSM harness; adjacent agent evaluation but robotics-focused."
+              },
+              {
+                "id": "p10",
+                "score": 2,
+                "tracks": [
+                  "AI hardware"
+                ],
+                "reason": "Odd radio circle radio astronomy; off topic."
+              },
+              {
+                "id": "p11",
+                "score": 90,
+                "tracks": [
+                  "Quantization",
+                  "Training"
+                ],
+                "reason": "4-bit NF4 quantized finetuning on single GPU; directly on quantization and memory-efficient training."
+              },
+              {
+                "id": "p12",
+                "score": 38,
+                "tracks": [
+                  "Training",
+                  "Agents"
+                ],
+                "reason": "Distillation for embodied robot policies; adjacent training but not LLM systems."
+              },
+              {
+                "id": "p13",
+                "score": 30,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "Event sequence forecasting benchmark; generative modeling but unrelated to LLM systems."
+              },
+              {
+                "id": "p14",
+                "score": 55,
+                "tracks": [
+                  "Inference",
+                  "AI hardware"
+                ],
+                "reason": "Mamba action expert to cut VLA inference cost; relevant to efficient inference but robotics-specific."
+              },
+              {
+                "id": "p15",
+                "score": 92,
+                "tracks": [
+                  "Training",
+                  "GPU kernels"
+                ],
+                "reason": "ZeRO memory optimization for trillion-parameter distributed training; core training systems."
+              },
+              {
+                "id": "p16",
+                "score": 93,
+                "tracks": [
+                  "Quantization",
+                  "Inference"
+                ],
+                "reason": "One-shot GPTQ weight quantization for large transformers; directly on quantization and inference."
+              },
+              {
+                "id": "p17",
+                "score": 58,
+                "tracks": [
+                  "Inference"
+                ],
+                "reason": "Analyzes diffusion LM forward-pass cost variation; relevant to inference efficiency but not systems."
+              },
+              {
+                "id": "p18",
+                "score": 96,
+                "tracks": [
+                  "GPU kernels",
+                  "Inference"
+                ],
+                "reason": "IO-aware tiled attention reducing HBM/SRAM traffic; foundational GPU kernel work."
+              },
+              {
+                "id": "p19",
+                "score": 62,
+                "tracks": [
+                  "Agents",
+                  "AI hardware"
+                ],
+                "reason": "SWE-bench evaluation of LLMs on GitHub issues; relevant to agent/coding evaluation."
+              },
+              {
+                "id": "p20",
+                "score": 97,
+                "tracks": [
+                  "Inference",
+                  "GPU kernels"
+                ],
+                "reason": "PagedAttention and vLLM KV cache memory management; core LLM serving system."
+              },
+              {
+                "id": "p21",
+                "score": 2,
+                "tracks": [
+                  "AI hardware"
+                ],
+                "reason": "Log adic spaces and rigid geometry; off topic."
+              },
+              {
+                "id": "p22",
+                "score": 35,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "Autonomous research agent for 3DGS; adjacent agent system but vision-research domain."
+              },
+              {
+                "id": "p23",
+                "score": 30,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "Agentic cinematography camera planning; agent framework but unrelated to LLM systems."
+              },
+              {
+                "id": "p24",
+                "score": 2,
+                "tracks": [
+                  "AI hardware"
+                ],
+                "reason": "CMB B-mode foreground contamination; off topic."
+              },
+              {
+                "id": "p25",
+                "score": 58,
+                "tracks": [
+                  "Agents",
+                  "Training"
+                ],
+                "reason": "Influence-function agent prioritization in multi-agent LLM systems; relevant to agent evaluation."
+              },
+              {
+                "id": "p26",
+                "score": 45,
+                "tracks": [
+                  "Training"
+                ],
+                "reason": "DPO alignment method; adjacent training/alignment but not systems or efficiency."
+              },
+              {
+                "id": "p27",
+                "score": 90,
+                "tracks": [
+                  "Training",
+                  "GPU kernels"
+                ],
+                "reason": "Megatron-LM intra-layer model parallelism for billion-parameter training; core distributed training."
+              },
+              {
+                "id": "p28",
+                "score": 50,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "Detecting research integrity violations in autonomous research agents; relevant to agent evaluation."
+              },
+              {
+                "id": "p29",
+                "score": 48,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "Confidentiality leak detection in agentic LLM systems; adjacent agent safety evaluation."
+              }
+            ]
+          },
+          "classifications": [
+            {
+              "id": "b1219d8c9b4462e1199f42829ac739d25b03a2405c00674fe9642a2e7cc74ca1",
+              "score": 3,
+              "tracks": [
+                "AI hardware"
+              ],
+              "reason": "Gravitational-wave lensing astrophysics; no connection to GPU, LLM, or systems topics."
+            },
+            {
+              "id": "ee9d31c850a7946cbf64900c1375833183bd6a2c00b4986387fd86deed2f4cae",
+              "score": 88,
+              "tracks": [
+                "Quantization",
+                "GPU kernels"
+              ],
+              "reason": "W8A8 post-training quantization for LLMs, directly on quantization and inference efficiency."
+            },
+            {
+              "id": "46338e0323e06c9b44619c58fb6c7b6efd2a1a91daf123dba3eb93d73787ab25",
+              "score": 2,
+              "tracks": [
+                "AI hardware"
+              ],
+              "reason": "Pure rigid analytic geometry; unrelated to any listed interest."
+            },
+            {
+              "id": "0f4bc2a13348e254780cb3a2528c1382e8ccb9d8fdc3a1fca37f85bb2d355c21",
+              "score": 52,
+              "tracks": [
+                "Agents",
+                "AI hardware"
+              ],
+              "reason": "VLM for visual perception; adjacent to multimodal models but not kernels, serving, or quantization."
+            },
+            {
+              "id": "afbacd5e0045d8232579a246b80b3589c5d3743901d8825a55d450d6024c2997",
+              "score": 95,
+              "tracks": [
+                "Inference",
+                "GPU kernels"
+              ],
+              "reason": "SGLang runtime with RadixAttention KV reuse and structured decoding; core LLM serving system."
+            },
+            {
+              "id": "c2b7a7b49c2bc7e302291b4df2e8a35905e62921efb5b4eb06d956bd6bed0a8e",
+              "score": 97,
+              "tracks": [
+                "GPU kernels",
+                "Quantization"
+              ],
+              "reason": "Hopper GPU attention kernels with warp-specialization, TMA, and block quantization; directly useful."
+            },
+            {
+              "id": "ee43c225dce6c2ae3014f6d399b6d1b3b679707f65ac9b451d006ed517c61974",
+              "score": 60,
+              "tracks": [
+                "Agents",
+                "Inference"
+              ],
+              "reason": "LLM routing across models and modes; relevant to serving/agents but not kernel-level."
+            },
+            {
+              "id": "4909682e2d4e9a114752acf6c104c7389cba62762c3b84debdad3dae61e5a950",
+              "score": 2,
+              "tracks": [
+                "AI hardware"
+              ],
+              "reason": "CMB polarized synchrotron astrophysics; off topic."
+            },
+            {
+              "id": "43aeab49c2eaa86751aab502cc880e9add904dde421bfea8efb9e459d721aed9",
+              "score": 2,
+              "tracks": [
+                "AI hardware"
+              ],
+              "reason": "Cosmological distance ladder and Hubble tension; off topic."
+            },
+            {
+              "id": "3d6ef10015483e0e9175dd6754269e48f4ad037cbb3f7cea17323df06de5c1cb",
+              "score": 40,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "Embodied agent framework with FSM harness; adjacent agent evaluation but robotics-focused."
+            },
+            {
+              "id": "cbdb878863b40aafad9e2a06ef92ad59d4d07b3c79dfa76dad45f3d6d24d6037",
+              "score": 2,
+              "tracks": [
+                "AI hardware"
+              ],
+              "reason": "Odd radio circle radio astronomy; off topic."
+            },
+            {
+              "id": "d4f0d35e223ee6f46801ef06e6b3c10471e6f168abeb77c95a12df411601951f",
+              "score": 90,
+              "tracks": [
+                "Quantization",
+                "Training"
+              ],
+              "reason": "4-bit NF4 quantized finetuning on single GPU; directly on quantization and memory-efficient training."
+            },
+            {
+              "id": "6ca5287de0d74b377d24997894fe55c73885b6ef353a8feab5afbe0bacdbd914",
+              "score": 38,
+              "tracks": [
+                "Training",
+                "Agents"
+              ],
+              "reason": "Distillation for embodied robot policies; adjacent training but not LLM systems."
+            },
+            {
+              "id": "942e3ea89fdc85a04e9cffbc167ec05cd883d31a7d30ef94ef7e3f31585b8fd4",
+              "score": 30,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "Event sequence forecasting benchmark; generative modeling but unrelated to LLM systems."
+            },
+            {
+              "id": "6ca65ee0fc1290167207673e1e18b18c015cbc4cc1016c5bf94221860c0ff824",
+              "score": 55,
+              "tracks": [
+                "Inference",
+                "AI hardware"
+              ],
+              "reason": "Mamba action expert to cut VLA inference cost; relevant to efficient inference but robotics-specific."
+            },
+            {
+              "id": "b11e194368fd12be33361569ccf202d3842990d8023acccc28b14c7d45331c12",
+              "score": 92,
+              "tracks": [
+                "Training",
+                "GPU kernels"
+              ],
+              "reason": "ZeRO memory optimization for trillion-parameter distributed training; core training systems."
+            },
+            {
+              "id": "5617db0b7e5487bb4e2ab70ac2a31b7adc7adac74d67ac6bdea8153187167098",
+              "score": 93,
+              "tracks": [
+                "Quantization",
+                "Inference"
+              ],
+              "reason": "One-shot GPTQ weight quantization for large transformers; directly on quantization and inference."
+            },
+            {
+              "id": "795e6cc9cfc64a6890d0bbc08899991640293ac86185b7c0871479b9333919d6",
+              "score": 58,
+              "tracks": [
+                "Inference"
+              ],
+              "reason": "Analyzes diffusion LM forward-pass cost variation; relevant to inference efficiency but not systems."
+            },
+            {
+              "id": "fa3c452c8de8030abae1eeb94f535e8f9a88cd4f80af6cd6ae07203a57e5684e",
+              "score": 96,
+              "tracks": [
+                "GPU kernels",
+                "Inference"
+              ],
+              "reason": "IO-aware tiled attention reducing HBM/SRAM traffic; foundational GPU kernel work."
+            },
+            {
+              "id": "d1f914c03e522b9ba0ba6ffb5398b7ac93121d1ac16eb2e61c782c0753920476",
+              "score": 62,
+              "tracks": [
+                "Agents",
+                "AI hardware"
+              ],
+              "reason": "SWE-bench evaluation of LLMs on GitHub issues; relevant to agent/coding evaluation."
+            },
+            {
+              "id": "7f7ceba21cdb840ed3db949101e38305083c06462274ca75a19fceda4803f04d",
+              "score": 97,
+              "tracks": [
+                "Inference",
+                "GPU kernels"
+              ],
+              "reason": "PagedAttention and vLLM KV cache memory management; core LLM serving system."
+            },
+            {
+              "id": "d5991e5f551d3c37a7c12751839232bf5a30243fb4be98ae391e2d6780148ff8",
+              "score": 2,
+              "tracks": [
+                "AI hardware"
+              ],
+              "reason": "Log adic spaces and rigid geometry; off topic."
+            },
+            {
+              "id": "3e7f85612b5cc4954c16a9670a065c6dbbd3d079100c9b1d2d2bb2e7572533f9",
+              "score": 35,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "Autonomous research agent for 3DGS; adjacent agent system but vision-research domain."
+            },
+            {
+              "id": "ecbfa6ed58f055fc6a4939b7d240c17d28d6da0037479e6df50d608cd57b6c47",
+              "score": 30,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "Agentic cinematography camera planning; agent framework but unrelated to LLM systems."
+            },
+            {
+              "id": "9ecca5506ed1df1c5dbc0410ba92687d0d72fde9736ee26d618f7fa0f00d6f37",
+              "score": 2,
+              "tracks": [
+                "AI hardware"
+              ],
+              "reason": "CMB B-mode foreground contamination; off topic."
+            },
+            {
+              "id": "2d78b29ed767d2c8b9cd1812518f8e54277a947223c3a97b3c1b762b5ec25adc",
+              "score": 58,
+              "tracks": [
+                "Agents",
+                "Training"
+              ],
+              "reason": "Influence-function agent prioritization in multi-agent LLM systems; relevant to agent evaluation."
+            },
+            {
+              "id": "08355e237614d5e2e1b99c8272a0749fb46fc5037b31e3b145f8429360c3764a",
+              "score": 45,
+              "tracks": [
+                "Training"
+              ],
+              "reason": "DPO alignment method; adjacent training/alignment but not systems or efficiency."
+            },
+            {
+              "id": "88042784e26b0c1485dc767e54610feb9182c159a69515070cd5a6b11be0f148",
+              "score": 90,
+              "tracks": [
+                "Training",
+                "GPU kernels"
+              ],
+              "reason": "Megatron-LM intra-layer model parallelism for billion-parameter training; core distributed training."
+            },
+            {
+              "id": "9d92781dd386d16b2cc9d222164deafdd083e779aed13547ec2e6c3bf7616775",
+              "score": 50,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "Detecting research integrity violations in autonomous research agents; relevant to agent evaluation."
+            },
+            {
+              "id": "ea2dedc9331b93b5188e1590ea47d12aa47ae024160c955a9d7f284b79573f58",
+              "score": 48,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "Confidentiality leak detection in agentic LLM systems; adjacent agent safety evaluation."
+            }
+          ],
+          "valid": true,
+          "elapsedSeconds": 7.330253041999999
+        },
+        {
+          "arm": "baseline",
+          "candidateIds": [
+            "b06ea8f25becfdef6ce12477f821a3bd8e0c7e752327195ede6979d95c098c4d",
+            "ab4920427f7ebc4a9bb5eca95e77021d6859149f73133ef6deaf988a9375956e",
+            "2e8704fb685e7eb8ddc1499ee9e6d3b2c40477f5840ea719e398eefede982ae3",
+            "2874c021f0adc2bfd0b42f48c60aef4c5e729a1496fb5c2b6cb73420b2dfdd84",
+            "f94a58ccf5001214a4e7547014834d681dd48eb2f8a4d7ba989dd9dcc297457d",
+            "17dc7c4f8774a4dd16682c92c46aed735a1497591bca41139b9f4733f127a12a",
+            "e3512e0e791ac7017c43dcbb6e0ef0f25ebef5f81f919742ea1d24a233b191cc",
+            "14a67c84ba31fb02b00503e866e7f430c80fb0942b5409a6dffb7d6359e0addb",
+            "483050a68544832860fe1cff547280a24f5010e11cb5348d684812f16104c10a",
+            "33ecec960e556ef2fd4d3bb0e84709ee6e5852c9dbb8d6aadae892130fe0bbcd",
+            "87b841870323c30f75c99c7b90484f9992d40e4d8aaff88cc168a47245a4e4a9",
+            "6b066cadc7dd868a2628c1422012f46ca32462318406edec8ec69e376e165509",
+            "20820c722eba832284042b86beadd7002f68d194b3a69db7c44f533edc399840",
+            "e4c89735c3d69e361d01327c1ee1d3f177f9a887122b77dede339a4e615c0139",
+            "90411be9bacb229b2709d680cdf9f36e53988620703502ee86401b2c845803e0",
+            "faf00ea20b801ce34008bf5f4e6a33a17b73f6adbcf37a656e43525f6fd4adea",
+            "f625e7171c806720e3ff5ab4e67f4c8d0bd5b805b70774b4f72d880d1c202188",
+            "d3eb1e2aea7586e7bd9d8c6c636b82cc0e79f9ca8e53347727ea8103e2779d4f",
+            "1407dbaefafd7a40128936c14d1fa1774059b631448a43bc4461b2aa4621ec33",
+            "95d284d8ab51539dd39b1d7f7eab3900366af99c7ab20b91d56e918c1a9d1b98",
+            "124a6b23246d720a864a647dacda031c02d9e0142f996e8b796456f753ae4312",
+            "a20f137d501720448275f31206a72833a6155330ee06189778807d1e86a1dce4",
+            "962045ead73e68ce23a0003dd471dc28de043ce6b72136275f727ab40f318325",
+            "46ee1a4aebfa6b3d1e0d2e58b0f59a44282fe2f849576862da8d49845c3ce884",
+            "cf499b8ee1f0d1bc4d958b1f4cb24d1938de63eb1d1778a4ed8a34ae042fd72f",
+            "9c58847efa40580876478dd6e54396c26fb57e5f44d08450e494d1cddcb68521",
+            "ee4139797a3238d4ff7df2cd37ba2b3a120b9ddf32cf9315014bf6b3ec10095b",
+            "04d3426f77d797314c28137086cdfd1a6af6fbee3ec69ef90533d6ffd7cb6efb",
+            "070e7d53b4d378305bb4bc6deadb07bbac59a8357c45b7a3f74780a872c52b09",
+            "2ec5c308edd21ffafc2ca171d56dd7a914089089eeb04fcf98b667c8c90bb945"
+          ],
+          "reservedUsd": 0.00643965,
+          "httpStatus": 200,
+          "provider": "Relace",
+          "responseId": "gen-1792963878-0Bdu48UR3Ra4dH9LTRrv",
+          "servedModel": "deepseek/deepseek-v4.1-flash-1017",
+          "usage": {
+            "prompt_tokens": 5234,
+            "completion_tokens": 1251,
+            "total_tokens": 6485,
+            "cost": 0.00067444,
+            "is_byok": false,
+            "prompt_tokens_details": {
+              "cached_tokens": 5120,
+              "cache_write_tokens": 0,
+              "audio_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost_details": {
+              "upstream_inference_cost": 0.00067444,
+              "upstream_inference_prompt_cost": 4.894e-05,
+              "upstream_inference_completions_cost": 0.0006255
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "image_tokens": 0,
+              "audio_tokens": 0
+            }
+          },
+          "finishReason": "stop",
+          "rawOutput": {
+            "items": [
+              {
+                "id": "p0",
+                "score": 58,
+                "tracks": [
+                  "Agents",
+                  "Training"
+                ],
+                "reason": "Studies human-agent task division and collaboration dynamics for LLM agents; relevant to agent evaluation but not systems/infra."
+              },
+              {
+                "id": "p1",
+                "score": 30,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "Unified multimodal model representations for fine-grained visual understanding; not about kernels, inference serving, or quantization."
+              },
+              {
+                "id": "p2",
+                "score": 5,
+                "tracks": [
+                  "Training"
+                ],
+                "reason": "Pure arithmetic geometry on toric divisors and local heights; no connection to GPU, LLM, or systems topics."
+              },
+              {
+                "id": "p3",
+                "score": 5,
+                "tracks": [
+                  "Training"
+                ],
+                "reason": "Coding theory on Reed-Solomon deep holes; unrelated to GPU kernels, LLM inference, or hardware."
+              },
+              {
+                "id": "p4",
+                "score": 55,
+                "tracks": [
+                  "Agents",
+                  "Training"
+                ],
+                "reason": "Red-team framework for privacy of split/distributed LLM systems; touches distributed LLM deployment and evaluation."
+              },
+              {
+                "id": "p5",
+                "score": 5,
+                "tracks": [
+                  "Training"
+                ],
+                "reason": "Arithmetic Siegel-Weil formula and Shimura varieties; pure number theory, off topic."
+              },
+              {
+                "id": "p6",
+                "score": 95,
+                "tracks": [
+                  "Quantization",
+                  "Inference"
+                ],
+                "reason": "AWQ activation-aware low-bit weight-only quantization for LLM compression and on-device acceleration; core quantization interest."
+              },
+              {
+                "id": "p7",
+                "score": 98,
+                "tracks": [
+                  "GPU kernels",
+                  "Inference"
+                ],
+                "reason": "FlashAttention-2 improves attention GPU parallelism and work partitioning; directly about kernels and memory hierarchy."
+              },
+              {
+                "id": "p8",
+                "score": 5,
+                "tracks": [
+                  "Training"
+                ],
+                "reason": "Cosmological forecast for H0 and neutrino masses; astrophysics, unrelated to AI systems."
+              },
+              {
+                "id": "p9",
+                "score": 5,
+                "tracks": [
+                  "Training"
+                ],
+                "reason": "Lyman-alpha forest power spectrum estimator; cosmology, off topic."
+              },
+              {
+                "id": "p10",
+                "score": 5,
+                "tracks": [
+                  "Training"
+                ],
+                "reason": "Langlands-Shahidi gamma factors and p-adic representation theory; pure math, off topic."
+              },
+              {
+                "id": "p11",
+                "score": 45,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "Agentic framework for physically feasible LEGO builds; agent tooling but domain far from LLM systems."
+              },
+              {
+                "id": "p12",
+                "score": 72,
+                "tracks": [
+                  "Training",
+                  "Inference"
+                ],
+                "reason": "320B MoE agentic foundation model with pretraining, mid-training, and post-training details; relevant to training systems."
+              },
+              {
+                "id": "p13",
+                "score": 68,
+                "tracks": [
+                  "Agents",
+                  "Training"
+                ],
+                "reason": "Benchmark for AI agents automating evaluation design and recursive self-improvement; relevant to agent evaluation."
+              },
+              {
+                "id": "p14",
+                "score": 88,
+                "tracks": [
+                  "Inference",
+                  "GPU kernels"
+                ],
+                "reason": "Streaming LLM inference with attention sinks and KV cache memory management; directly relevant to inference serving."
+              },
+              {
+                "id": "p15",
+                "score": 60,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "AutoGen multi-agent conversation framework for LLM applications; relevant to agent infrastructure."
+              },
+              {
+                "id": "p16",
+                "score": 85,
+                "tracks": [
+                  "Quantization",
+                  "Training"
+                ],
+                "reason": "8-bit optimizers via block-wise dynamic quantization reducing optimizer state memory; core quantization and training memory."
+              },
+              {
+                "id": "p17",
+                "score": 5,
+                "tracks": [
+                  "Training"
+                ],
+                "reason": "Elliptic curve Kolyvagin classes and Selmer dimensions; pure number theory, off topic."
+              },
+              {
+                "id": "p18",
+                "score": 50,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "Test-time agent personalization via dueling bandits; agent adaptation but not systems or evaluation infra."
+              },
+              {
+                "id": "p19",
+                "score": 52,
+                "tracks": [
+                  "Agents",
+                  "Inference"
+                ],
+                "reason": "Speculative reasoning and tool execution in realtime voice agents; agent inference latency but niche domain."
+              },
+              {
+                "id": "p20",
+                "score": 5,
+                "tracks": [
+                  "Training"
+                ],
+                "reason": "Landau-Siegel zeros and effective Brauer-Siegel theorem; pure number theory, off topic."
+              },
+              {
+                "id": "p21",
+                "score": 95,
+                "tracks": [
+                  "Quantization",
+                  "Inference"
+                ],
+                "reason": "LLM.int8() 8-bit matrix multiplication cutting transformer inference GPU memory; core quantization and inference."
+              },
+              {
+                "id": "p22",
+                "score": 92,
+                "tracks": [
+                  "Inference",
+                  "GPU kernels"
+                ],
+                "reason": "FlexGen high-throughput LLM inference on a single GPU via memory/compute aggregation and scheduling; core serving."
+              },
+              {
+                "id": "p23",
+                "score": 40,
+                "tracks": [
+                  "GPU kernels"
+                ],
+                "reason": "Fast quadrotor simulator with GPU ray-tracing backends; GPU-adjacent but robotics rendering, not LLM."
+              },
+              {
+                "id": "p24",
+                "score": 35,
+                "tracks": [
+                  "Inference"
+                ],
+                "reason": "Budget control for feed-forward 3D Gaussian splatting inference; resource-budget angle but graphics domain."
+              },
+              {
+                "id": "p25",
+                "score": 45,
+                "tracks": [
+                  "Inference"
+                ],
+                "reason": "Controlled study of learned unmasking policies in diffusion LMs; decoding efficiency but not systems-level."
+              },
+              {
+                "id": "p26",
+                "score": 65,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "ReAct interleaves reasoning and acting in LLMs; foundational agent method relevant to agent interests."
+              },
+              {
+                "id": "p27",
+                "score": 20,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "Transformer for video scene graph generation; vision task, not LLM inference, kernels, or agents."
+              },
+              {
+                "id": "p28",
+                "score": 90,
+                "tracks": [
+                  "Quantization",
+                  "Inference"
+                ],
+                "reason": "SpQR sparse-quantized representation for near-lossless 3-4 bit LLM weight compression; core quantization interest."
+              },
+              {
+                "id": "p29",
+                "score": 70,
+                "tracks": [
+                  "Quantization",
+                  "Inference"
+                ],
+                "reason": "Task- and time-aware mixed-precision quantization for diffusion language models; relevant quantization for LLM inference."
+              }
+            ]
+          },
+          "classifications": [
+            {
+              "id": "b06ea8f25becfdef6ce12477f821a3bd8e0c7e752327195ede6979d95c098c4d",
+              "score": 58,
+              "tracks": [
+                "Agents",
+                "Training"
+              ],
+              "reason": "Studies human-agent task division and collaboration dynamics for LLM agents; relevant to agent evaluation but not systems/infra."
+            },
+            {
+              "id": "ab4920427f7ebc4a9bb5eca95e77021d6859149f73133ef6deaf988a9375956e",
+              "score": 30,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "Unified multimodal model representations for fine-grained visual understanding; not about kernels, inference serving, or quantization."
+            },
+            {
+              "id": "2e8704fb685e7eb8ddc1499ee9e6d3b2c40477f5840ea719e398eefede982ae3",
+              "score": 5,
+              "tracks": [
+                "Training"
+              ],
+              "reason": "Pure arithmetic geometry on toric divisors and local heights; no connection to GPU, LLM, or systems topics."
+            },
+            {
+              "id": "2874c021f0adc2bfd0b42f48c60aef4c5e729a1496fb5c2b6cb73420b2dfdd84",
+              "score": 5,
+              "tracks": [
+                "Training"
+              ],
+              "reason": "Coding theory on Reed-Solomon deep holes; unrelated to GPU kernels, LLM inference, or hardware."
+            },
+            {
+              "id": "f94a58ccf5001214a4e7547014834d681dd48eb2f8a4d7ba989dd9dcc297457d",
+              "score": 55,
+              "tracks": [
+                "Agents",
+                "Training"
+              ],
+              "reason": "Red-team framework for privacy of split/distributed LLM systems; touches distributed LLM deployment and evaluation."
+            },
+            {
+              "id": "17dc7c4f8774a4dd16682c92c46aed735a1497591bca41139b9f4733f127a12a",
+              "score": 5,
+              "tracks": [
+                "Training"
+              ],
+              "reason": "Arithmetic Siegel-Weil formula and Shimura varieties; pure number theory, off topic."
+            },
+            {
+              "id": "e3512e0e791ac7017c43dcbb6e0ef0f25ebef5f81f919742ea1d24a233b191cc",
+              "score": 95,
+              "tracks": [
+                "Quantization",
+                "Inference"
+              ],
+              "reason": "AWQ activation-aware low-bit weight-only quantization for LLM compression and on-device acceleration; core quantization interest."
+            },
+            {
+              "id": "14a67c84ba31fb02b00503e866e7f430c80fb0942b5409a6dffb7d6359e0addb",
+              "score": 98,
+              "tracks": [
+                "GPU kernels",
+                "Inference"
+              ],
+              "reason": "FlashAttention-2 improves attention GPU parallelism and work partitioning; directly about kernels and memory hierarchy."
+            },
+            {
+              "id": "483050a68544832860fe1cff547280a24f5010e11cb5348d684812f16104c10a",
+              "score": 5,
+              "tracks": [
+                "Training"
+              ],
+              "reason": "Cosmological forecast for H0 and neutrino masses; astrophysics, unrelated to AI systems."
+            },
+            {
+              "id": "33ecec960e556ef2fd4d3bb0e84709ee6e5852c9dbb8d6aadae892130fe0bbcd",
+              "score": 5,
+              "tracks": [
+                "Training"
+              ],
+              "reason": "Lyman-alpha forest power spectrum estimator; cosmology, off topic."
+            },
+            {
+              "id": "87b841870323c30f75c99c7b90484f9992d40e4d8aaff88cc168a47245a4e4a9",
+              "score": 5,
+              "tracks": [
+                "Training"
+              ],
+              "reason": "Langlands-Shahidi gamma factors and p-adic representation theory; pure math, off topic."
+            },
+            {
+              "id": "6b066cadc7dd868a2628c1422012f46ca32462318406edec8ec69e376e165509",
+              "score": 45,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "Agentic framework for physically feasible LEGO builds; agent tooling but domain far from LLM systems."
+            },
+            {
+              "id": "20820c722eba832284042b86beadd7002f68d194b3a69db7c44f533edc399840",
+              "score": 72,
+              "tracks": [
+                "Training",
+                "Inference"
+              ],
+              "reason": "320B MoE agentic foundation model with pretraining, mid-training, and post-training details; relevant to training systems."
+            },
+            {
+              "id": "e4c89735c3d69e361d01327c1ee1d3f177f9a887122b77dede339a4e615c0139",
+              "score": 68,
+              "tracks": [
+                "Agents",
+                "Training"
+              ],
+              "reason": "Benchmark for AI agents automating evaluation design and recursive self-improvement; relevant to agent evaluation."
+            },
+            {
+              "id": "90411be9bacb229b2709d680cdf9f36e53988620703502ee86401b2c845803e0",
+              "score": 88,
+              "tracks": [
+                "Inference",
+                "GPU kernels"
+              ],
+              "reason": "Streaming LLM inference with attention sinks and KV cache memory management; directly relevant to inference serving."
+            },
+            {
+              "id": "faf00ea20b801ce34008bf5f4e6a33a17b73f6adbcf37a656e43525f6fd4adea",
+              "score": 60,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "AutoGen multi-agent conversation framework for LLM applications; relevant to agent infrastructure."
+            },
+            {
+              "id": "f625e7171c806720e3ff5ab4e67f4c8d0bd5b805b70774b4f72d880d1c202188",
+              "score": 85,
+              "tracks": [
+                "Quantization",
+                "Training"
+              ],
+              "reason": "8-bit optimizers via block-wise dynamic quantization reducing optimizer state memory; core quantization and training memory."
+            },
+            {
+              "id": "d3eb1e2aea7586e7bd9d8c6c636b82cc0e79f9ca8e53347727ea8103e2779d4f",
+              "score": 5,
+              "tracks": [
+                "Training"
+              ],
+              "reason": "Elliptic curve Kolyvagin classes and Selmer dimensions; pure number theory, off topic."
+            },
+            {
+              "id": "1407dbaefafd7a40128936c14d1fa1774059b631448a43bc4461b2aa4621ec33",
+              "score": 50,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "Test-time agent personalization via dueling bandits; agent adaptation but not systems or evaluation infra."
+            },
+            {
+              "id": "95d284d8ab51539dd39b1d7f7eab3900366af99c7ab20b91d56e918c1a9d1b98",
+              "score": 52,
+              "tracks": [
+                "Agents",
+                "Inference"
+              ],
+              "reason": "Speculative reasoning and tool execution in realtime voice agents; agent inference latency but niche domain."
+            },
+            {
+              "id": "124a6b23246d720a864a647dacda031c02d9e0142f996e8b796456f753ae4312",
+              "score": 5,
+              "tracks": [
+                "Training"
+              ],
+              "reason": "Landau-Siegel zeros and effective Brauer-Siegel theorem; pure number theory, off topic."
+            },
+            {
+              "id": "a20f137d501720448275f31206a72833a6155330ee06189778807d1e86a1dce4",
+              "score": 95,
+              "tracks": [
+                "Quantization",
+                "Inference"
+              ],
+              "reason": "LLM.int8() 8-bit matrix multiplication cutting transformer inference GPU memory; core quantization and inference."
+            },
+            {
+              "id": "962045ead73e68ce23a0003dd471dc28de043ce6b72136275f727ab40f318325",
+              "score": 92,
+              "tracks": [
+                "Inference",
+                "GPU kernels"
+              ],
+              "reason": "FlexGen high-throughput LLM inference on a single GPU via memory/compute aggregation and scheduling; core serving."
+            },
+            {
+              "id": "46ee1a4aebfa6b3d1e0d2e58b0f59a44282fe2f849576862da8d49845c3ce884",
+              "score": 40,
+              "tracks": [
+                "GPU kernels"
+              ],
+              "reason": "Fast quadrotor simulator with GPU ray-tracing backends; GPU-adjacent but robotics rendering, not LLM."
+            },
+            {
+              "id": "cf499b8ee1f0d1bc4d958b1f4cb24d1938de63eb1d1778a4ed8a34ae042fd72f",
+              "score": 35,
+              "tracks": [
+                "Inference"
+              ],
+              "reason": "Budget control for feed-forward 3D Gaussian splatting inference; resource-budget angle but graphics domain."
+            },
+            {
+              "id": "9c58847efa40580876478dd6e54396c26fb57e5f44d08450e494d1cddcb68521",
+              "score": 45,
+              "tracks": [
+                "Inference"
+              ],
+              "reason": "Controlled study of learned unmasking policies in diffusion LMs; decoding efficiency but not systems-level."
+            },
+            {
+              "id": "ee4139797a3238d4ff7df2cd37ba2b3a120b9ddf32cf9315014bf6b3ec10095b",
+              "score": 65,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "ReAct interleaves reasoning and acting in LLMs; foundational agent method relevant to agent interests."
+            },
+            {
+              "id": "04d3426f77d797314c28137086cdfd1a6af6fbee3ec69ef90533d6ffd7cb6efb",
+              "score": 20,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "Transformer for video scene graph generation; vision task, not LLM inference, kernels, or agents."
+            },
+            {
+              "id": "070e7d53b4d378305bb4bc6deadb07bbac59a8357c45b7a3f74780a872c52b09",
+              "score": 90,
+              "tracks": [
+                "Quantization",
+                "Inference"
+              ],
+              "reason": "SpQR sparse-quantized representation for near-lossless 3-4 bit LLM weight compression; core quantization interest."
+            },
+            {
+              "id": "2ec5c308edd21ffafc2ca171d56dd7a914089089eeb04fcf98b667c8c90bb945",
+              "score": 70,
+              "tracks": [
+                "Quantization",
+                "Inference"
+              ],
+              "reason": "Task- and time-aware mixed-precision quantization for diffusion language models; relevant quantization for LLM inference."
+            }
+          ],
+          "valid": true,
+          "elapsedSeconds": 7.8930887080000005
+        },
+        {
+          "arm": "feedback",
+          "candidateIds": [
+            "c2b7a7b49c2bc7e302291b4df2e8a35905e62921efb5b4eb06d956bd6bed0a8e",
+            "d1f914c03e522b9ba0ba6ffb5398b7ac93121d1ac16eb2e61c782c0753920476",
+            "ee4139797a3238d4ff7df2cd37ba2b3a120b9ddf32cf9315014bf6b3ec10095b",
+            "5617db0b7e5487bb4e2ab70ac2a31b7adc7adac74d67ac6bdea8153187167098",
+            "3d6ef10015483e0e9175dd6754269e48f4ad037cbb3f7cea17323df06de5c1cb",
+            "e4c89735c3d69e361d01327c1ee1d3f177f9a887122b77dede339a4e615c0139",
+            "2ec5c308edd21ffafc2ca171d56dd7a914089089eeb04fcf98b667c8c90bb945",
+            "b06ea8f25becfdef6ce12477f821a3bd8e0c7e752327195ede6979d95c098c4d",
+            "3e7f85612b5cc4954c16a9670a065c6dbbd3d079100c9b1d2d2bb2e7572533f9",
+            "0f4bc2a13348e254780cb3a2528c1382e8ccb9d8fdc3a1fca37f85bb2d355c21"
+          ],
+          "reservedUsd": 0.00409635,
+          "httpStatus": 200,
+          "provider": "Relace",
+          "responseId": "gen-1792963886-StT526034XpH27Ws4fHs",
+          "servedModel": "deepseek/deepseek-v4.1-flash-1017",
+          "usage": {
+            "prompt_tokens": 2023,
+            "completion_tokens": 483,
+            "total_tokens": 2506,
+            "cost": 0.00026407,
+            "is_byok": false,
+            "prompt_tokens_details": {
+              "cached_tokens": 1920,
+              "cache_write_tokens": 0,
+              "audio_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost_details": {
+              "upstream_inference_cost": 0.00026407,
+              "upstream_inference_prompt_cost": 2.257e-05,
+              "upstream_inference_completions_cost": 0.0002415
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "image_tokens": 0,
+              "audio_tokens": 0
+            }
+          },
+          "finishReason": "stop",
+          "rawOutput": {
+            "items": [
+              {
+                "id": "p0",
+                "score": 95,
+                "tracks": [
+                  "GPU kernels",
+                  "Quantization",
+                  "AI hardware"
+                ],
+                "reason": "FlashAttention-3 on Hopper: warp-specialization, TMA/Tensor Core overlap, block quantization for attention kernels\u2014directly GPU kernel/compiler and low-precision work."
+              },
+              {
+                "id": "p1",
+                "score": 30,
+                "tracks": [
+                  "Agents",
+                  "Agents"
+                ],
+                "reason": "SWE-bench evaluation benchmark for coding agents; user gave explicit negative feedback on this exact example, so low personal relevance."
+              },
+              {
+                "id": "p2",
+                "score": 55,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "ReAct interleaves reasoning and acting in LLMs; foundational agent method, relevant to agents interest but not kernels/inference systems."
+              },
+              {
+                "id": "p3",
+                "score": 85,
+                "tracks": [
+                  "Quantization",
+                  "GPU kernels"
+                ],
+                "reason": "GPTQ one-shot weight quantization for large GPT inference, addressing GPU memory/cost\u2014core quantization and LLM inference relevance."
+              },
+              {
+                "id": "p4",
+                "score": 25,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "Robot-oriented embodied-agent framework with physics simulator and FSM; embodied robotics focus, only tangentially agent-related."
+              },
+              {
+                "id": "p5",
+                "score": 60,
+                "tracks": [
+                  "Agents",
+                  "Agents"
+                ],
+                "reason": "Benchmark for AI agents automating evaluation design and grader synthesis; relevant to agents/evaluation interest, not systems."
+              },
+              {
+                "id": "p6",
+                "score": 75,
+                "tracks": [
+                  "Quantization",
+                  "Quantization"
+                ],
+                "reason": "Task- and timestep-aware mixed-precision quantization for diffusion LMs; quantization/memory relevance though diffusion rather than serving."
+              },
+              {
+                "id": "p7",
+                "score": 35,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "Human-agent collaboration study in shared-control maze; adjacent human-AI interaction, weak fit to systems or evaluation interests."
+              },
+              {
+                "id": "p8",
+                "score": 30,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "Autonomous research system for 3D Gaussian Splatting; agentic discovery but computer-vision domain, off core interests."
+              },
+              {
+                "id": "p9",
+                "score": 20,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "Vision-language model for unified visual perception; VLM/vision focus, not GPU kernels, inference serving, or quantization."
+              }
+            ]
+          },
+          "classifications": [
+            {
+              "id": "c2b7a7b49c2bc7e302291b4df2e8a35905e62921efb5b4eb06d956bd6bed0a8e",
+              "score": 95,
+              "tracks": [
+                "GPU kernels",
+                "Quantization",
+                "AI hardware"
+              ],
+              "reason": "FlashAttention-3 on Hopper: warp-specialization, TMA/Tensor Core overlap, block quantization for attention kernels\u2014directly GPU kernel/compiler and low-precision work."
+            },
+            {
+              "id": "d1f914c03e522b9ba0ba6ffb5398b7ac93121d1ac16eb2e61c782c0753920476",
+              "score": 30,
+              "tracks": [
+                "Agents",
+                "Agents"
+              ],
+              "reason": "SWE-bench evaluation benchmark for coding agents; user gave explicit negative feedback on this exact example, so low personal relevance."
+            },
+            {
+              "id": "ee4139797a3238d4ff7df2cd37ba2b3a120b9ddf32cf9315014bf6b3ec10095b",
+              "score": 55,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "ReAct interleaves reasoning and acting in LLMs; foundational agent method, relevant to agents interest but not kernels/inference systems."
+            },
+            {
+              "id": "5617db0b7e5487bb4e2ab70ac2a31b7adc7adac74d67ac6bdea8153187167098",
+              "score": 85,
+              "tracks": [
+                "Quantization",
+                "GPU kernels"
+              ],
+              "reason": "GPTQ one-shot weight quantization for large GPT inference, addressing GPU memory/cost\u2014core quantization and LLM inference relevance."
+            },
+            {
+              "id": "3d6ef10015483e0e9175dd6754269e48f4ad037cbb3f7cea17323df06de5c1cb",
+              "score": 25,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "Robot-oriented embodied-agent framework with physics simulator and FSM; embodied robotics focus, only tangentially agent-related."
+            },
+            {
+              "id": "e4c89735c3d69e361d01327c1ee1d3f177f9a887122b77dede339a4e615c0139",
+              "score": 60,
+              "tracks": [
+                "Agents",
+                "Agents"
+              ],
+              "reason": "Benchmark for AI agents automating evaluation design and grader synthesis; relevant to agents/evaluation interest, not systems."
+            },
+            {
+              "id": "2ec5c308edd21ffafc2ca171d56dd7a914089089eeb04fcf98b667c8c90bb945",
+              "score": 75,
+              "tracks": [
+                "Quantization",
+                "Quantization"
+              ],
+              "reason": "Task- and timestep-aware mixed-precision quantization for diffusion LMs; quantization/memory relevance though diffusion rather than serving."
+            },
+            {
+              "id": "b06ea8f25becfdef6ce12477f821a3bd8e0c7e752327195ede6979d95c098c4d",
+              "score": 35,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "Human-agent collaboration study in shared-control maze; adjacent human-AI interaction, weak fit to systems or evaluation interests."
+            },
+            {
+              "id": "3e7f85612b5cc4954c16a9670a065c6dbbd3d079100c9b1d2d2bb2e7572533f9",
+              "score": 30,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "Autonomous research system for 3D Gaussian Splatting; agentic discovery but computer-vision domain, off core interests."
+            },
+            {
+              "id": "0f4bc2a13348e254780cb3a2528c1382e8ccb9d8fdc3a1fca37f85bb2d355c21",
+              "score": 20,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "Vision-language model for unified visual perception; VLM/vision focus, not GPU kernels, inference serving, or quantization."
+            }
+          ],
+          "valid": true,
+          "elapsedSeconds": 4.357119166999999
+        }
+      ],
+      "metrics": {
+        "validRequests": 3,
+        "totalRequests": 3,
+        "baselineSeconds": 15.22334175,
+        "baselineReportedCostUsd": 0.001285016,
+        "qualityAvailable": true,
+        "precision": 0.96875,
+        "recall": 0.7948717948717948,
+        "binaryAccuracy": 0.85,
+        "exactFourBandAgreement": 0.6,
+        "ndcg15": 1,
+        "trackAccuracy": 1,
+        "offTopicPromoted": 0,
+        "referenceRelevant": 39,
+        "falsePositiveIds": [
+          "0f4bc2a13348e254780cb3a2528c1382e8ccb9d8fdc3a1fca37f85bb2d355c21"
+        ],
+        "missedIds": [
+          "3d6ef10015483e0e9175dd6754269e48f4ad037cbb3f7cea17323df06de5c1cb",
+          "3e7f85612b5cc4954c16a9670a065c6dbbd3d079100c9b1d2d2bb2e7572533f9",
+          "08355e237614d5e2e1b99c8272a0749fb46fc5037b31e3b145f8429360c3764a",
+          "ea2dedc9331b93b5188e1590ea47d12aa47ae024160c955a9d7f284b79573f58",
+          "6b066cadc7dd868a2628c1422012f46ca32462318406edec8ec69e376e165509",
+          "46ee1a4aebfa6b3d1e0d2e58b0f59a44282fe2f849576862da8d49845c3ce884",
+          "cf499b8ee1f0d1bc4d958b1f4cb24d1938de63eb1d1778a4ed8a34ae042fd72f",
+          "9c58847efa40580876478dd6e54396c26fb57e5f44d08450e494d1cddcb68521"
+        ],
+        "hypotheticalFeedback": {
+          "negativeBefore": 62,
+          "negativeAfter": 30,
+          "positiveBefore": 97,
+          "positiveAfter": 95,
+          "otherAgentBefore": 65,
+          "otherAgentAfter": 55
+        },
+        "baselineUncachedEstimateUsd": 0.0029727,
+        "cachedPromptTokens": 10112
+      }
+    },
+    {
+      "model": "xiaomi/mimo-v2.6-flash",
+      "rates": {
+        "input": 1.4e-07,
+        "output": 2.8e-07,
+        "request": 0
+      },
+      "requests": [
+        {
+          "arm": "baseline",
+          "candidateIds": [
+            "b1219d8c9b4462e1199f42829ac739d25b03a2405c00674fe9642a2e7cc74ca1",
+            "ee9d31c850a7946cbf64900c1375833183bd6a2c00b4986387fd86deed2f4cae",
+            "46338e0323e06c9b44619c58fb6c7b6efd2a1a91daf123dba3eb93d73787ab25",
+            "0f4bc2a13348e254780cb3a2528c1382e8ccb9d8fdc3a1fca37f85bb2d355c21",
+            "afbacd5e0045d8232579a246b80b3589c5d3743901d8825a55d450d6024c2997",
+            "c2b7a7b49c2bc7e302291b4df2e8a35905e62921efb5b4eb06d956bd6bed0a8e",
+            "ee43c225dce6c2ae3014f6d399b6d1b3b679707f65ac9b451d006ed517c61974",
+            "4909682e2d4e9a114752acf6c104c7389cba62762c3b84debdad3dae61e5a950",
+            "43aeab49c2eaa86751aab502cc880e9add904dde421bfea8efb9e459d721aed9",
+            "3d6ef10015483e0e9175dd6754269e48f4ad037cbb3f7cea17323df06de5c1cb",
+            "cbdb878863b40aafad9e2a06ef92ad59d4d07b3c79dfa76dad45f3d6d24d6037",
+            "d4f0d35e223ee6f46801ef06e6b3c10471e6f168abeb77c95a12df411601951f",
+            "6ca5287de0d74b377d24997894fe55c73885b6ef353a8feab5afbe0bacdbd914",
+            "942e3ea89fdc85a04e9cffbc167ec05cd883d31a7d30ef94ef7e3f31585b8fd4",
+            "6ca65ee0fc1290167207673e1e18b18c015cbc4cc1016c5bf94221860c0ff824",
+            "b11e194368fd12be33361569ccf202d3842990d8023acccc28b14c7d45331c12",
+            "5617db0b7e5487bb4e2ab70ac2a31b7adc7adac74d67ac6bdea8153187167098",
+            "795e6cc9cfc64a6890d0bbc08899991640293ac86185b7c0871479b9333919d6",
+            "fa3c452c8de8030abae1eeb94f535e8f9a88cd4f80af6cd6ae07203a57e5684e",
+            "d1f914c03e522b9ba0ba6ffb5398b7ac93121d1ac16eb2e61c782c0753920476",
+            "7f7ceba21cdb840ed3db949101e38305083c06462274ca75a19fceda4803f04d",
+            "d5991e5f551d3c37a7c12751839232bf5a30243fb4be98ae391e2d6780148ff8",
+            "3e7f85612b5cc4954c16a9670a065c6dbbd3d079100c9b1d2d2bb2e7572533f9",
+            "ecbfa6ed58f055fc6a4939b7d240c17d28d6da0037479e6df50d608cd57b6c47",
+            "9ecca5506ed1df1c5dbc0410ba92687d0d72fde9736ee26d618f7fa0f00d6f37",
+            "2d78b29ed767d2c8b9cd1812518f8e54277a947223c3a97b3c1b762b5ec25adc",
+            "08355e237614d5e2e1b99c8272a0749fb46fc5037b31e3b145f8429360c3764a",
+            "88042784e26b0c1485dc767e54610feb9182c159a69515070cd5a6b11be0f148",
+            "9d92781dd386d16b2cc9d222164deafdd083e779aed13547ec2e6c3bf7616775",
+            "ea2dedc9331b93b5188e1590ea47d12aa47ae024160c955a9d7f284b79573f58"
+          ],
+          "reservedUsd": 0.00484036,
+          "httpStatus": 200,
+          "provider": "Io Net",
+          "responseId": "gen-1792963871-L9RJR5mfni1gljQ2Q4Zn",
+          "servedModel": "xiaomi/mimo-v2.6-flash",
+          "usage": {
+            "prompt_tokens": 5126,
+            "completion_tokens": 1183,
+            "total_tokens": 6309,
+            "cost": 0.000350304,
+            "is_byok": false,
+            "prompt_tokens_details": {
+              "cached_tokens": 5088,
+              "cache_write_tokens": 0,
+              "audio_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost_details": {
+              "upstream_inference_cost": 0.000350304,
+              "upstream_inference_prompt_cost": 1.9064e-05,
+              "upstream_inference_completions_cost": 0.00033124
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "image_tokens": 0,
+              "audio_tokens": 0
+            }
+          },
+          "finishReason": "stop",
+          "rawOutput": {
+            "items": [
+              {
+                "id": "p0",
+                "score": 5,
+                "tracks": [
+                  "AI hardware"
+                ],
+                "reason": "Gravitational wave lensing and diffraction imaging is unrelated to GPU, LLM, or systems topics."
+              },
+              {
+                "id": "p1",
+                "score": 95,
+                "tracks": [
+                  "Quantization",
+                  "Inference"
+                ],
+                "reason": "Directly on post-training W8A8 LLM quantization for memory reduction and inference acceleration."
+              },
+              {
+                "id": "p2",
+                "score": 2,
+                "tracks": [
+                  "AI hardware"
+                ],
+                "reason": "Pure math paper on cohomology of structure sheaves; no relation to stated interests."
+              },
+              {
+                "id": "p3",
+                "score": 40,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "Vision-language model architecture and training; adjacent to LLM interests but focused on perception tasks."
+              },
+              {
+                "id": "p4",
+                "score": 96,
+                "tracks": [
+                  "Inference",
+                  "Agents"
+                ],
+                "reason": "SGLang is a core LLM serving system with KV cache reuse, directly matching inference/serving interests."
+              },
+              {
+                "id": "p5",
+                "score": 97,
+                "tracks": [
+                  "GPU kernels",
+                  "Quantization"
+                ],
+                "reason": "GPU attention kernel optimization on Hopper with warp specialization, Tensor Cores, and block quantization."
+              },
+              {
+                "id": "p6",
+                "score": 62,
+                "tracks": [
+                  "Agents",
+                  "Inference"
+                ],
+                "reason": "LLM routing across models and agentic modes; relevant to inference orchestration and agent systems."
+              },
+              {
+                "id": "p7",
+                "score": 3,
+                "tracks": [
+                  "AI hardware"
+                ],
+                "reason": "Cosmology/CMB polarization power spectrum analysis; off topic."
+              },
+              {
+                "id": "p8",
+                "score": 3,
+                "tracks": [
+                  "AI hardware"
+                ],
+                "reason": "Astrophysics Hubble tension analysis; unrelated to stated interests."
+              },
+              {
+                "id": "p9",
+                "score": 45,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "Embodied agent framework with FSM-based evaluation; tangentially related to agent systems."
+              },
+              {
+                "id": "p10",
+                "score": 3,
+                "tracks": [
+                  "AI hardware"
+                ],
+                "reason": "Radio astronomy of odd radio circles; off topic."
+              },
+              {
+                "id": "p11",
+                "score": 94,
+                "tracks": [
+                  "Quantization",
+                  "Training"
+                ],
+                "reason": "QLoRA is foundational for 4-bit quantized LLM finetuning and GPU memory efficiency."
+              },
+              {
+                "id": "p12",
+                "score": 38,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "Distillation for embodied robot policies; robotics-focused, only marginally adjacent."
+              },
+              {
+                "id": "p13",
+                "score": 30,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "Event sequence forecasting benchmark; evaluation angle but not AI-systems focused."
+              },
+              {
+                "id": "p14",
+                "score": 55,
+                "tracks": [
+                  "Inference"
+                ],
+                "reason": "Efficient inference for action models via Mamba replacing transformer; relevant to inference cost."
+              },
+              {
+                "id": "p15",
+                "score": 93,
+                "tracks": [
+                  "Training",
+                  "Quantization"
+                ],
+                "reason": "ZeRO is a foundational distributed training memory optimization paper, directly on topic."
+              },
+              {
+                "id": "p16",
+                "score": 95,
+                "tracks": [
+                  "Quantization",
+                  "Inference"
+                ],
+                "reason": "GPTQ is a landmark one-shot weight quantization method for LLM inference on GPUs."
+              },
+              {
+                "id": "p17",
+                "score": 58,
+                "tracks": [
+                  "Inference"
+                ],
+                "reason": "Analyzes inference cost variation in diffusion LMs; relevant to LLM inference efficiency."
+              },
+              {
+                "id": "p18",
+                "score": 97,
+                "tracks": [
+                  "GPU kernels",
+                  "Quantization"
+                ],
+                "reason": "FlashAttention is a canonical GPU memory-IO-aware kernel paper central to LLM inference."
+              },
+              {
+                "id": "p19",
+                "score": 72,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "SWE-bench is a key LLM agent/code evaluation benchmark, matching agent/evaluation interest."
+              },
+              {
+                "id": "p20",
+                "score": 96,
+                "tracks": [
+                  "Inference",
+                  "Quantization"
+                ],
+                "reason": "PagedAttention/vLLM is a core LLM serving system with KV cache memory management."
+              },
+              {
+                "id": "p21",
+                "score": 2,
+                "tracks": [
+                  "AI hardware"
+                ],
+                "reason": "Mathematics paper on log adic spaces; unrelated."
+              },
+              {
+                "id": "p22",
+                "score": 50,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "Autonomous research agent system with training/ablation loops; relevant to agent capabilities."
+              },
+              {
+                "id": "p23",
+                "score": 35,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "Multi-agent framework for cinematography; agent architecture but far from core topics."
+              },
+              {
+                "id": "p24",
+                "score": 3,
+                "tracks": [
+                  "AI hardware"
+                ],
+                "reason": "CMB foreground contamination analysis; off topic."
+              },
+              {
+                "id": "p25",
+                "score": 68,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "Multi-agent LLM system prioritization and failure attribution; relevant to agent evaluation."
+              },
+              {
+                "id": "p26",
+                "score": 60,
+                "tracks": [
+                  "Training"
+                ],
+                "reason": "DPO is a core LLM alignment/training method; relevant to training systems interest."
+              },
+              {
+                "id": "p27",
+                "score": 94,
+                "tracks": [
+                  "Training",
+                  "GPU kernels"
+                ],
+                "reason": "Megatron-LM is a foundational model-parallel training paper for large transformers."
+              },
+              {
+                "id": "p28",
+                "score": 55,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "Integrity monitoring for autonomous research agents; relevant to agent evaluation/safety."
+              },
+              {
+                "id": "p29",
+                "score": 52,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "Confidentiality leakage in agentic LLM systems; relevant to agent evaluation and safety."
+              }
+            ]
+          },
+          "classifications": [
+            {
+              "id": "b1219d8c9b4462e1199f42829ac739d25b03a2405c00674fe9642a2e7cc74ca1",
+              "score": 5,
+              "tracks": [
+                "AI hardware"
+              ],
+              "reason": "Gravitational wave lensing and diffraction imaging is unrelated to GPU, LLM, or systems topics."
+            },
+            {
+              "id": "ee9d31c850a7946cbf64900c1375833183bd6a2c00b4986387fd86deed2f4cae",
+              "score": 95,
+              "tracks": [
+                "Quantization",
+                "Inference"
+              ],
+              "reason": "Directly on post-training W8A8 LLM quantization for memory reduction and inference acceleration."
+            },
+            {
+              "id": "46338e0323e06c9b44619c58fb6c7b6efd2a1a91daf123dba3eb93d73787ab25",
+              "score": 2,
+              "tracks": [
+                "AI hardware"
+              ],
+              "reason": "Pure math paper on cohomology of structure sheaves; no relation to stated interests."
+            },
+            {
+              "id": "0f4bc2a13348e254780cb3a2528c1382e8ccb9d8fdc3a1fca37f85bb2d355c21",
+              "score": 40,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "Vision-language model architecture and training; adjacent to LLM interests but focused on perception tasks."
+            },
+            {
+              "id": "afbacd5e0045d8232579a246b80b3589c5d3743901d8825a55d450d6024c2997",
+              "score": 96,
+              "tracks": [
+                "Inference",
+                "Agents"
+              ],
+              "reason": "SGLang is a core LLM serving system with KV cache reuse, directly matching inference/serving interests."
+            },
+            {
+              "id": "c2b7a7b49c2bc7e302291b4df2e8a35905e62921efb5b4eb06d956bd6bed0a8e",
+              "score": 97,
+              "tracks": [
+                "GPU kernels",
+                "Quantization"
+              ],
+              "reason": "GPU attention kernel optimization on Hopper with warp specialization, Tensor Cores, and block quantization."
+            },
+            {
+              "id": "ee43c225dce6c2ae3014f6d399b6d1b3b679707f65ac9b451d006ed517c61974",
+              "score": 62,
+              "tracks": [
+                "Agents",
+                "Inference"
+              ],
+              "reason": "LLM routing across models and agentic modes; relevant to inference orchestration and agent systems."
+            },
+            {
+              "id": "4909682e2d4e9a114752acf6c104c7389cba62762c3b84debdad3dae61e5a950",
+              "score": 3,
+              "tracks": [
+                "AI hardware"
+              ],
+              "reason": "Cosmology/CMB polarization power spectrum analysis; off topic."
+            },
+            {
+              "id": "43aeab49c2eaa86751aab502cc880e9add904dde421bfea8efb9e459d721aed9",
+              "score": 3,
+              "tracks": [
+                "AI hardware"
+              ],
+              "reason": "Astrophysics Hubble tension analysis; unrelated to stated interests."
+            },
+            {
+              "id": "3d6ef10015483e0e9175dd6754269e48f4ad037cbb3f7cea17323df06de5c1cb",
+              "score": 45,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "Embodied agent framework with FSM-based evaluation; tangentially related to agent systems."
+            },
+            {
+              "id": "cbdb878863b40aafad9e2a06ef92ad59d4d07b3c79dfa76dad45f3d6d24d6037",
+              "score": 3,
+              "tracks": [
+                "AI hardware"
+              ],
+              "reason": "Radio astronomy of odd radio circles; off topic."
+            },
+            {
+              "id": "d4f0d35e223ee6f46801ef06e6b3c10471e6f168abeb77c95a12df411601951f",
+              "score": 94,
+              "tracks": [
+                "Quantization",
+                "Training"
+              ],
+              "reason": "QLoRA is foundational for 4-bit quantized LLM finetuning and GPU memory efficiency."
+            },
+            {
+              "id": "6ca5287de0d74b377d24997894fe55c73885b6ef353a8feab5afbe0bacdbd914",
+              "score": 38,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "Distillation for embodied robot policies; robotics-focused, only marginally adjacent."
+            },
+            {
+              "id": "942e3ea89fdc85a04e9cffbc167ec05cd883d31a7d30ef94ef7e3f31585b8fd4",
+              "score": 30,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "Event sequence forecasting benchmark; evaluation angle but not AI-systems focused."
+            },
+            {
+              "id": "6ca65ee0fc1290167207673e1e18b18c015cbc4cc1016c5bf94221860c0ff824",
+              "score": 55,
+              "tracks": [
+                "Inference"
+              ],
+              "reason": "Efficient inference for action models via Mamba replacing transformer; relevant to inference cost."
+            },
+            {
+              "id": "b11e194368fd12be33361569ccf202d3842990d8023acccc28b14c7d45331c12",
+              "score": 93,
+              "tracks": [
+                "Training",
+                "Quantization"
+              ],
+              "reason": "ZeRO is a foundational distributed training memory optimization paper, directly on topic."
+            },
+            {
+              "id": "5617db0b7e5487bb4e2ab70ac2a31b7adc7adac74d67ac6bdea8153187167098",
+              "score": 95,
+              "tracks": [
+                "Quantization",
+                "Inference"
+              ],
+              "reason": "GPTQ is a landmark one-shot weight quantization method for LLM inference on GPUs."
+            },
+            {
+              "id": "795e6cc9cfc64a6890d0bbc08899991640293ac86185b7c0871479b9333919d6",
+              "score": 58,
+              "tracks": [
+                "Inference"
+              ],
+              "reason": "Analyzes inference cost variation in diffusion LMs; relevant to LLM inference efficiency."
+            },
+            {
+              "id": "fa3c452c8de8030abae1eeb94f535e8f9a88cd4f80af6cd6ae07203a57e5684e",
+              "score": 97,
+              "tracks": [
+                "GPU kernels",
+                "Quantization"
+              ],
+              "reason": "FlashAttention is a canonical GPU memory-IO-aware kernel paper central to LLM inference."
+            },
+            {
+              "id": "d1f914c03e522b9ba0ba6ffb5398b7ac93121d1ac16eb2e61c782c0753920476",
+              "score": 72,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "SWE-bench is a key LLM agent/code evaluation benchmark, matching agent/evaluation interest."
+            },
+            {
+              "id": "7f7ceba21cdb840ed3db949101e38305083c06462274ca75a19fceda4803f04d",
+              "score": 96,
+              "tracks": [
+                "Inference",
+                "Quantization"
+              ],
+              "reason": "PagedAttention/vLLM is a core LLM serving system with KV cache memory management."
+            },
+            {
+              "id": "d5991e5f551d3c37a7c12751839232bf5a30243fb4be98ae391e2d6780148ff8",
+              "score": 2,
+              "tracks": [
+                "AI hardware"
+              ],
+              "reason": "Mathematics paper on log adic spaces; unrelated."
+            },
+            {
+              "id": "3e7f85612b5cc4954c16a9670a065c6dbbd3d079100c9b1d2d2bb2e7572533f9",
+              "score": 50,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "Autonomous research agent system with training/ablation loops; relevant to agent capabilities."
+            },
+            {
+              "id": "ecbfa6ed58f055fc6a4939b7d240c17d28d6da0037479e6df50d608cd57b6c47",
+              "score": 35,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "Multi-agent framework for cinematography; agent architecture but far from core topics."
+            },
+            {
+              "id": "9ecca5506ed1df1c5dbc0410ba92687d0d72fde9736ee26d618f7fa0f00d6f37",
+              "score": 3,
+              "tracks": [
+                "AI hardware"
+              ],
+              "reason": "CMB foreground contamination analysis; off topic."
+            },
+            {
+              "id": "2d78b29ed767d2c8b9cd1812518f8e54277a947223c3a97b3c1b762b5ec25adc",
+              "score": 68,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "Multi-agent LLM system prioritization and failure attribution; relevant to agent evaluation."
+            },
+            {
+              "id": "08355e237614d5e2e1b99c8272a0749fb46fc5037b31e3b145f8429360c3764a",
+              "score": 60,
+              "tracks": [
+                "Training"
+              ],
+              "reason": "DPO is a core LLM alignment/training method; relevant to training systems interest."
+            },
+            {
+              "id": "88042784e26b0c1485dc767e54610feb9182c159a69515070cd5a6b11be0f148",
+              "score": 94,
+              "tracks": [
+                "Training",
+                "GPU kernels"
+              ],
+              "reason": "Megatron-LM is a foundational model-parallel training paper for large transformers."
+            },
+            {
+              "id": "9d92781dd386d16b2cc9d222164deafdd083e779aed13547ec2e6c3bf7616775",
+              "score": 55,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "Integrity monitoring for autonomous research agents; relevant to agent evaluation/safety."
+            },
+            {
+              "id": "ea2dedc9331b93b5188e1590ea47d12aa47ae024160c955a9d7f284b79573f58",
+              "score": 52,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "Confidentiality leakage in agentic LLM systems; relevant to agent evaluation and safety."
+            }
+          ],
+          "valid": true,
+          "elapsedSeconds": 15.623357333
+        },
+        {
+          "arm": "baseline",
+          "candidateIds": [
+            "b06ea8f25becfdef6ce12477f821a3bd8e0c7e752327195ede6979d95c098c4d",
+            "ab4920427f7ebc4a9bb5eca95e77021d6859149f73133ef6deaf988a9375956e",
+            "2e8704fb685e7eb8ddc1499ee9e6d3b2c40477f5840ea719e398eefede982ae3",
+            "2874c021f0adc2bfd0b42f48c60aef4c5e729a1496fb5c2b6cb73420b2dfdd84",
+            "f94a58ccf5001214a4e7547014834d681dd48eb2f8a4d7ba989dd9dcc297457d",
+            "17dc7c4f8774a4dd16682c92c46aed735a1497591bca41139b9f4733f127a12a",
+            "e3512e0e791ac7017c43dcbb6e0ef0f25ebef5f81f919742ea1d24a233b191cc",
+            "14a67c84ba31fb02b00503e866e7f430c80fb0942b5409a6dffb7d6359e0addb",
+            "483050a68544832860fe1cff547280a24f5010e11cb5348d684812f16104c10a",
+            "33ecec960e556ef2fd4d3bb0e84709ee6e5852c9dbb8d6aadae892130fe0bbcd",
+            "87b841870323c30f75c99c7b90484f9992d40e4d8aaff88cc168a47245a4e4a9",
+            "6b066cadc7dd868a2628c1422012f46ca32462318406edec8ec69e376e165509",
+            "20820c722eba832284042b86beadd7002f68d194b3a69db7c44f533edc399840",
+            "e4c89735c3d69e361d01327c1ee1d3f177f9a887122b77dede339a4e615c0139",
+            "90411be9bacb229b2709d680cdf9f36e53988620703502ee86401b2c845803e0",
+            "faf00ea20b801ce34008bf5f4e6a33a17b73f6adbcf37a656e43525f6fd4adea",
+            "f625e7171c806720e3ff5ab4e67f4c8d0bd5b805b70774b4f72d880d1c202188",
+            "d3eb1e2aea7586e7bd9d8c6c636b82cc0e79f9ca8e53347727ea8103e2779d4f",
+            "1407dbaefafd7a40128936c14d1fa1774059b631448a43bc4461b2aa4621ec33",
+            "95d284d8ab51539dd39b1d7f7eab3900366af99c7ab20b91d56e918c1a9d1b98",
+            "124a6b23246d720a864a647dacda031c02d9e0142f996e8b796456f753ae4312",
+            "a20f137d501720448275f31206a72833a6155330ee06189778807d1e86a1dce4",
+            "962045ead73e68ce23a0003dd471dc28de043ce6b72136275f727ab40f318325",
+            "46ee1a4aebfa6b3d1e0d2e58b0f59a44282fe2f849576862da8d49845c3ce884",
+            "cf499b8ee1f0d1bc4d958b1f4cb24d1938de63eb1d1778a4ed8a34ae042fd72f",
+            "9c58847efa40580876478dd6e54396c26fb57e5f44d08450e494d1cddcb68521",
+            "ee4139797a3238d4ff7df2cd37ba2b3a120b9ddf32cf9315014bf6b3ec10095b",
+            "04d3426f77d797314c28137086cdfd1a6af6fbee3ec69ef90533d6ffd7cb6efb",
+            "070e7d53b4d378305bb4bc6deadb07bbac59a8357c45b7a3f74780a872c52b09",
+            "2ec5c308edd21ffafc2ca171d56dd7a914089089eeb04fcf98b667c8c90bb945"
+          ],
+          "reservedUsd": 0.00486346,
+          "httpStatus": 200,
+          "provider": "Io Net",
+          "responseId": "gen-1792963887-aLzjjVz0idDXAuispyMK",
+          "servedModel": "xiaomi/mimo-v2.6-flash",
+          "usage": {
+            "prompt_tokens": 5303,
+            "completion_tokens": 1039,
+            "total_tokens": 6342,
+            "cost": 0.000312164,
+            "is_byok": false,
+            "prompt_tokens_details": {
+              "cached_tokens": 5248,
+              "cache_write_tokens": 0,
+              "audio_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost_details": {
+              "upstream_inference_cost": 0.000312164,
+              "upstream_inference_prompt_cost": 2.1244e-05,
+              "upstream_inference_completions_cost": 0.00029092
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "image_tokens": 0,
+              "audio_tokens": 0
+            }
+          },
+          "finishReason": "stop",
+          "rawOutput": {
+            "items": [
+              {
+                "id": "p0",
+                "score": 40,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "Agent-human collaboration study, adjacent to agent interests but no systems or evaluation infrastructure content."
+              },
+              {
+                "id": "p1",
+                "score": 25,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "Multimodal representation analysis, off-topic for GPU kernels, inference, or agent systems."
+              },
+              {
+                "id": "p2",
+                "score": 5,
+                "tracks": [
+                  "AI hardware"
+                ],
+                "reason": "Pure math paper on toric geometry, unrelated to stated interests."
+              },
+              {
+                "id": "p3",
+                "score": 5,
+                "tracks": [
+                  "AI hardware"
+                ],
+                "reason": "Coding theory paper, unrelated to stated interests."
+              },
+              {
+                "id": "p4",
+                "score": 55,
+                "tracks": [
+                  "Agents",
+                  "Training"
+                ],
+                "reason": "Privacy evaluation of split/distributed LLM systems touches distributed LLM serving and evaluation."
+              },
+              {
+                "id": "p5",
+                "score": 5,
+                "tracks": [
+                  "AI hardware"
+                ],
+                "reason": "Number theory/Shimura varieties, unrelated to stated interests."
+              },
+              {
+                "id": "p6",
+                "score": 95,
+                "tracks": [
+                  "Quantization",
+                  "Inference"
+                ],
+                "reason": "AWQ is a core LLM quantization method directly relevant to memory-efficient inference."
+              },
+              {
+                "id": "p7",
+                "score": 95,
+                "tracks": [
+                  "GPU kernels",
+                  "Inference"
+                ],
+                "reason": "FlashAttention-2 is a foundational GPU kernel/attention optimization paper for LLM inference."
+              },
+              {
+                "id": "p8",
+                "score": 5,
+                "tracks": [
+                  "AI hardware"
+                ],
+                "reason": "Cosmology forecast paper, unrelated to stated interests."
+              },
+              {
+                "id": "p9",
+                "score": 5,
+                "tracks": [
+                  "AI hardware"
+                ],
+                "reason": "Astrophysics/cosmology estimator, unrelated to stated interests."
+              },
+              {
+                "id": "p10",
+                "score": 5,
+                "tracks": [
+                  "AI hardware"
+                ],
+                "reason": "Number theory/representation theory, unrelated to stated interests."
+              },
+              {
+                "id": "p11",
+                "score": 45,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "Agent framework for physical feasibility, tangential to agent tooling interests."
+              },
+              {
+                "id": "p12",
+                "score": 70,
+                "tracks": [
+                  "Training",
+                  "Agents"
+                ],
+                "reason": "MoE model training with novel optimizers/curriculum, relevant to training systems and agentic models."
+              },
+              {
+                "id": "p13",
+                "score": 75,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "Benchmark/eval design by agents for recursive self-improvement, directly relevant to agents/evaluation."
+              },
+              {
+                "id": "p14",
+                "score": 85,
+                "tracks": [
+                  "Inference",
+                  "GPU kernels"
+                ],
+                "reason": "Attention sinks/KV cache memory for streaming LLM inference, core to serving and memory topics."
+              },
+              {
+                "id": "p15",
+                "score": 70,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "AutoGen multi-agent framework, relevant to agent infrastructure interests."
+              },
+              {
+                "id": "p16",
+                "score": 85,
+                "tracks": [
+                  "Quantization",
+                  "Training"
+                ],
+                "reason": "8-bit optimizer state quantization directly addresses GPU memory in training."
+              },
+              {
+                "id": "p17",
+                "score": 5,
+                "tracks": [
+                  "AI hardware"
+                ],
+                "reason": "Number theory/elliptic curves, unrelated to stated interests."
+              },
+              {
+                "id": "p18",
+                "score": 60,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "Test-time agent personalization via dueling bandits, relevant to agent adaptation."
+              },
+              {
+                "id": "p19",
+                "score": 55,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "Realtime voice agent tool execution, adjacent to agent systems interests."
+              },
+              {
+                "id": "p20",
+                "score": 5,
+                "tracks": [
+                  "AI hardware"
+                ],
+                "reason": "Analytic number theory, unrelated to stated interests."
+              },
+              {
+                "id": "p21",
+                "score": 90,
+                "tracks": [
+                  "Quantization",
+                  "Inference"
+                ],
+                "reason": "LLM.int8 is a landmark 8-bit inference quantization method reducing GPU memory."
+              },
+              {
+                "id": "p22",
+                "score": 90,
+                "tracks": [
+                  "Inference",
+                  "GPU kernels"
+                ],
+                "reason": "FlexGen is a high-throughput LLM inference engine optimizing GPU/CPU/disk memory hierarchies."
+              },
+              {
+                "id": "p23",
+                "score": 50,
+                "tracks": [
+                  "GPU kernels"
+                ],
+                "reason": "GPU-accelerated ray-tracing engine, adjacent to GPU compute but not LLM-focused."
+              },
+              {
+                "id": "p24",
+                "score": 45,
+                "tracks": [
+                  "Inference"
+                ],
+                "reason": "Inference-time resource/latency budget control, adjacent to efficient inference."
+              },
+              {
+                "id": "p25",
+                "score": 55,
+                "tracks": [
+                  "Inference",
+                  "Training"
+                ],
+                "reason": "Diffusion LM decoding efficiency/NFE tradeoffs, adjacent to inference optimization."
+              },
+              {
+                "id": "p26",
+                "score": 65,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "ReAct is a foundational reasoning+acting agent paper, relevant to agent interests."
+              },
+              {
+                "id": "p27",
+                "score": 20,
+                "tracks": [
+                  "Training"
+                ],
+                "reason": "Video scene graph model, tangential to core interests."
+              },
+              {
+                "id": "p28",
+                "score": 90,
+                "tracks": [
+                  "Quantization"
+                ],
+                "reason": "SpQR is a key LLM weight compression/quantization method for memory-limited devices."
+              },
+              {
+                "id": "p29",
+                "score": 75,
+                "tracks": [
+                  "Quantization",
+                  "Training"
+                ],
+                "reason": "Mixed-precision quantization for diffusion LMs, relevant to quantization research."
+              }
+            ]
+          },
+          "classifications": [
+            {
+              "id": "b06ea8f25becfdef6ce12477f821a3bd8e0c7e752327195ede6979d95c098c4d",
+              "score": 40,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "Agent-human collaboration study, adjacent to agent interests but no systems or evaluation infrastructure content."
+            },
+            {
+              "id": "ab4920427f7ebc4a9bb5eca95e77021d6859149f73133ef6deaf988a9375956e",
+              "score": 25,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "Multimodal representation analysis, off-topic for GPU kernels, inference, or agent systems."
+            },
+            {
+              "id": "2e8704fb685e7eb8ddc1499ee9e6d3b2c40477f5840ea719e398eefede982ae3",
+              "score": 5,
+              "tracks": [
+                "AI hardware"
+              ],
+              "reason": "Pure math paper on toric geometry, unrelated to stated interests."
+            },
+            {
+              "id": "2874c021f0adc2bfd0b42f48c60aef4c5e729a1496fb5c2b6cb73420b2dfdd84",
+              "score": 5,
+              "tracks": [
+                "AI hardware"
+              ],
+              "reason": "Coding theory paper, unrelated to stated interests."
+            },
+            {
+              "id": "f94a58ccf5001214a4e7547014834d681dd48eb2f8a4d7ba989dd9dcc297457d",
+              "score": 55,
+              "tracks": [
+                "Agents",
+                "Training"
+              ],
+              "reason": "Privacy evaluation of split/distributed LLM systems touches distributed LLM serving and evaluation."
+            },
+            {
+              "id": "17dc7c4f8774a4dd16682c92c46aed735a1497591bca41139b9f4733f127a12a",
+              "score": 5,
+              "tracks": [
+                "AI hardware"
+              ],
+              "reason": "Number theory/Shimura varieties, unrelated to stated interests."
+            },
+            {
+              "id": "e3512e0e791ac7017c43dcbb6e0ef0f25ebef5f81f919742ea1d24a233b191cc",
+              "score": 95,
+              "tracks": [
+                "Quantization",
+                "Inference"
+              ],
+              "reason": "AWQ is a core LLM quantization method directly relevant to memory-efficient inference."
+            },
+            {
+              "id": "14a67c84ba31fb02b00503e866e7f430c80fb0942b5409a6dffb7d6359e0addb",
+              "score": 95,
+              "tracks": [
+                "GPU kernels",
+                "Inference"
+              ],
+              "reason": "FlashAttention-2 is a foundational GPU kernel/attention optimization paper for LLM inference."
+            },
+            {
+              "id": "483050a68544832860fe1cff547280a24f5010e11cb5348d684812f16104c10a",
+              "score": 5,
+              "tracks": [
+                "AI hardware"
+              ],
+              "reason": "Cosmology forecast paper, unrelated to stated interests."
+            },
+            {
+              "id": "33ecec960e556ef2fd4d3bb0e84709ee6e5852c9dbb8d6aadae892130fe0bbcd",
+              "score": 5,
+              "tracks": [
+                "AI hardware"
+              ],
+              "reason": "Astrophysics/cosmology estimator, unrelated to stated interests."
+            },
+            {
+              "id": "87b841870323c30f75c99c7b90484f9992d40e4d8aaff88cc168a47245a4e4a9",
+              "score": 5,
+              "tracks": [
+                "AI hardware"
+              ],
+              "reason": "Number theory/representation theory, unrelated to stated interests."
+            },
+            {
+              "id": "6b066cadc7dd868a2628c1422012f46ca32462318406edec8ec69e376e165509",
+              "score": 45,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "Agent framework for physical feasibility, tangential to agent tooling interests."
+            },
+            {
+              "id": "20820c722eba832284042b86beadd7002f68d194b3a69db7c44f533edc399840",
+              "score": 70,
+              "tracks": [
+                "Training",
+                "Agents"
+              ],
+              "reason": "MoE model training with novel optimizers/curriculum, relevant to training systems and agentic models."
+            },
+            {
+              "id": "e4c89735c3d69e361d01327c1ee1d3f177f9a887122b77dede339a4e615c0139",
+              "score": 75,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "Benchmark/eval design by agents for recursive self-improvement, directly relevant to agents/evaluation."
+            },
+            {
+              "id": "90411be9bacb229b2709d680cdf9f36e53988620703502ee86401b2c845803e0",
+              "score": 85,
+              "tracks": [
+                "Inference",
+                "GPU kernels"
+              ],
+              "reason": "Attention sinks/KV cache memory for streaming LLM inference, core to serving and memory topics."
+            },
+            {
+              "id": "faf00ea20b801ce34008bf5f4e6a33a17b73f6adbcf37a656e43525f6fd4adea",
+              "score": 70,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "AutoGen multi-agent framework, relevant to agent infrastructure interests."
+            },
+            {
+              "id": "f625e7171c806720e3ff5ab4e67f4c8d0bd5b805b70774b4f72d880d1c202188",
+              "score": 85,
+              "tracks": [
+                "Quantization",
+                "Training"
+              ],
+              "reason": "8-bit optimizer state quantization directly addresses GPU memory in training."
+            },
+            {
+              "id": "d3eb1e2aea7586e7bd9d8c6c636b82cc0e79f9ca8e53347727ea8103e2779d4f",
+              "score": 5,
+              "tracks": [
+                "AI hardware"
+              ],
+              "reason": "Number theory/elliptic curves, unrelated to stated interests."
+            },
+            {
+              "id": "1407dbaefafd7a40128936c14d1fa1774059b631448a43bc4461b2aa4621ec33",
+              "score": 60,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "Test-time agent personalization via dueling bandits, relevant to agent adaptation."
+            },
+            {
+              "id": "95d284d8ab51539dd39b1d7f7eab3900366af99c7ab20b91d56e918c1a9d1b98",
+              "score": 55,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "Realtime voice agent tool execution, adjacent to agent systems interests."
+            },
+            {
+              "id": "124a6b23246d720a864a647dacda031c02d9e0142f996e8b796456f753ae4312",
+              "score": 5,
+              "tracks": [
+                "AI hardware"
+              ],
+              "reason": "Analytic number theory, unrelated to stated interests."
+            },
+            {
+              "id": "a20f137d501720448275f31206a72833a6155330ee06189778807d1e86a1dce4",
+              "score": 90,
+              "tracks": [
+                "Quantization",
+                "Inference"
+              ],
+              "reason": "LLM.int8 is a landmark 8-bit inference quantization method reducing GPU memory."
+            },
+            {
+              "id": "962045ead73e68ce23a0003dd471dc28de043ce6b72136275f727ab40f318325",
+              "score": 90,
+              "tracks": [
+                "Inference",
+                "GPU kernels"
+              ],
+              "reason": "FlexGen is a high-throughput LLM inference engine optimizing GPU/CPU/disk memory hierarchies."
+            },
+            {
+              "id": "46ee1a4aebfa6b3d1e0d2e58b0f59a44282fe2f849576862da8d49845c3ce884",
+              "score": 50,
+              "tracks": [
+                "GPU kernels"
+              ],
+              "reason": "GPU-accelerated ray-tracing engine, adjacent to GPU compute but not LLM-focused."
+            },
+            {
+              "id": "cf499b8ee1f0d1bc4d958b1f4cb24d1938de63eb1d1778a4ed8a34ae042fd72f",
+              "score": 45,
+              "tracks": [
+                "Inference"
+              ],
+              "reason": "Inference-time resource/latency budget control, adjacent to efficient inference."
+            },
+            {
+              "id": "9c58847efa40580876478dd6e54396c26fb57e5f44d08450e494d1cddcb68521",
+              "score": 55,
+              "tracks": [
+                "Inference",
+                "Training"
+              ],
+              "reason": "Diffusion LM decoding efficiency/NFE tradeoffs, adjacent to inference optimization."
+            },
+            {
+              "id": "ee4139797a3238d4ff7df2cd37ba2b3a120b9ddf32cf9315014bf6b3ec10095b",
+              "score": 65,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "ReAct is a foundational reasoning+acting agent paper, relevant to agent interests."
+            },
+            {
+              "id": "04d3426f77d797314c28137086cdfd1a6af6fbee3ec69ef90533d6ffd7cb6efb",
+              "score": 20,
+              "tracks": [
+                "Training"
+              ],
+              "reason": "Video scene graph model, tangential to core interests."
+            },
+            {
+              "id": "070e7d53b4d378305bb4bc6deadb07bbac59a8357c45b7a3f74780a872c52b09",
+              "score": 90,
+              "tracks": [
+                "Quantization"
+              ],
+              "reason": "SpQR is a key LLM weight compression/quantization method for memory-limited devices."
+            },
+            {
+              "id": "2ec5c308edd21ffafc2ca171d56dd7a914089089eeb04fcf98b667c8c90bb945",
+              "score": 75,
+              "tracks": [
+                "Quantization",
+                "Training"
+              ],
+              "reason": "Mixed-precision quantization for diffusion LMs, relevant to quantization research."
+            }
+          ],
+          "valid": true,
+          "elapsedSeconds": 12.971133666999998
+        },
+        {
+          "arm": "feedback",
+          "candidateIds": [
+            "c2b7a7b49c2bc7e302291b4df2e8a35905e62921efb5b4eb06d956bd6bed0a8e",
+            "d1f914c03e522b9ba0ba6ffb5398b7ac93121d1ac16eb2e61c782c0753920476",
+            "ee4139797a3238d4ff7df2cd37ba2b3a120b9ddf32cf9315014bf6b3ec10095b",
+            "5617db0b7e5487bb4e2ab70ac2a31b7adc7adac74d67ac6bdea8153187167098",
+            "3d6ef10015483e0e9175dd6754269e48f4ad037cbb3f7cea17323df06de5c1cb",
+            "e4c89735c3d69e361d01327c1ee1d3f177f9a887122b77dede339a4e615c0139",
+            "2ec5c308edd21ffafc2ca171d56dd7a914089089eeb04fcf98b667c8c90bb945",
+            "b06ea8f25becfdef6ce12477f821a3bd8e0c7e752327195ede6979d95c098c4d",
+            "3e7f85612b5cc4954c16a9670a065c6dbbd3d079100c9b1d2d2bb2e7572533f9",
+            "0f4bc2a13348e254780cb3a2528c1382e8ccb9d8fdc3a1fca37f85bb2d355c21"
+          ],
+          "reservedUsd": 0.00267638,
+          "httpStatus": 200,
+          "provider": "Io Net",
+          "responseId": "gen-1792963900-GvDvLtNi4CbdO9C0jE9g",
+          "servedModel": "xiaomi/mimo-v2.6-flash",
+          "usage": {
+            "prompt_tokens": 2029,
+            "completion_tokens": 384,
+            "total_tokens": 2413,
+            "cost": 0.000117972,
+            "is_byok": false,
+            "prompt_tokens_details": {
+              "cached_tokens": 1984,
+              "cache_write_tokens": 0,
+              "audio_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost_details": {
+              "upstream_inference_cost": 0.000117972,
+              "upstream_inference_prompt_cost": 1.0452e-05,
+              "upstream_inference_completions_cost": 0.00010752
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "image_tokens": 0,
+              "audio_tokens": 0
+            }
+          },
+          "finishReason": "stop",
+          "rawOutput": {
+            "items": [
+              {
+                "id": "p0",
+                "score": 95,
+                "tracks": [
+                  "GPU kernels",
+                  "Quantization",
+                  "AI hardware"
+                ],
+                "reason": "Directly on Hopper GPU attention kernels, warp-specialization, TMA, and block quantization for LLM inference."
+              },
+              {
+                "id": "p1",
+                "score": 30,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "Software-engineering benchmark for LLMs; evaluation-adjacent but explicitly negative feedback on this example."
+              },
+              {
+                "id": "p2",
+                "score": 55,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "Foundational agent/reasoning-acting paper; relevant to agent interests but not systems-focused."
+              },
+              {
+                "id": "p3",
+                "score": 88,
+                "tracks": [
+                  "Quantization",
+                  "Inference"
+                ],
+                "reason": "Post-training weight quantization to reduce GPU memory and inference cost for large transformers."
+              },
+              {
+                "id": "p4",
+                "score": 35,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "Embodied agent framework; tangential to core LLM systems and hardware interests."
+              },
+              {
+                "id": "p5",
+                "score": 45,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "Agent-driven evaluation benchmark design; adjacent to evaluation interest but meta rather than systems."
+              },
+              {
+                "id": "p6",
+                "score": 72,
+                "tracks": [
+                  "Quantization",
+                  "Inference"
+                ],
+                "reason": "Mixed-precision activation quantization for diffusion LLMs under bit-width budget; relevant to memory/quantization."
+              },
+              {
+                "id": "p7",
+                "score": 25,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "Human-agent collaboration study; off the GPU/inference/training systems core."
+              },
+              {
+                "id": "p8",
+                "score": 30,
+                "tracks": [
+                  "Agents"
+                ],
+                "reason": "Autonomous research system for 3DGS; agent-adjacent but off-topic for LLM systems and hardware."
+              },
+              {
+                "id": "p9",
+                "score": 40,
+                "tracks": [
+                  "Inference"
+                ],
+                "reason": "VLM architecture and training curriculum; mildly relevant to training but vision-focused, not systems."
+              }
+            ]
+          },
+          "classifications": [
+            {
+              "id": "c2b7a7b49c2bc7e302291b4df2e8a35905e62921efb5b4eb06d956bd6bed0a8e",
+              "score": 95,
+              "tracks": [
+                "GPU kernels",
+                "Quantization",
+                "AI hardware"
+              ],
+              "reason": "Directly on Hopper GPU attention kernels, warp-specialization, TMA, and block quantization for LLM inference."
+            },
+            {
+              "id": "d1f914c03e522b9ba0ba6ffb5398b7ac93121d1ac16eb2e61c782c0753920476",
+              "score": 30,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "Software-engineering benchmark for LLMs; evaluation-adjacent but explicitly negative feedback on this example."
+            },
+            {
+              "id": "ee4139797a3238d4ff7df2cd37ba2b3a120b9ddf32cf9315014bf6b3ec10095b",
+              "score": 55,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "Foundational agent/reasoning-acting paper; relevant to agent interests but not systems-focused."
+            },
+            {
+              "id": "5617db0b7e5487bb4e2ab70ac2a31b7adc7adac74d67ac6bdea8153187167098",
+              "score": 88,
+              "tracks": [
+                "Quantization",
+                "Inference"
+              ],
+              "reason": "Post-training weight quantization to reduce GPU memory and inference cost for large transformers."
+            },
+            {
+              "id": "3d6ef10015483e0e9175dd6754269e48f4ad037cbb3f7cea17323df06de5c1cb",
+              "score": 35,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "Embodied agent framework; tangential to core LLM systems and hardware interests."
+            },
+            {
+              "id": "e4c89735c3d69e361d01327c1ee1d3f177f9a887122b77dede339a4e615c0139",
+              "score": 45,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "Agent-driven evaluation benchmark design; adjacent to evaluation interest but meta rather than systems."
+            },
+            {
+              "id": "2ec5c308edd21ffafc2ca171d56dd7a914089089eeb04fcf98b667c8c90bb945",
+              "score": 72,
+              "tracks": [
+                "Quantization",
+                "Inference"
+              ],
+              "reason": "Mixed-precision activation quantization for diffusion LLMs under bit-width budget; relevant to memory/quantization."
+            },
+            {
+              "id": "b06ea8f25becfdef6ce12477f821a3bd8e0c7e752327195ede6979d95c098c4d",
+              "score": 25,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "Human-agent collaboration study; off the GPU/inference/training systems core."
+            },
+            {
+              "id": "3e7f85612b5cc4954c16a9670a065c6dbbd3d079100c9b1d2d2bb2e7572533f9",
+              "score": 30,
+              "tracks": [
+                "Agents"
+              ],
+              "reason": "Autonomous research system for 3DGS; agent-adjacent but off-topic for LLM systems and hardware."
+            },
+            {
+              "id": "0f4bc2a13348e254780cb3a2528c1382e8ccb9d8fdc3a1fca37f85bb2d355c21",
+              "score": 40,
+              "tracks": [
+                "Inference"
+              ],
+              "reason": "VLM architecture and training curriculum; mildly relevant to training but vision-focused, not systems."
+            }
+          ],
+          "valid": true,
+          "elapsedSeconds": 5.248128
+        }
+      ],
+      "metrics": {
+        "validRequests": 3,
+        "totalRequests": 3,
+        "baselineSeconds": 28.594490999999998,
+        "baselineReportedCostUsd": 0.000662468,
+        "qualityAvailable": true,
+        "precision": 1,
+        "recall": 0.8974358974358975,
+        "binaryAccuracy": 0.9333333333333333,
+        "exactFourBandAgreement": 0.6666666666666666,
+        "ndcg15": 1,
+        "trackAccuracy": 1,
+        "offTopicPromoted": 0,
+        "referenceRelevant": 39,
+        "falsePositiveIds": [],
+        "missedIds": [
+          "3d6ef10015483e0e9175dd6754269e48f4ad037cbb3f7cea17323df06de5c1cb",
+          "b06ea8f25becfdef6ce12477f821a3bd8e0c7e752327195ede6979d95c098c4d",
+          "6b066cadc7dd868a2628c1422012f46ca32462318406edec8ec69e376e165509",
+          "cf499b8ee1f0d1bc4d958b1f4cb24d1938de63eb1d1778a4ed8a34ae042fd72f"
+        ],
+        "hypotheticalFeedback": {
+          "negativeBefore": 72,
+          "negativeAfter": 30,
+          "positiveBefore": 97,
+          "positiveAfter": 95,
+          "otherAgentBefore": 65,
+          "otherAgentAfter": 55
+        },
+        "baselineUncachedEstimateUsd": 0.00208222,
+        "cachedPromptTokens": 10336
+      }
+    }
+  ]
+}
