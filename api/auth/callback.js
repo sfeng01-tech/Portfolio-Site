@@ -3,6 +3,7 @@ import {
   STATE_COOKIE,
   TOKEN_COOKIE,
   REPOSITORY,
+  isOrinAllowedUser,
   getOrigin,
   githubFetch,
   parseCookies,
@@ -69,7 +70,10 @@ export default async function handler(req, res) {
     if (!userResponse.ok) return redirectWithError(res, 'user_lookup_failed');
 
     const user = await userResponse.json();
-    if (user.login?.toLowerCase() !== REPOSITORY.owner.toLowerCase()) {
+    const authorized = destination === '/orin'
+      ? isOrinAllowedUser(user.login)
+      : user.login?.toLowerCase() === REPOSITORY.owner.toLowerCase();
+    if (!authorized) {
       return redirectWithError(res, 'not_repository_owner');
     }
 

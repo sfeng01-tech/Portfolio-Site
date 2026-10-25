@@ -5,6 +5,13 @@ export const REPOSITORY = {
   dataFile: 'apps/portfolio/src/data/portfolioData.js'
 };
 
+const normalizeLogin = (login) => typeof login === 'string' ? login.trim().toLowerCase() : '';
+const orinAllowedUsers = new Set([
+  REPOSITORY.owner,
+  ...(process.env.ORIN_GITHUB_ALLOWED_USERS || '').split(',')
+].map(normalizeLogin).filter(Boolean));
+export const isOrinAllowedUser = (login) => orinAllowedUsers.has(normalizeLogin(login));
+
 export const TOKEN_COOKIE = 'portfolio_github_token';
 export const STATE_COOKIE = 'portfolio_oauth_state';
 
@@ -83,6 +90,19 @@ export const getAuthorizedUser = async (req) => {
 
   const user = await response.json();
   if (user.login?.toLowerCase() !== REPOSITORY.owner.toLowerCase()) return null;
+
+  return { token, user };
+};
+
+export const getAuthorizedOrinUser = async (req) => {
+  const token = parseCookies(req)[TOKEN_COOKIE];
+  if (!token) return null;
+
+  const response = await githubFetch('/user', token);
+  if (!response.ok) return null;
+
+  const user = await response.json();
+  if (!isOrinAllowedUser(user.login)) return null;
 
   return { token, user };
 };

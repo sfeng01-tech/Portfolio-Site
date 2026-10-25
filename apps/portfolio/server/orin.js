@@ -1,5 +1,5 @@
 import { createHash, timingSafeEqual } from 'node:crypto';
-import { getAuthorizedUser, requireSameOrigin } from './githubAuth.js';
+import { getAuthorizedOrinUser, requireSameOrigin } from './githubAuth.js';
 
 export const ORIN_SOURCES = ['twitter', 'linkedin', 'reddit', 'arxiv', 'hackernews', 'google_news', 'threads', 'huggingface', 'alphaxiv', 'substack', 'rss'];
 const fail = (message, status = 400) => Object.assign(new Error(message), { status });
@@ -123,7 +123,7 @@ export function requireIngestToken(req) {
 }
 export async function requireOrinOwner(req, write = false) {
   let auth;
-  try { auth = await getAuthorizedUser(req); } catch { throw fail('Unable to verify GitHub session', 502); }
+  try { auth = await getAuthorizedOrinUser(req); } catch { throw fail('Unable to verify GitHub session', 502); }
   if (!auth) throw fail('Not authenticated', 401);
   if (write) {
     requireSameOrigin(req);

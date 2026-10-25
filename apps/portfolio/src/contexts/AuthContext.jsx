@@ -10,7 +10,10 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const restoreSession = async () => {
       try {
-        const response = await fetch('/api/auth/session', {
+        const sessionUrl = window.location.pathname === '/orin'
+          ? '/api/auth/session?destination=%2Forin'
+          : '/api/auth/session';
+        const response = await fetch(sessionUrl, {
           credentials: 'same-origin',
           headers: { Accept: 'application/json' }
         });
