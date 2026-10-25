@@ -89,4 +89,13 @@ There is no automatic deletion policy. To remove old daily digests while preserv
 - Neon project: `muddy-dust-79837278`, database `orin`, production branch, Free organization, 0.25 CU. Schema applied.
 - Public service build variable `VITE_ORIN_ORIGIN` delegates `/orin` to the Node service. Leave it unset on the Node service.
 - Database connection and ingestion token are configured on the Node service; the same ingestion token and URL are stored in GitHub Actions secrets. Values are never tracked here.
-- GitHub OAuth app homepage: `https://orin-sahil.onrender.com/orin`; callback: `https://orin-sahil.onrender.com/api/auth/callback`. Its client ID and secret must be configured on the Node service to enable login.
+- GitHub OAuth app homepage: `https://orin-sahil.onrender.com/orin`; callback: `https://orin-sahil.onrender.com/api/auth/callback`. Client ID and secret are configured on the Node service; owner login and authenticated digest rendering were verified. ORIN requests only `read:user`.
+
+### Verified operational state
+
+- Render Node service deployment is live; `/api/health` returns JSON 200.
+- Anonymous session and digest endpoints return JSON 401.
+- Owner GitHub sign-in completed and the private digest rendered in Safari.
+- Initial Actions run succeeded: 3 items grouped into 3 threads for October 25, 2026.
+- `ORIN_ENABLED=true`: daily public-feed collection runs at 14:17 UTC (07:17 PDT / 06:17 PST).
+- arXiv and Hacker News collection are enabled. X, LinkedIn and Reddit remain disabled pending dedicated authenticated browser sessions; no existing Safari cookies are copied.
