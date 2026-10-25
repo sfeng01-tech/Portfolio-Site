@@ -1,12 +1,12 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, ArrowUpRight, Bookmark, Check, Compass, Github, Lock, LogOut, RefreshCw, Search, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import ThemeToggle from '../components/ThemeToggle';
+import OrinBrain from '../components/orin/OrinBrain';
+import { displaySource } from '../components/orin/brainGraph';
 import './orin.css';
 
-const sourceLabels = { x: 'X / Twitter', twitter: 'X / Twitter', linkedin: 'LinkedIn', reddit: 'Reddit', arxiv: 'arXiv', hackernews: 'Hacker News', google_news: 'Google News', threads: 'Threads', huggingface: 'Hugging Face Papers', alphaxiv: 'alphaXiv', substack: 'Substack', rss: 'Articles' };
-const displaySource = (source) => sourceLabels[source] || source;
 const localDate = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles' }).format(new Date());
 const safeUrl = (url) => { try { const parsed = new URL(url); return parsed.protocol === 'https:' ? parsed.href : null; } catch { return null; } };
 
@@ -28,6 +28,7 @@ export default function OrinPage() {
   const [search, setSearch] = useState('');
   const [pending, setPending] = useState(new Set());
   const [revision, setRevision] = useState(0);
+  const lastLoaded = useRef(0);
 
   useEffect(() => {
     document.title = 'ORIN — A world of exploration & study';
@@ -41,11 +42,23 @@ export default function OrinPage() {
     if (date) params.set('date', date);
     if (tab === 'saved') params.set('saved', 'true');
     request(`/api/orin/digest?${params}`, { signal: controller.signal })
-      .then(setData)
+      .then(payload => { lastLoaded.current = Date.now(); setData(payload); })
       .catch(err => { if (err.name !== 'AbortError') { setData(null); setError(err.message); } })
       .finally(() => { if (!controller.signal.aborted) setBusy(false); });
     return () => controller.abort();
   }, [user, date, tab, revision]);
+
+  // The collector publishes once a day; poll gently, and only while visible, so a
+  // tab left open overnight picks up the new digest without a manual reload.
+  useEffect(() => {
+    if (!user) return undefined;
+    const timer = setInterval(() => { if (document.visibilityState === 'visible') setRevision(value => value + 1); }, 15 * 60 * 1000);
+    const onVisible = () => {
+      if (document.visibilityState === 'visible' && Date.now() - lastLoaded.current > 2 * 60 * 1000) setRevision(value => value + 1);
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => { clearInterval(timer); document.removeEventListener('visibilitychange', onVisible); };
+  }, [user]);
 
   const items = data?.items || [];
   const sources = [...new Set(items.map(item => item.source))];
@@ -69,15 +82,17 @@ export default function OrinPage() {
     <main id="main-content" className="orin-main">
       <div className="orin-intro"><div className="eyebrow"><Compass size={15}/> A WORLD OF EXPLORATION & STUDY</div><h1>ORIN<span>.</span></h1><p>A quieter place to follow your curiosity.</p></div>
       {authLoading ? <div className="orin-state" role="status">Opening your space…</div> : !user ? <section className="orin-gate"><div className="orin-lock"><Lock size={25} strokeWidth={1.4}/></div><div className="eyebrow">JUST FOR YOU</div><h2>Your daily window into<br/>what’s worth understanding.</h2><p>Research, ideas, and conversations from across AI and systems. Gathered in one private reading space.</p><button className="button-primary" disabled={Boolean(authError)} onClick={() => login('/orin')}><Github size={17}/> Sign in with GitHub <ArrowUpRight size={16}/></button><small>Access is restricted to the portfolio owner’s GitHub account.</small>{authError && <p role="alert" className="orin-error">{authError}</p>}</section> : <>
-        <div className="orin-toolbar"><div className="orin-tabs" role="tablist" aria-label="Reading view">{[['digest','Daily digest'],['saved','Reading list']].map(([value,label]) => <button key={value} role="tab" aria-selected={tab===value} onClick={() => {setTab(value);setSource('All');}}>{label}</button>)}</div><label className="orin-date">{tab === 'digest' && <><span className="sr-only">Digest date</span><input type="date" value={date || data?.date || localDate()} max={localDate()} onChange={event => setDate(event.target.value)}/></>}</label><button className="orin-icon" disabled={busy} onClick={() => setRevision(v=>v+1)} aria-label="Reload digest"><RefreshCw size={17} className={busy ? 'animate-spin' : ''}/></button></div>
+        <div className="orin-toolbar"><div className="orin-tabs" role="tablist" aria-label="Reading view">{[['digest','Daily digest'],['brain','Live brain'],['saved','Reading list']].map(([value,label]) => <button key={value} role="tab" aria-selected={tab===value} onClick={() => {setTab(value);setSource('All');}}>{label}</button>)}</div><label className="orin-date">{tab !== 'saved' && <><span className="sr-only">Digest date</span><input type="date" value={date || data?.date || localDate()} max={localDate()} onChange={event => setDate(event.target.value)}/></>}</label><button className="orin-icon" disabled={busy} onClick={() => setRevision(v=>v+1)} aria-label="Reload digest"><RefreshCw size={17} className={busy ? 'animate-spin' : ''}/></button></div>
         {error && <div role="alert" className="orin-error">{error}</div>}
         {busy ? <div className="orin-state" role="status">Gathering your reading list…</div> : data && <>
           {tab==='digest' && <section className="orin-brief"><div className="eyebrow">THE DAILY BRIEF · {data.date || 'NO DIGEST YET'}</div><h2>{data.digest?.title || 'A little space for discovery.'}</h2><p>{data.digest?.summary || 'Your first digest will appear here after the collector completes a run.'}</p><div className="orin-counts"><span>{items.length} finds</span><span>{sources.length} sources</span><span>{items.filter(item=>!item.read).length} unread</span></div></section>}
           {tab==='digest' && data.digest?.groups?.length > 0 && <div className="orin-groups">{data.digest.groups.map((group,index)=><article key={`${group.title}-${index}`}><div className="eyebrow">THREAD {String(index+1).padStart(2,'0')}</div><h3>{group.title}</h3><p>{group.summary}</p><div>{group.urls?.map((url,i)=> safeUrl(url) && <a key={url} href={safeUrl(url)} target="_blank" rel="noopener noreferrer">Source {i+1} <ArrowUpRight size={12}/></a>)}</div></article>)}</div>}
+          {tab==='brain' ? <OrinBrain items={items} groups={data.digest?.groups || []} date={data.date || ''} sourceStatus={data.sourceStatus || []} availableDates={data.availableDates || []}/> : <>
         <div className="orin-filterbar"><div className="orin-source-filters">{['All',...sources].map(value=><button key={value} aria-pressed={source===value} onClick={()=>setSource(value)}>{displaySource(value)}</button>)}</div><label className="orin-search"><Search size={15}/><input placeholder="Find an idea…" aria-label="Search digest" value={search} onChange={event=>setSearch(event.target.value)}/></label></div>
           <div className="orin-items">{filtered.map(item=><article key={item.id} className={`orin-item ${item.read ? 'is-read' : ''}`}><div className="orin-item-meta"><span>{displaySource(item.source)}</span>{item.author && <span>{item.author}</span>}{item.publishedAt && <time dateTime={item.publishedAt}>{new Date(item.publishedAt).toLocaleDateString()}</time>}</div><h3>{safeUrl(item.url) ? <a href={safeUrl(item.url)} target="_blank" rel="noopener noreferrer">{item.title}<ArrowUpRight size={18}/></a> : item.title}</h3><p>{item.excerpt}</p>{item.ranking && <p className="orin-ranking"><span>{item.ranking.discovery ? 'Discovery' : 'Why this fits'}</span> {item.ranking.reason}</p>}{Object.keys(item.metrics || {}).length > 0 && <div className="orin-metrics">{Object.entries(item.metrics).map(([metric, value]) => <span key={metric}>{Number(value).toLocaleString()} {metric}</span>)}<span>observed at collection</span></div>}<div className="orin-item-bottom"><div className="orin-topics">{item.topics?.map(topic=><span key={topic}>{topic}</span>)}</div><div className="orin-item-actions"><button disabled={pending.has(item.id)} onClick={()=>updateItem(item,'feedback',item.feedback===1 ? 0 : 1)} aria-pressed={item.feedback===1} aria-label="Recommend more like this"><ThumbsUp size={15}/>More like this</button><button disabled={pending.has(item.id)} onClick={()=>updateItem(item,'feedback',item.feedback===-1 ? 0 : -1)} aria-pressed={item.feedback===-1} aria-label="Recommend fewer like this"><ThumbsDown size={15}/>Less relevant</button><button disabled={pending.has(item.id)} onClick={()=>updateItem(item,'read')} aria-pressed={item.read} aria-label={item.read ? 'Mark unread' : 'Mark read'}><Check size={15}/>{item.read ? 'Read' : 'Mark read'}</button><button disabled={pending.has(item.id)} onClick={()=>updateItem(item,'saved')} aria-pressed={item.saved} aria-label={item.saved ? 'Remove from reading list' : 'Save to reading list'}><Bookmark size={15} fill={item.saved ? 'currentColor' : 'none'}/></button></div></div></article>)}</div>
           {!filtered.length && <div className="orin-state"><Compass size={27} strokeWidth={1.2}/><h3>{tab==='saved' ? 'Keep the ideas you want to return to.' : 'Nothing on the horizon just yet.'}</h3><p>{search || source!=='All' ? 'Try another search or source.' : tab==='saved' ? 'Save a find from your daily digest to add it here.' : 'The next completed collection will fill this space.'}</p></div>}
           {data.sourceStatus?.length > 0 && <details className="orin-source-status"><summary>Collection notes</summary>{data.digest?.rankingStatus && <p><strong>Selection</strong> — {data.digest.rankingStatus.message}</p>}{data.sourceStatus.map((status,index)=><p key={index}><strong>{displaySource(status.source)}</strong> — {status.message || status.status}</p>)}</details>}
+        </>}
         </>}
       </>}
       <footer className="orin-footer"><span>Follow the interesting threads.</span><span>AI systems / Research / Engineering</span></footer>

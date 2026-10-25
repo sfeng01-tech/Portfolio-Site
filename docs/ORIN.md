@@ -51,6 +51,64 @@ Example ingestion payload (up to 100 items and 2 MB):
 
 Sources are `twitter`, `linkedin`, `reddit`, `arxiv`, `hackernews`, and `rss`. Source-specific URLs must match their service host; RSS may link to other public HTTPS hosts. Article IDs are derived server-side from canonical URLs, with fragments and common tracking parameters removed. Group URLs must reference an ingested item. Titles, excerpts, topics, timestamps, popularity metrics and model output are validated; arbitrary HTML is never required by this contract. No network fetching occurs from ingested URLs in the API.
 
+## Live actions brain
+
+The `/orin` digest and reading-list tabs are joined by a **Live brain** tab that renders the digest as an
+animated signal map instead of a list. It is derived entirely on the client from the same
+`GET /api/orin/digest` payload, so it adds no API route, database table, or ingested field; it works for any
+historical digest date and for the reading list.
+
+- Three neuron layers: **source neurons** (one per data source, sized by volume and given a stable colour),
+  **topic segments** in the middle, and **action neurons** (one per item) on the right.
+- Topic segmentation is local and deterministic. Topics are tokenised, stop-worded and merged when their
+  token overlap passes a similarity threshold, so near-duplicates such as `GPU kernels` and `ROCm kernels`
+  collapse into a single segment whose label is whichever topic carried the most items. Unlabelled items fall
+  into an `Unfiled` segment rather than disappearing.
+- Links flow `source -> topic segment -> item`; a link only exists where an item actually connected the two,
+  and its stroke weight follows the number of items behind it. Travelling dashes show direction of flow.
+- Digest `groups` become **threads**: items sharing a published group are cross-referenced in the panel, so the
+  model's own grouping and the local topic clustering can be compared side by side.
+- Selecting any neuron focuses its two-hop neighbourhood and dims the rest. Source, segment and item details
+  (fit score, discovered-vs-directed, read/saved/feedback state, outbound link) appear in the panel below.
+- Neurons are keyboard-focusable `role="button"` elements with accessible labels, the map carries a
+  descriptive `aria-label`, and the global `prefers-reduced-motion` rule in `index.css` disables all pulse
+  animation, leaving a static dotted graph.
+- A digest renders at most 40 of its highest-signal neurons (saved first, then fit score); anything beyond
+  that is reported in the view and stays available in the digest list.
+- The header carries the digest date and how long ago the collector last delivered anything, derived from
+  `collectedAt` and `checkedAt`. When the newest digest's data is more than 30 hours old — or missing
+  timestamps entirely — it reads `COLLECTOR STALLED` in a muted, non-pulsing style instead of claiming to be
+  live. Looking back at an older date deliberately is not treated as a stall.
+- The page refetches every 15 minutes while the tab is visible, and once more when it becomes visible again if
+  the last read was over 2 minutes ago, so a tab left open overnight picks up the new digest on its own. There
+  is no websocket, and hidden tabs do no work.
+
+### Two views
+
+A switcher in the header toggles between them; both share the same selection, focus and panel state.
+
+- **3D brain** (default) wraps the same three-layer network inside a procedural brain. A deformed sphere
+  supplies the shell, the longitudinal fissure and the gyri folds; sources sit on the left hemisphere, topic
+  segments run as a spine down the midline, and action neurons sit on the right hemisphere carrying their
+  source's colour, so a single idea crosses the brain from the feed that reported it to the item it produced.
+  It is rendered on a `<canvas>` with a hand-rolled perspective projection, depth-bucketed shading, a smoothed
+  silhouette and pulses travelling along the edges. Drag or use the arrow keys to rotate; it turns slowly on
+  its own until you take hold of it. A greedy label placer keeps captions from overlapping each other or
+  covering another neuron, and only near-side neurons are labelled.
+- **Flow** is the flat left-to-right map, which stays the precise, keyboard-navigable reading of the same data.
+
+The 3D view keeps the accessible panel below it as its equivalent: the canvas is a `role="img"` with a
+descriptive label, and every segment, thread and item it draws is listed as a real button in the panels and in
+the flow view. Under `prefers-reduced-motion` the brain stops rotating, the pulses freeze and the canvas only
+repaints when something changes. No 3D library is used; the whole scene is a few hundred lines of plain math.
+
+Implementation: `apps/portfolio/src/components/orin/OrinBrain.jsx` (views and panels),
+`apps/portfolio/src/components/orin/OrinBrain3D.jsx` (canvas renderer and interaction),
+`apps/portfolio/src/components/orin/brainScene.js` (pure 3D shell, neuron placement and projection),
+`apps/portfolio/src/components/orin/brainGraph.js` (pure model, topic clustering, 2D layout and
+neighbourhood logic); styles live at the end of `apps/portfolio/src/pages/orin.css`; tests are in
+`apps/portfolio/tests/orin-brain.test.js`.
+
 ## Operational limits
 
 The collector performs comprehension and grouping before sending the digest, so API requests only validate and store data. Provider keys and browser sessions stay on the runner. Extracted content and model responses are untrusted and should be displayed as text, with external links opened safely. Popularity metrics are source-relative and may be unavailable; they are not comparable as a universal score.
