@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  actions: write
 
 concurrency:
   group: orin-daily-digest
@@ -26,6 +27,8 @@ jobs:
       REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
       REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
       REDDIT_USERNAME: ${{ vars.REDDIT_USERNAME }}
+      X_API_BEARER_TOKEN: ${{ secrets.X_API_BEARER_TOKEN }}
+      GH_TOKEN: ${{ github.token }}
       ORIN_CONFIG: ${{ vars.ORIN_CONFIG }}
     steps:
       - name: Check configuration

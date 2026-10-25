@@ -97,7 +97,50 @@ export function createRedditApi({ clientId = process.env.REDDIT_CLIENT_ID, clien
   };
 }
 
-export async function collectFeed(feed, { redditApi } = {}) {
+export function createXApi({ bearerToken = process.env.X_API_BEARER_TOKEN, fetchImpl = fetch } = {}) {
+  return async function collectX(feed) {
+    if (feed.source !== 'twitter' || !allowedSourceUrl('twitter', feed.url)) throw new Error('X API URL is outside the configured source allowlist');
+    const url = new URL(feed.url);
+    if (url.hostname !== 'api.x.com' || url.pathname !== '/2/tweets/search/recent' || !url.searchParams.has('query')) throw new Error('X source must use the v2 recent search endpoint');
+    if (!bearerToken) throw new Error('X API is not configured; set the X_API_BEARER_TOKEN Actions secret');
+    const requested = Number(url.searchParams.get('max_results') || 10);
+    if (!Number.isInteger(requested) || requested < 10 || requested > 50) throw new Error('X API daily read cap must be 10–50 posts per request');
+    const response = await fetchImpl(url, {
+      redirect: 'error', signal: AbortSignal.timeout(30_000),
+      headers: { Authorization: `Bearer ${bearerToken}`, 'User-Agent': 'ORIN-personal-digest/1.0', Accept: 'application/json' },
+    });
+    if (response.status === 429) {
+      const reset = response.headers.get('x-rate-limit-reset');
+      throw new Error(`X API rate or usage limit reached${reset && /^\d+$/.test(reset) ? `; reset epoch ${reset}` : ''}; waiting until next scheduled run`);
+    }
+    if (!response.ok) throw new Error(`X API returned HTTP ${response.status}; verify app access to recent search`);
+    const payload = JSON.parse(await boundedText(response));
+    const users = new Map((payload.includes?.users || []).map(user => [user.id, user]));
+    return (payload.data || []).slice(0, requested).flatMap(post => {
+      try {
+        if (!post?.id || !post.text || !post.author_id) return [];
+        const user = users.get(post.author_id);
+        const metrics = post.public_metrics || {};
+        return [normalizeItem({
+          url: `https://x.com/${encodeURIComponent(user?.username || post.author_id)}/status/${encodeURIComponent(post.id)}`,
+          title: post.text.slice(0, 160), excerpt: post.text,
+          author: user?.name || (user?.username ? `@${user.username}` : undefined), publishedAt: post.created_at,
+          metrics: {
+            ...(Number.isFinite(metrics.like_count) ? { likes: metrics.like_count } : {}),
+            ...(Number.isFinite(metrics.retweet_count) ? { reposts: metrics.retweet_count } : {}),
+            ...(Number.isFinite(metrics.reply_count) ? { comments: metrics.reply_count } : {}),
+          },
+        }, 'twitter')];
+      } catch { return []; }
+    });
+  };
+}
+
+export async function collectFeed(feed, { redditApi, xApi } = {}) {
+  if (feed.source === 'twitter') {
+    if (!xApi) throw new Error('X API is not configured; browser collection is disabled for the daily cap');
+    return xApi(feed);
+  }
   if (feed.source === 'reddit') {
     if (!redditApi) throw new Error('Reddit OAuth is not configured; public RSS collection is disabled');
     return redditApi(feed);

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { collectFeed, createRedditApi } from './sources.mjs';
+import { collectFeed, createRedditApi, createXApi } from './sources.mjs';
 
 const feed = { source: 'reddit', url: 'https://oauth.reddit.com/r/LocalLLaMA/top?t=day&limit=50' };
 
@@ -48,4 +48,21 @@ test('Reddit 429 is surfaced without retrying the source', async () => {
   });
   await assert.rejects(() => api(feed), /Retry-After 60s/);
   assert.equal(calls, 2);
+});
+
+test('X API v2 searches at most 50 posts and maps public engagement', async () => {
+  const url = 'https://api.x.com/2/tweets/search/recent?query=ROCm&max_results=50&tweet.fields=created_at%2Cpublic_metrics%2Cauthor_id&expansions=author_id&user.fields=username%2Cname';
+  const xApi = createXApi({ bearerToken: 'test-token', fetchImpl: async (request, options) => {
+    assert.equal(new URL(request).searchParams.get('max_results'), '50');
+    assert.equal(options.headers.Authorization, 'Bearer test-token');
+    return new Response(JSON.stringify({
+      data: [{ id: '123', text: 'ROCm kernel update', author_id: 'u1', created_at: '2026-10-25T12:00:00Z', public_metrics: { like_count: 12, retweet_count: 3, reply_count: 2 } }],
+      includes: { users: [{ id: 'u1', username: 'gpu_dev', name: 'GPU Dev' }] },
+    }));
+  } });
+  const [item] = await collectFeed({ source: 'twitter', url }, { xApi });
+  assert.equal(item.url, 'https://x.com/gpu_dev/status/123');
+  assert.deepEqual(item.metrics, { likes: 12, reposts: 3, comments: 2 });
+  const tooMany = createXApi({ bearerToken: 'test-token', fetchImpl: async () => { throw new Error('must not fetch'); } });
+  await assert.rejects(() => tooMany({ source: 'twitter', url: url.replace('max_results=50', 'max_results=100') }), /daily read cap/);
 });
