@@ -19,12 +19,13 @@ export default async function handler(req, res) {
         || (hasFeedback && ![-1, 0, 1].includes(feedback))) return res.status(400).json({ error: 'Invalid item update' });
     const sql = await orinSql();
     // Set/clear the category and merge feedback in one atomic statement:
-    // 1) set a user label + stamp the source, 2) clear the label, 3) feedback
-    // only, 4) untouched. Feedback and category compose through the reordered
-    // jsonb_set branches below.
+    // 1) set a user label + stamp the source, 2) clear the label but keep
+    // `categorySource: user` as an owner tombstone (a later ingest must not
+    // hand the item back to the model), 3) feedback only, 4) untouched.
+    // Feedback and category compose through the reordered jsonb_set branches below.
     const [item] = await sql`UPDATE orin_items SET is_read = COALESCE(${read ?? null}::boolean, is_read), saved = COALESCE(${saved ?? null}::boolean, saved), item = CASE
       WHEN ${setCategory}::boolean THEN jsonb_set(jsonb_set(CASE WHEN ${hasFeedback}::boolean THEN jsonb_set(item, '{feedback}', to_jsonb(${feedbackJson}::integer), true) ELSE item END, '{category}', to_jsonb(${setCategory ? parsedCategory : null}::text), true), '{categorySource}', '"user"'::jsonb, true)
-      WHEN ${clearCategory}::boolean THEN (CASE WHEN ${hasFeedback}::boolean THEN jsonb_set(item, '{feedback}', to_jsonb(${feedbackJson}::integer), true) ELSE item END) - 'category' - 'categorySource'
+      WHEN ${clearCategory}::boolean THEN jsonb_set((CASE WHEN ${hasFeedback}::boolean THEN jsonb_set(item, '{feedback}', to_jsonb(${feedbackJson}::integer), true) ELSE item END) - 'category', '{categorySource}', '"user"'::jsonb, true)
       WHEN ${hasFeedback}::boolean THEN jsonb_set(item, '{feedback}', to_jsonb(${feedbackJson}::integer), true)
       ELSE item END, updated_at = now() WHERE id = ${id} RETURNING id, is_read, saved, item`;
     if (!item) return res.status(404).json({ error: 'Item not found' });

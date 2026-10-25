@@ -6,6 +6,22 @@ export const REPOSITORY = {
 };
 
 const normalizeLogin = (login) => typeof login === 'string' ? login.trim().toLowerCase() : '';
+
+// Local testing only: when the operator sets ORIN_LOCAL_AUTH_BYPASS=1 in a
+// non-production environment, sessions report a synthetic user and the GitHub
+// verification call never runs. Two gates keep this inert in deployments: the
+// flag itself, and NODE_ENV — Vercel and Render both set NODE_ENV=production.
+export const localAuthBypassEnabled = () =>
+  process.env.ORIN_LOCAL_AUTH_BYPASS === '1' && process.env.NODE_ENV !== 'production';
+
+export const LOCAL_BYPASS_USER = Object.freeze({
+  login: 'local-dev',
+  name: 'Local Testing',
+  avatar_url: '',
+  html_url: ''
+});
+
+const localBypassAuth = () => ({ token: null, user: LOCAL_BYPASS_USER });
 const portalAllowedUsers = new Set([
   REPOSITORY.owner,
   ...(process.env.PORTAL_GITHUB_ALLOWED_USERS || '').split(',')
@@ -87,6 +103,7 @@ export const githubFetch = (path, token, options = {}) => fetch(
 );
 
 export const getAuthorizedUser = async (req) => {
+  if (localAuthBypassEnabled()) return localBypassAuth();
   const token = parseCookies(req)[TOKEN_COOKIE];
   if (!token) return null;
 
@@ -100,6 +117,7 @@ export const getAuthorizedUser = async (req) => {
 };
 
 export const getAuthorizedOrinUser = async (req) => {
+  if (localAuthBypassEnabled()) return localBypassAuth();
   const token = parseCookies(req)[TOKEN_COOKIE];
   if (!token) return null;
 

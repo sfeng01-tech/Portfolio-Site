@@ -68,6 +68,13 @@ standard classification tracks) and is fully editable in the ORIN UI:
 - `PATCH /api/orin/items` extended: `{id, category: "Agents" | null}` sets or clears an owner label. A user edit
   stamps `categorySource: user`, which survives later re-ingestion, so the model never overwrites an owner's
   decision.
+- Clearing a label tombstones the item (`categorySource: user` with no `category`): the model can never re-file
+  that item, on re-ingest or in a backfill run, until the owner picks a new label.
+- `DELETE /api/orin/categories` extended. Labels with zero items delete directly. A label in use must declare one
+  of two fates for its items: `{label, action: 'unfile'}` removes the label from every item (they fall back to
+  topics and the model may re-file them later), or `{label, action: 'reassign', to: "Other"}` moves all of them
+  onto another taxonomy label and stamps `categorySource: user`. The digest list carries a **Categories** manager
+  next to the source filters with these buttons per row.
 
 **Model auto-assignment.** The daily classifier (`apps/orin-collector/ranking.mjs`) receives the current taxonomy
 and assigns exactly one enum label to every classified item that has no `category` yet. Owner overrides always

@@ -39,7 +39,9 @@ async function main() {
   const taxonomyRows = await sql`SELECT label FROM orin_categories ORDER BY label`;
   const categories = taxonomyRows.map(row => row.label);
   if (!categories.length) throw new Error('Taxonomy is empty; add categories in the ORIN UI or seed orin_categories first');
-  const pending = await sql`SELECT id, item->>'title' AS title, item->>'excerpt' AS excerpt FROM orin_items WHERE item->>'category' IS NULL ORDER BY updated_at DESC LIMIT ${limit}`;
+  // Owner-cleared items carry a `categorySource: user` tombstone without a
+  // label; the backfill must respect that decision instead of re-filing them.
+  const pending = await sql`SELECT id, item->>'title' AS title, item->>'excerpt' AS excerpt FROM orin_items WHERE item->>'category' IS NULL AND NOT (item->>'categorySource' = 'user' AND NOT (item ? 'category')) ORDER BY updated_at DESC LIMIT ${limit}`;
   console.info(`Taxonomy: ${categories.join(', ')}`);
   console.info(`${pending.length} item(s) without a category, up to ${limit}; model ${model}${values['dry-run'] ? ' (dry run)' : ''}.`);
   let tagged = 0;

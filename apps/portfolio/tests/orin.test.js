@@ -182,11 +182,16 @@ test('category reads allowed without errors while taxonomy writes stay owner-onl
   try {
     // Body validation happens before any database access, so an unconfigured
     // database never masks a malformed payload.
-    for (const [method, body] of [['POST', { label: '' }], ['POST', { label: 'x'.repeat(81) }], ['POST', {}], ['DELETE', { label: 9 }]]) {
+    for (const [method, body] of [['POST', { label: '' }], ['POST', { label: 'x'.repeat(81) }], ['POST', {}], ['DELETE', { label: 9 }],
+      ['DELETE', { label: 'Agents', action: 'explode' }], ['DELETE', { label: 'Agents', action: 'reassign' }],
+      ['DELETE', { label: 'Agents', action: 'reassign', to: 7 }], ['DELETE', { label: 'Agents', action: 'reassign', to: 'x'.repeat(81) }],
+      ['DELETE', { label: 'Agents', to: 'Inference' }]]) {
       const res = response();
       await categoriesHandler({ method, headers: ownerHeaders, body }, res);
       assert.equal(res.statusCode, 400);
     }
+    // Unfile and reassign are explicit actions: label-only deletes never touch
+    // items, so they stay 400-free before reaching storage.
     // Same-origin enforcement still applies to browser taxonomy writes.
     const res = response();
     await categoriesHandler({ method: 'POST', headers: { ...ownerHeaders, origin: 'https://attacker.example' }, body: { label: 'Agents' } }, res);
