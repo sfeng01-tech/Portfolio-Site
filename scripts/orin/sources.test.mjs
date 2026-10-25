@@ -131,3 +131,10 @@ test('Substack supports publication feeds and explicit custom domains, rejecting
   }
   await assert.rejects(() => collectFeed({ source: 'substack', url: 'https://substack.com.evil.test/feed' }), /allowlist/);
 });
+
+
+test('long-form Substack feeds can exceed the ordinary feed response limit', async () => {
+  const xml = `<rss><channel><item><title>GPU systems</title><link>https://cameronrwolfe.substack.com/p/gpu</link><description>${'Research '.repeat(350000)}</description></item></channel></rss>`;
+  const [item] = await collectFeed({ source: 'substack', url: 'https://cameronrwolfe.substack.com/feed' }, { fetchImpl: async () => new Response(xml) });
+  assert.equal(item.excerpt.length, 12000);
+});

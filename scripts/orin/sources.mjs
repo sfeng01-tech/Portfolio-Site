@@ -213,7 +213,8 @@ export async function collectFeed(feed, { redditApi, xApi, threadsApi, fetchImpl
   if (!['arxiv', 'hackernews', 'google_news', 'substack', 'rss'].includes(feed.source) || !allowedSourceUrl(feed.source, feed.url)) throw new Error('Feed URL is outside the configured source allowlist');
   const response = await fetchImpl(feed.url, { redirect: 'error', signal: AbortSignal.timeout(30_000), headers: { 'User-Agent': 'ORIN-personal-digest/1.0', Accept: 'application/rss+xml, application/atom+xml, application/xml' } });
   if (!response.ok) throw new Error(response.status === 429 ? 'Source rate limited; waiting until next scheduled run' : `Feed returned HTTP ${response.status}`);
-  return parseFeed(await boundedText(response), feed.source);
+  // Long-form Substack feeds can exceed 3 MB; keep a separate bounded allowance.
+  return parseFeed(await boundedText(response, feed.source === 'substack' ? 8_000_000 : 3_000_000), feed.source);
 }
 
 export async function detectBlock(page, response) {
