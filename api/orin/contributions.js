@@ -1,4 +1,5 @@
-import { orinSql, privateResponse, requireOrinOwner, safeUrl, sendError, validDate, validateCategory, itemId } from '../../apps/portfolio/server/orin.js';
+import { ORIN_DEMO_MODE, orinSql, privateResponse, requireOrinOwner, safeUrl, sendError, validDate, validateCategory, itemId } from '../../apps/portfolio/server/orin.js';
+import { addDemoContribution } from '../../apps/portfolio/server/orinDemo.js';
 
 const localDay = () => new Intl.DateTimeFormat('en-CA', {
   timeZone: process.env.ORIN_TIMEZONE || 'America/Los_Angeles'
@@ -20,6 +21,9 @@ export default async function handler(req, res) {
     if (body.note !== undefined && body.note !== null && typeof body.note !== 'string') return res.status(400).json({ error: 'Invalid note' });
     if (day > localDay()) return res.status(400).json({ error: 'Digest date cannot be in the future' });
     if (note.length > 4000) return res.status(400).json({ error: 'Note is too long' });
+    if (ORIN_DEMO_MODE()) {
+      return res.status(201).json(addDemoContribution({ url: canonicalUrl, note, category, date: day }));
+    }
 
     const sql = await orinSql();
     let category = null;
