@@ -38,6 +38,7 @@ export function createRemoteMcpClient({ endpoint = process.env.ORIN_MCP_URL, tok
 
 export async function startRemoteMcpClient({ input = process.stdin, output = process.stdout, client = createRemoteMcpClient() } = {}) {
   let buffer = '';
+  let pending = Promise.resolve();
   input.setEncoding?.('utf8');
   input.on('data', chunk => {
     buffer += chunk;
@@ -46,14 +47,15 @@ export async function startRemoteMcpClient({ input = process.stdin, output = pro
       const line = buffer.slice(0, newline).trim();
       buffer = buffer.slice(newline + 1);
       if (!line) continue;
-      let request;
-      try {
-        request = JSON.parse(line);
-      } catch {
-        output.write(`${JSON.stringify({ jsonrpc: '2.0', id: null, error: { code: -32700, message: 'Parse error' } })}\n`);
-        continue;
-      }
-      client(request).then(response => {
+      pending = pending.then(async () => {
+        let request;
+        try {
+          request = JSON.parse(line);
+        } catch {
+          output.write(`${JSON.stringify({ jsonrpc: '2.0', id: null, error: { code: -32700, message: 'Parse error' } })}\n`);
+          return;
+        }
+        const response = await client(request);
         if (response) output.write(`${JSON.stringify(response)}\n`);
       }).catch(error => {
         output.write(`${JSON.stringify({ jsonrpc: '2.0', id: request?.id ?? null, error: { code: -32603, message: error.message } })}\n`);

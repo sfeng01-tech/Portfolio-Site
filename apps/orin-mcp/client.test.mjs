@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createRemoteMcpClient } from './client.mjs';
+import { PassThrough } from 'node:stream';
+import { createRemoteMcpClient, startRemoteMcpClient } from './client.mjs';
 
 const token = 'b'.repeat(40);
 
@@ -60,4 +61,26 @@ test('remote client rejects unsafe endpoints and short tokens', async () => {
   assert.throws(() => createRemoteMcpClient({ endpoint: 'http://orin.example.com/mcp', token }), /HTTPS URL/);
   assert.throws(() => createRemoteMcpClient({ endpoint: 'https://orin.example.com/api', token }), /\/mcp/);
   assert.throws(() => createRemoteMcpClient({ endpoint: 'https://orin.example.com/mcp', token: 'short' }), /32 characters/);
+});
+
+test('remote stdio bridge preserves JSON-RPC request order', async () => {
+  const input = new PassThrough();
+  const output = new PassThrough();
+  const delays = new Map([['initialize', 25], ['tools/list', 1]]);
+  const client = async request => {
+    if (request.id === undefined) return null;
+    await new Promise(resolve => setTimeout(resolve, delays.get(request.method) || 0));
+    return { jsonrpc: '2.0', id: request.id ?? null, result: { method: request.method } };
+  };
+
+  await startRemoteMcpClient({ input, output, client });
+  input.write(`${JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'initialize' })}\n`);
+  input.write(`${JSON.stringify({ jsonrpc: '2.0', method: 'notifications/initialized' })}\n`);
+  input.write(`${JSON.stringify({ jsonrpc: '2.0', id: 2, method: 'tools/list' })}\n`);
+  await new Promise(resolve => setTimeout(resolve, 60));
+
+  const responses = output.read().toString().trim().split('\n').map(JSON.parse);
+  assert.deepEqual(responses.map(response => response.result?.method), ['initialize', 'tools/list']);
+  input.destroy();
+  output.destroy();
 });
