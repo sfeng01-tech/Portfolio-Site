@@ -100,7 +100,7 @@ Add repository **Actions secrets**:
 
 | Secret | Value |
 | --- | --- |
-| `ORIN_INGEST_URL` | `https://orin-sahil.onrender.com/api/orin/ingest` (provisioned Node service) |
+| `ORIN_INGEST_URL` | `https://orin-digest.onrender.com/api/orin/ingest` (provisioned Node service) |
 | `ORIN_INGEST_TOKEN` | Same strong 32+ character secret configured in the website's Node service |
 | `OPENROUTER_API_KEY` | Existing OpenRouter credential; never use a `VITE_` variable |
 | `ORIN_BROWSER_STORAGE_STATE` | Optional JSON object mapping `twitter` and `linkedin` to Playwright storage-state objects |

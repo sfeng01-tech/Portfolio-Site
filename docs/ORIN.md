@@ -4,7 +4,7 @@ ORIN is a private route at `/orin`. The GitHub identity is checked on the server
 
 ## Current hosting
 
-The public portfolio is served as a Render Static Site at `https://sahil-ai-portfolio.onrender.com`. ORIN's Node web service is `https://orin-sahil.onrender.com`; the static `/orin` entry redirects there. The Node adapter serves `dist` and the API handlers from the same origin, while Neon persists digests and GitHub OAuth restricts access to the repository owner. Unknown `/api/*` routes return JSON 404, not the SPA HTML.
+The public portfolio is served as a Render Static Site at `https://sahil-ai-portfolio.onrender.com`. ORIN's Node web service is `https://orin-digest.onrender.com`; the static `/orin` entry redirects there. The Node adapter serves `dist` and the API handlers from the same origin, while Neon persists digests and GitHub OAuth restricts access to the repository owner. Unknown `/api/*` routes return JSON 404, not the SPA HTML.
 
 The existing GitHub OAuth app, Render environment variables, Neon schema and Actions ingestion secrets are configured. The owner login and private digest were verified. GitHub Actions runs the daily collector independently from the Render web service. For local API preview, run `npm run build` and `npm run dev:server`, then visit `http://localhost:3000/orin`; Vite alone on port 5173 cannot authenticate or store a private digest.
 
@@ -166,11 +166,11 @@ There is no automatic deletion policy. To remove old daily digests while preserv
 ## Provisioned resources (October 25, 2026)
 
 - Public static portfolio: https://sahil-ai-portfolio.onrender.com
-- ORIN Node service: https://orin-sahil.onrender.com/orin (free plan, Oregon)
+- ORIN Node service: https://orin-digest.onrender.com/orin (free plan, Oregon)
 - Neon project: `muddy-dust-79837278`, database `orin`, production branch, Free organization, 0.25 CU. Schema applied.
 - Public service build variable `VITE_ORIN_ORIGIN` delegates `/orin` to the Node service. Leave it unset on the Node service.
 - Database connection and ingestion token are configured on the Node service; the same ingestion token and URL are stored in GitHub Actions secrets. Values are never tracked here.
-- GitHub OAuth app homepage: `https://orin-sahil.onrender.com/orin`; callback: `https://orin-sahil.onrender.com/api/auth/callback`. Client ID and secret are configured on the Node service; owner login and authenticated digest rendering were verified. ORIN requests only `read:user`.
+- GitHub OAuth app homepage: `https://orin-digest.onrender.com/orin`; callback: `https://orin-digest.onrender.com/api/auth/callback`. Client ID and secret are configured on the Node service; owner login and authenticated digest rendering were verified. ORIN requests only `read:user`.
 
 ### Verified operational state
 
