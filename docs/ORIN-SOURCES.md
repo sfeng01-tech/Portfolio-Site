@@ -18,7 +18,7 @@ Add repository **Actions secrets**:
 
 | Secret | Value |
 | --- | --- |
-| `ORIN_INGEST_URL` | `https://sahil-ai-portfolio.onrender.com/api/orin/ingest`, after the deployment runs the Node service |
+| `ORIN_INGEST_URL` | `https://orin-sahil.onrender.com/api/orin/ingest` (provisioned Node service) |
 | `ORIN_INGEST_TOKEN` | Same strong 32+ character secret configured in the website's Node service |
 | `OPENROUTER_API_KEY` | Existing OpenRouter credential; never use a `VITE_` variable |
 | `ORIN_BROWSER_STORAGE_STATE` | Optional JSON object mapping `twitter`, `linkedin`, `reddit` to Playwright storage-state objects |
@@ -72,3 +72,5 @@ I recommend **`z-ai/glm-5.3-flash` as the initial value default**, then compare 
 | [Gemini 2.5 Flash Lite](https://openrouter.ai/google/gemini-2.5-flash-lite) | $0.10 / $0.40 | $0.00620 | $0.186 | Lightweight classification alternate |
 
 Example assumes 50,000 input + 3,000 output tokens for one daily call, without caching discounts, retries, separate reasoning tokens, taxes/credit fees or hosting costs. Rates are displayed starting prices and vary by provider and promotions; the runner rechecks availability/pricing using the [models endpoint](https://openrouter.ai/docs/api/api-reference/models/list-all-models-and-their-properties). Prices and ranks can change. The initial implementation uses one model call for grouping; a separate filtering model is unnecessary at this volume. Free model tiers are an optional experiment, not the default because their limits and availability can disrupt a daily job.
+
+Mandatory reasoning models are handled using their advertised supported effort levels. GLM 5.3 Flash requires reasoning, so ORIN uses low effort and omits reasoning text from the response. The 6,000-token output ceiling includes both internal reasoning and visible JSON output; budget checks include the full ceiling.

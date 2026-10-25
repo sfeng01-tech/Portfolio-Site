@@ -81,3 +81,12 @@ Sources are `twitter`, `linkedin`, `reddit`, `arxiv`, `hackernews`, and `rss`. S
 The collector performs comprehension and grouping before sending the digest, so API requests only validate and store data. Provider keys and browser sessions stay on the runner. Extracted content and model responses are untrusted and should be displayed as text, with external links opened safely. Popularity metrics are source-relative and may be unavailable; they are not comparable as a universal score.
 
 There is no automatic deletion policy. To remove old daily digests while preserving bookmarks, delete `orin_digests` rows in SQL (membership cascades); orphan items remain until explicitly removed. Back up the database before bulk deletion. Use Neon database access controls and an appropriate retention policy for personal reading history.
+
+## Provisioned resources (October 25, 2026)
+
+- Public static portfolio: https://sahil-ai-portfolio.onrender.com
+- ORIN Node service: https://orin-sahil.onrender.com/orin (free plan, Oregon)
+- Neon project: `muddy-dust-79837278`, database `orin`, production branch, Free organization, 0.25 CU. Schema applied.
+- Public service build variable `VITE_ORIN_ORIGIN` delegates `/orin` to the Node service. Leave it unset on the Node service.
+- Database connection and ingestion token are configured on the Node service; the same ingestion token and URL are stored in GitHub Actions secrets. Values are never tracked here.
+- GitHub OAuth app homepage: `https://orin-sahil.onrender.com/orin`; callback: `https://orin-sahil.onrender.com/api/auth/callback`. Its client ID and secret must be configured on the Node service to enable login.

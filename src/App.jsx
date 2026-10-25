@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -31,6 +31,17 @@ const RouteFallback = () => (
     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-dark-text-primary" />
   </div>
 );
+
+// Static portfolio hosting delegates the private route to its Node service.
+// The Node deployment leaves this build variable unset and renders ORIN locally.
+function OrinEntry() {
+  const target = import.meta.env.VITE_ORIN_ORIGIN;
+  const external = target && target !== window.location.origin;
+  useEffect(() => {
+    if (external) window.location.replace(`${target.replace(/\/$/, '')}/orin`);
+  }, [target, external]);
+  return external ? <RouteFallback /> : <OrinPage />;
+}
 
 function App() {
   return (
@@ -110,7 +121,7 @@ function App() {
             } />
 
             {/* Admin Routes */}
-            <Route path="/orin" element={<OrinPage />} />
+            <Route path="/orin" element={<OrinEntry />} />
             <Route path="/admin/login" element={<LoginPage />} />
             <Route path="/admin" element={
               <ProtectedRoute>
