@@ -3,8 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   LayoutDashboard,
-  Briefcase,
-  GraduationCap,
   BookOpen,
   Library,
   FileText,
@@ -26,8 +24,6 @@ const AdminLayout = ({ children }) => {
 
   const navigationItems = [
     { name: 'Dashboard', path: '/admin', icon: LayoutDashboard },
-    { name: 'Projects', path: '/admin/projects', icon: Briefcase },
-    { name: 'Experience', path: '/admin/experience', icon: GraduationCap },
     { name: 'Blog', path: '/admin/blog', icon: BookOpen },
     { name: 'Books', path: '/admin/books', icon: Library },
     { name: 'Papers', path: '/admin/papers', icon: FileText },

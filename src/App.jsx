@@ -3,10 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navigation from './components/Navigation';
-import { publicSections } from './config/publicSections';
 import HomePage from './pages/HomePage';
-import ExperiencePage from './pages/ExperiencePage';
-import ProjectsPage from './pages/ProjectsPage';
 import OpenSourcePage from './pages/OpenSourcePage';
 import PublicationsPage from './pages/PublicationsPage';
 import TalksPage from './pages/TalksPage';
@@ -19,8 +16,6 @@ import ContactPage from './pages/ContactPage';
 const LoginPage = lazy(() => import('./pages/admin/LoginPage'));
 const OrinPage = lazy(() => import('./pages/OrinPage'));
 const DashboardPage = lazy(() => import('./pages/admin/DashboardPage'));
-const ProjectsAdmin = lazy(() => import('./pages/admin/ProjectsAdmin'));
-const ExperienceAdmin = lazy(() => import('./pages/admin/ExperienceAdmin'));
 const BlogAdmin = lazy(() => import('./pages/admin/BlogAdmin'));
 const BlogEditor = lazy(() => import('./pages/admin/BlogEditor'));
 const BooksAdmin = lazy(() => import('./pages/admin/BooksAdmin'));
@@ -57,18 +52,8 @@ function App() {
                 <main id="main-content" tabIndex={-1}><HomePage /></main>
               </>
             } />
-            <Route path="/experience" element={publicSections.experience ? (
-              <>
-                <Navigation />
-                <main id="main-content" tabIndex={-1}><ExperiencePage /></main>
-              </>
-            ) : <Navigate to="/" replace />} />
-            <Route path="/projects" element={publicSections.projects ? (
-              <>
-                <Navigation />
-                <main id="main-content" tabIndex={-1}><ProjectsPage /></main>
-              </>
-            ) : <Navigate to="/" replace />} />
+            <Route path="/experience" element={<Navigate to="/" replace />} />
+            <Route path="/projects" element={<Navigate to="/" replace />} />
             <Route path="/open-source" element={
               <>
                 <Navigation />
@@ -128,16 +113,8 @@ function App() {
                 <DashboardPage />
               </ProtectedRoute>
             } />
-            <Route path="/admin/projects" element={
-              <ProtectedRoute>
-                <ProjectsAdmin />
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/experience" element={
-              <ProtectedRoute>
-                <ExperienceAdmin />
-              </ProtectedRoute>
-            } />
+            <Route path="/admin/projects" element={<Navigate to="/admin" replace />} />
+            <Route path="/admin/experience" element={<Navigate to="/admin" replace />} />
             <Route path="/admin/blog" element={
               <ProtectedRoute>
                 <BlogAdmin />

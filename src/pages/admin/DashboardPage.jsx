@@ -4,8 +4,6 @@ import { useAuth } from '../../contexts/AuthContext';
 import githubService from '../../services/githubService';
 import AdminLayout from '../../components/admin/AdminLayout';
 import {
-  Briefcase,
-  GraduationCap,
   BookOpen,
   Library,
   FileText,
@@ -40,20 +38,6 @@ const DashboardPage = () => {
   };
 
   const stats = data ? [
-    {
-      name: 'Projects',
-      count: data.projects?.length || 0,
-      icon: Briefcase,
-      link: '/admin/projects',
-      color: 'text-blue-400'
-    },
-    {
-      name: 'Experience',
-      count: data.experiences?.length || 0,
-      icon: GraduationCap,
-      link: '/admin/experience',
-      color: 'text-green-400'
-    },
     {
       name: 'Blog Posts',
       count: data.blogPosts?.length || 0,
@@ -155,20 +139,6 @@ const DashboardPage = () => {
                 Quick Actions
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <Link
-                  to="/admin/projects"
-                  className="flex items-center gap-3 px-4 py-3 bg-dark-bg border border-dark-border rounded-lg hover:border-dark-text-muted transition-colors"
-                >
-                  <Plus size={20} className="text-blue-400" />
-                  <span className="text-dark-text-primary font-medium">Add Project</span>
-                </Link>
-                <Link
-                  to="/admin/experience"
-                  className="flex items-center gap-3 px-4 py-3 bg-dark-bg border border-dark-border rounded-lg hover:border-dark-text-muted transition-colors"
-                >
-                  <Plus size={20} className="text-green-400" />
-                  <span className="text-dark-text-primary font-medium">Add Experience</span>
-                </Link>
                 <Link
                   to="/admin/blog"
                   className="flex items-center gap-3 px-4 py-3 bg-dark-bg border border-dark-border rounded-lg hover:border-dark-text-muted transition-colors"

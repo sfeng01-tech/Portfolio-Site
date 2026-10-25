@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { publicSections } from '../config/publicSections';
-import { ArrowDown, ArrowRight, ArrowUpRight, Cpu, Github, Linkedin } from 'lucide-react';
+import { ArrowDown, ArrowUpRight, Cpu, Github, Linkedin } from 'lucide-react';
 
 function ComputeIllustration() {
   return <div className="compute-illustration" role="img" aria-label="Schematic of an AI system, connecting training and inference through a GPU compute core">
@@ -17,25 +16,20 @@ function ComputeIllustration() {
   </div>;
 }
 
-export default function Hero({ profile, skills, achievements, projects }) {
+export default function Hero({ profile, skills, achievements }) {
   return <div className="home-layout container-width">
     <section id="about" className="hero-section">
       <div className="hero-copy">
         <div className="eyebrow"><span className="status-dot"/>SOFTWARE ENGINEER · AI SYSTEMS</div>
         <h1>I build the systems<br/>that make <span>AI work.</span></h1>
         <p className="hero-description">I’m {profile.name}. {profile.tagline} — from GPU kernels to production infrastructure.</p>
-        <div className="hero-actions"><Link to={publicSections.projects ? "/projects" : "/open-source"} className="button-primary">Explore my work <ArrowUpRight size={18}/></Link><a href={profile.github} target="_blank" rel="noopener noreferrer" className="button-quiet"><Github size={18}/> GitHub <ArrowUpRight size={14}/></a></div>
-        <a className="explore-link" href={publicSections.projects ? "#selected-work" : "#expertise"}><ArrowDown size={14}/> A little further down</a>
+        <div className="hero-actions"><Link to="/open-source" className="button-primary">Explore my work <ArrowUpRight size={18}/></Link><a href={profile.github} target="_blank" rel="noopener noreferrer" className="button-quiet"><Github size={18}/> GitHub <ArrowUpRight size={14}/></a></div>
+        <a className="explore-link" href="#expertise"><ArrowDown size={14}/> A little further down</a>
       </div>
       <ComputeIllustration/>
     </section>
-    {publicSections.experience && <div className="context-strip"><span className="eyebrow">CURRENTLY BUILDING AT</span><span className="company-wordmark">AMD <ArrowUpRight size={19}/></span><span className="context-divider"/><span>AI platforms. Real-world impact.</span><Link to="/experience">View experience <ArrowRight size={15}/></Link></div>}
-    {publicSections.projects && <section id="selected-work" className="home-section">
-      <div className="section-heading"><div><div className="eyebrow">01 / SELECTED WORK</div><h2>Ideas, put into practice.</h2></div><Link className="text-link" to="/projects">All projects <ArrowUpRight size={17}/></Link></div>
-      <div className="selected-projects">{projects.slice(0,3).map((project,index)=><a key={project.title} href={project.github} target="_blank" rel="noopener noreferrer" className="selected-project"><div className="project-topline"><span className="project-number">0{index+1}</span><ArrowUpRight size={20}/></div><div className={`project-art project-art-${index}`} aria-hidden="true">{index===0?<><span/><span/><span/><span/><span/></>:index===1?<div className="kernel-grid">{Array.from({length:25},(_,i)=><i key={i}/>)}</div>:<div className="model-glyph">t<span>LM</span><small>FROM FIRST PRINCIPLES</small></div>}</div><h3>{project.title}</h3><p>{project.description}</p><div className="project-tags">{project.technologies.slice(0,3).map(tech=><span key={tech}>{tech}</span>)}</div></a>)}</div>
-    </section>}
-    <section id="expertise" className="home-section expertise-section"><div className="section-heading"><div><div className="eyebrow">{publicSections.projects ? '02' : '01'} / THE TOOLKIT</div><h2>Across the AI stack.</h2></div><p>Close to the hardware.<br/>Focused on the whole system.</p></div><div className="skill-rows">{skills.map((group,index)=><div className="skill-row" key={group.category}><h3><span>0{index+1}</span>{group.category}</h3><div>{group.items.map(skill=><span key={skill}>{skill}</span>)}</div></div>)}</div></section>
-    <section className="home-section"><div className="section-heading"><div><div className="eyebrow">{publicSections.projects ? '03' : '02'} / ALONG THE WAY</div><h2>A few things I’m proud of.</h2></div></div><div className="achievement-list">{achievements.map((item,index)=><div key={item}><span className="achievement-index">{String(index+1).padStart(2,'0')}</span><p>{item}</p><ArrowUpRight size={17}/></div>)}</div></section>
+    <section id="expertise" className="home-section expertise-section"><div className="section-heading"><div><div className="eyebrow">01 / THE TOOLKIT</div><h2>Across the AI stack.</h2></div><p>Close to the hardware.<br/>Focused on the whole system.</p></div><div className="skill-rows">{skills.map((group,index)=><div className="skill-row" key={group.category}><h3><span>0{index+1}</span>{group.category}</h3><div>{group.items.map(skill=><span key={skill}>{skill}</span>)}</div></div>)}</div></section>
+    <section className="home-section"><div className="section-heading"><div><div className="eyebrow">02 / ALONG THE WAY</div><h2>A few things I’m proud of.</h2></div></div><div className="achievement-list">{achievements.map((item,index)=><div key={item}><span className="achievement-index">{String(index+1).padStart(2,'0')}</span><p>{item}</p><ArrowUpRight size={17}/></div>)}</div></section>
     <section className="home-contact"><div className="eyebrow">LET’S CONNECT</div><h2>Good systems start with<br/>a good conversation.</h2><a className="text-link" href={`mailto:${profile.email}`}>Say hello <ArrowUpRight size={22}/></a></section>
     <footer className="home-footer"><Link className="brand-mark" to="/">sf<span>.</span></Link><span>© {new Date().getFullYear()} {profile.name}</span><div><a href={profile.github} aria-label="GitHub" target="_blank" rel="noopener noreferrer"><Github size={18}/></a><a href={profile.linkedin} aria-label="LinkedIn" target="_blank" rel="noopener noreferrer"><Linkedin size={18}/></a><Link to="/orin">ORIN <ArrowUpRight size={14}/></Link><Link to="/contact">Get in touch <ArrowUpRight size={14}/></Link></div></footer>
   </div>;
