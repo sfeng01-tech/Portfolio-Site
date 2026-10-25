@@ -8,7 +8,7 @@ The workflow is configured with the application database, GitHub OAuth and worke
 
 X and LinkedIn browser collection use normal Playwright Chromium sessions with a maximum of three configured URLs per source, three viewport snapshots per page, sequential navigation and pauses. Login walls, verification challenges and HTTP 401/403/429 stop that source for the current run. There are no stealth plugins, proxies, CAPTCHA solvers or automatic rate-limit retries. A cloud IP may require fresh manual login or may remain blocked; ORIN reports the source status and continues available feeds. Reddit uses application-only OAuth and the official Data API; configure a Reddit script app's client ID and secret as GitHub Actions secrets. The runner uses a descriptive User-Agent, one cached OAuth token per run, serial requests, and does not retry a 429 before the next scheduled run.
 
-Only visible source excerpts are collected. Links always identify their provenance: social permalinks, Reddit RSS links, arXiv abstracts and HN discussions. Full external articles/papers are not silently fetched. Research claims remain claims from supplied abstracts. Popularity is shown only when a numeric metric was actually observed; missing metrics remain missing. Items are prioritized by topic matches and recency with source quotas. Observed engagement breaks relevance ties only among posts from the same source; cross-platform raw counts are never compared, and missing metrics remain unknown; this is a relevant daily selection, not an exhaustive popularity ranking across entire platforms. Unknown publication dates remain unknown. Site markup changes may require selector maintenance.
+Only visible source excerpts are collected. Links always identify their provenance: social permalinks, Reddit RSS links, arXiv abstracts and HN discussions. Full external articles/papers are not silently fetched. Research claims remain claims from supplied abstracts. Popularity is shown only when a numeric metric was actually observed; missing metrics remain missing. Items are classified for personal relevance before digest selection, with keyword ranking as a fallback and source quotas retained. Observed engagement breaks relevance ties only among posts from the same source; cross-platform raw counts are never compared, and missing metrics remain unknown; this is a relevant daily selection, not an exhaustive popularity ranking across entire platforms. Unknown publication dates remain unknown. Site markup changes may require selector maintenance.
 
 ## Hugging Face, alphaXiv and Substack
 
@@ -43,6 +43,40 @@ The existing X recent-search query now includes `from:_akhaliq` in its OR group.
 Karpathy's [arXiv Sanity Preserver](https://github.com/karpathy/arxiv-sanity-preserver) points to [arXiv Sanity Lite](https://github.com/karpathy/arxiv-sanity-lite) as its rewrite. Neither live site responded during checks on October 25, 2026, and the published applications do not expose an RSS route. As a fallback, Orin now reads direct arXiv feeds for `cs.AI`, `cs.CL`, `cs.CV`, `cs.NE` and `stat.ML`, alongside existing `cs.LG` and `cs.DC`. These are arXiv entries, not arXiv Sanity rankings or personalized recommendations. Empty weekend feeds are valid checks.
 
 The collector and ingestion endpoint now support up to 40 source checks per run; default configuration has 32 including the two disabled browser sources. Deploy the updated backend before the expanded collector runs: earlier backends reject more than 20 source checks. `maxItems=60` and the existing model budget remain unchanged.
+
+## Feedback-aware classification and selection
+
+Orin uses **`google/gemini-2.5-flash-lite` through OpenRouter** for classification and the configured GLM model for digest synthesis. This replaces TF-IDF/SVM-style preference features with scores based on supplied text. It is an initial model choice, not a claim that any model is an ideal judge of research quality. The score measures personal relevance; it does not verify findings or assess scientific validity. [OpenRouter structured outputs](https://openrouter.ai/docs/guides/features/structured-outputs).
+
+Before applying the old keyword gate, the worker removes stale/seen entries and deduplicates explicit arXiv identifiers across arXiv, Hugging Face Papers and alphaXiv, ignoring version suffixes. It balances the candidate pool across sources, then classifies up to 120 candidates in batches of 30, using titles and the first 700 excerpt characters. Zero-keyword candidates are eligible. This bounds coverage: entries outside the capped pool or relevant details beyond the excerpt can still be missed. Freshness remains 72 hours. New ingested records persist paper identities for cross-day suppression; historical records without that field are not backfilled automatically.
+
+The seven interest tracks are GPU kernels, quantization, inference, training, agents, AI hardware and research. “More like this” and “Less relevant” buttons record explicit feedback (+1/-1); clicking an active button clears it. Read/saved controls remain separate. The next run retrieves up to 40 recent feedback records through the worker-only `/api/orin/preferences` endpoint and supplies at most 12 compact examples to the classifier. Existing JSON storage retains feedback during ingestion updates, so no schema migration is required.
+
+Selection uses validated 0–100 scores, interest-track diversity and existing source quotas. Up to 15% of the item limit is reserved for discovery, which can include adjacent-interest scores and favors underrepresented tracks. Cards show the model's relevance reason and discovery label. No popularity claim is inferred from an LLM score.
+
+Configuration defaults:
+
+```json
+"ranking": {
+  "enabled": true,
+  "model": "google/gemini-2.5-flash-lite",
+  "maxCandidates": 120,
+  "budgetFraction": 0.4,
+  "discoveryFraction": 0.15
+}
+```
+
+`budgetFraction` reserves at most 40% of the existing `maxRunUsd` for classification. The worker checks current catalog support, prices and context before metered requests and trims the candidate plan to fit. It reserves the conservative estimate even for failed paid responses, subtracts it from the digest budget, and never automatically retries. This is a per-invocation price-based guard, not an account-wide spending cap. A missing key, unsupported model, over-budget plan, rate limit or invalid/incomplete schema falls back to keyword ranking; Collection notes explain the selection method. A feedback-fetch failure still allows classification using configured interests. `--dry-run` and `--no-model` never call the classifier. Set `ranking.enabled=false` to retain keyword selection.
+
+On October 25, 2026, a small opt-in live smoke evaluation selected all six relevant synthetic examples, excluded two irrelevant examples and rejected an irrelevant prompt-injection example (9 total). Its conservative reservation was $0.002025, not the measured charge. This checks wiring and obvious relevance, not performance on real reader preferences or subtle papers. Continue judging recommendations with explicit feedback. Re-run it with:
+
+```sh
+OPENROUTER_API_KEY=... node apps/orin-collector/evaluate-ranking.mjs
+# Existing macOS Keychain setup, with no key printed:
+node apps/orin-collector/evaluate-ranking.mjs --keychain-openrouter
+```
+
+The same existing OpenRouter key is used for both stages. If `ORIN_CONFIG` overrides the example config in GitHub Actions, include `ranking` there too. Deploy the updated backend before using the feedback UI and collector.
 
 ## GitHub Actions setup
 
@@ -111,6 +145,6 @@ I recommend **`z-ai/glm-5.3-flash` as the initial value default**, then compare 
 | [MiMo V2.6 Flash](https://openrouter.ai/xiaomi/mimo-v2.6-flash) | $0.091 / $0.182 | $0.00510 | $0.153 | Low-cost alternate provider/model family |
 | [Gemini 2.5 Flash Lite](https://openrouter.ai/google/gemini-2.5-flash-lite) | $0.10 / $0.40 | $0.00620 | $0.186 | Lightweight classification alternate |
 
-Example assumes 50,000 input + 3,000 output tokens for one daily call, without caching discounts, retries, separate reasoning tokens, taxes/credit fees or hosting costs. Rates are displayed starting prices and vary by provider and promotions; the runner rechecks availability/pricing using the [models endpoint](https://openrouter.ai/docs/api/api-reference/models/list-all-models-and-their-properties). Prices and ranks can change. The initial implementation uses one model call for grouping; a separate filtering model is unnecessary at this volume. Free model tiers are an optional experiment, not the default because their limits and availability can disrupt a daily job.
+Example assumes 50,000 input + 3,000 output tokens for one daily call, without caching discounts, retries, separate reasoning tokens, taxes/credit fees or hosting costs. Rates are displayed starting prices and vary by provider and promotions; the runner rechecks availability/pricing using the [models endpoint](https://openrouter.ai/docs/api/api-reference/models/list-all-models-and-their-properties). Prices and ranks can change. Digest synthesis uses GLM; a separate bounded Flash Lite classification pass now ranks candidates first, as described below. Free model tiers are an optional experiment, not the default because their limits and availability can disrupt a daily job.
 
 Mandatory reasoning models are handled using their advertised supported effort levels. GLM 5.3 Flash requires reasoning, so ORIN uses low effort and omits reasoning text from the response. The 6,000-token output ceiling includes both internal reasoning and visible JSON output; budget checks include the full ceiling.

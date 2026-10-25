@@ -4,6 +4,7 @@ import { requireIngestToken, requireOrinOwner, safeUrl, suppressPreviousItems, v
 import digestHandler from '../../../api/orin/digest.js';
 import itemsHandler from '../../../api/orin/items.js';
 import ingestHandler from '../../../api/orin/ingest.js';
+import preferencesHandler from '../../../api/orin/preferences.js';
 
 const entry = { source: 'arxiv', url: 'https://arxiv.org/abs/2601.12345', title: 'A GPU paper', excerpt: 'Untrusted extracted text', author: '', topics: ['ROCm'] };
 const response = () => ({ headers: {}, statusCode: 200, setHeader(key, value) { this.headers[key] = value; }, status(code) { this.statusCode = code; return this; }, json(body) { this.body = body; return this; } });
@@ -129,4 +130,30 @@ test('ranking metadata is bounded and paper identity is derived from the link', 
   assert.throws(()=>validateIngest({date:'2026-10-25',items:[{...entry,ranking:{...ranking,score:101}}]}));
   const suppressed=suppressPreviousItems(payload,[],['arxiv:2601.12345']);
   assert.equal(suppressed.items.length,0);
+});
+
+
+test('worker feedback endpoint rejects browser cookies and invalid ingestion tokens', async () => {
+  const original = process.env.ORIN_INGEST_TOKEN;
+  process.env.ORIN_INGEST_TOKEN = 'a'.repeat(40);
+  try {
+    for (const headers of [{cookie:'portfolio_github_token=valid'}, {authorization:'Bearer invalid'}]) {
+      const res=response();
+      await preferencesHandler({method:'GET',headers},res);
+      assert.equal(res.statusCode,401);
+      assert.equal(res.headers['Cache-Control'],'private, no-store');
+    }
+  } finally { if(original===undefined) delete process.env.ORIN_INGEST_TOKEN; else process.env.ORIN_INGEST_TOKEN=original; }
+});
+
+test('explicit feedback rejects booleans and out-of-range values before database access', async () => {
+  const originalFetch=global.fetch;
+  global.fetch=async()=>({ok:true,json:async()=>({login:process.env.GITHUB_REPOSITORY_OWNER||'sfeng01-tech'})});
+  try {
+    for(const feedback of [true,2,'1',null]) {
+      const res=response();
+      await itemsHandler({method:'PATCH',headers:{host:'portfolio.example','x-forwarded-proto':'https',origin:process.env.APP_ORIGIN?.replace(/\/$/,'')||'https://portfolio.example',cookie:'portfolio_github_token=valid','content-type':'application/json'},body:{id:'a'.repeat(64),feedback}},res);
+      assert.equal(res.statusCode,400);
+    }
+  } finally {global.fetch=originalFetch;}
 });

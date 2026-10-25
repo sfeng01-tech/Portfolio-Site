@@ -1,6 +1,7 @@
 {
   "timezone": "America/Los_Angeles",
   "model": "z-ai/glm-5.3-flash",
+  "ranking": {"enabled": true, "model": "google/gemini-2.5-flash-lite", "maxCandidates": 120, "budgetFraction": 0.4, "discoveryFraction": 0.15},
   "maxItems": 60,
   "maxAgeHours": 72,
   "maxRunUsd": 0.05,
