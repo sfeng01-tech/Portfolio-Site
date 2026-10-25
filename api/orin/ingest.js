@@ -19,7 +19,11 @@ export default async function handler(req, res) {
     const statements = [sql`INSERT INTO orin_digests (day, digest, source_status) VALUES (${date}, ${JSON.stringify(digest)}::jsonb, ${JSON.stringify(sourceStatus)}::jsonb) ON CONFLICT (day) DO UPDATE SET digest = EXCLUDED.digest, source_status = EXCLUDED.source_status, updated_at = now()`];
     if (replace) statements.push(sql`DELETE FROM orin_digest_items WHERE day = ${date}`);
     for (const item of items) {
-      statements.push(sql`INSERT INTO orin_items (id, item) VALUES (${item.id}, ${JSON.stringify(item)}::jsonb) ON CONFLICT (id) DO UPDATE SET item = EXCLUDED.item || CASE WHEN orin_items.item ? 'feedback' THEN jsonb_build_object('feedback', orin_items.item->'feedback') ELSE '{}'::jsonb END, updated_at = now()`);
+      // Re-delivered items keep the owner's decisions: feedback always, and the
+      // category plus its source whenever the owner (not the model) set it.
+      // jsonb_strip_nulls drops the keys when they must not be preserved, so a
+      // fresh model-assigned label from the collector still wins otherwise.
+      statements.push(sql`INSERT INTO orin_items (id, item) VALUES (${item.id}, ${JSON.stringify(item)}::jsonb) ON CONFLICT (id) DO UPDATE SET item = EXCLUDED.item || jsonb_strip_nulls(jsonb_build_object('feedback', orin_items.item->'feedback', 'category', CASE WHEN orin_items.item->>'categorySource' = 'user' THEN orin_items.item->'category' ELSE NULL END, 'categorySource', CASE WHEN orin_items.item->>'categorySource' = 'user' THEN orin_items.item->'categorySource' ELSE NULL END)), updated_at = now()`);
       statements.push(sql`INSERT INTO orin_digest_items (day, item_id) VALUES (${date}, ${item.id}) ON CONFLICT DO NOTHING`);
     }
     await sql.transaction(statements);

@@ -47,6 +47,51 @@ test('classifier rejects fabricated/duplicate/missing IDs, scores, tracks and lo
   assert.throws(()=>validateClassifications({items:[valid,valid]},[a,b]));
 });
 
+const TAXONOMY = ['Inference', 'Agents', 'Research'];
+const categorized = (item, category = 'Inference') => ({ ...classification(item), category });
+
+test('a supplied taxonomy makes the same classification call assign one enum category', () => {
+  const paper = item(1);
+  const request = classificationRequest([paper], config, [], TAXONOMY);
+  const schema = request.responseFormat.json_schema.schema.properties.items.items;
+  assert.ok(schema.required.includes('category'));
+  assert.deepEqual(schema.properties.category.enum, TAXONOMY);
+  assert.deepEqual(JSON.parse(request.messages[1].content).taxonomy, TAXONOMY);
+  assert.equal(request.decode({ items: [{ ...categorized(paper), id: 'p0' }] })[0].category, 'Inference');
+  for (const row of [{ ...categorized(paper, 'Made-up'), id: 'p0' }, { ...classification(paper), id: 'p0' }]) {
+    assert.throws(() => request.decode({ items: [row] }), /Invalid classifier category/);
+  }
+  // Without a taxonomy the schema stays category-free for older callers.
+  const plain = classificationRequest([paper], config);
+  assert.ok(!JSON.stringify(plain.responseFormat.json_schema.schema).includes('"category"'));
+});
+
+test('classified items carry the model label plus its source for grouping', () => {
+  const candidates = [item(1), item(2), item(3, 'Adjacent agent work', 'huggingface')];
+  const rows = candidates.map(row => categorized(row, row.source === 'huggingface' ? 'Agents' : 'Inference'));
+  // Above the relevance floor, so every candidate is actually published.
+  rows[2].score = 66;
+  const result = selectClassified(candidates, rows, { ...config, maxItems: 3 });
+  assert.equal(result.length, 3);
+  assert.equal(result.find(row => row.source === 'huggingface').category, 'Agents');
+  assert.ok(result.every(row => row.categorySource === 'model'));
+});
+
+test('the daily ranking writes taxonomy labels into the published item blob', async () => {
+  const paper = item(1, 'Quantized matrix kernels');
+  const result = await rankItems([paper], config, { apiKey: 'test', date: '2026-10-25', now, categories: TAXONOMY, fetchImpl: async (url, options) => {
+    if (url.endsWith('/models')) return new Response(JSON.stringify(catalog));
+    const body = JSON.parse(options.body);
+    const schema = body.response_format.json_schema.schema.properties.items.items.properties;
+    if (!schema.category) throw new Error('taxonomy was not sent to the model');
+    const input = JSON.parse(body.messages[1].content);
+    return new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify({ items: input.candidates.map(row => categorized({ id: row.id, title: row.title, reason: 'Enough.' }, 'Research')) }) } }] }));
+  } });
+  assert.equal(result.items[0].category, 'Research');
+  assert.equal(result.items[0].categorySource, 'model');
+  assert.equal(result.status.method, 'llm');
+});
+
 test('fallback after a failed metered response retains the budget reservation and never retries', async () => {
   let calls=0;
   const result=await rankItems([item(1)],config,{apiKey:'test',date:'2026-10-25',now,fetchImpl:async url=>{

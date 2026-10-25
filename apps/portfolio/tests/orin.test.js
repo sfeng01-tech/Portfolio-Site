@@ -1,10 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { requireIngestToken, requireOrinOwner, safeUrl, suppressPreviousItems, validDate, validateIngest } from '../server/orin.js';
+import { requireIngestToken, requireOrinOwner, safeUrl, suppressPreviousItems, validDate, validateCategory, validateIngest } from '../server/orin.js';
 import digestHandler from '../../../api/orin/digest.js';
 import itemsHandler from '../../../api/orin/items.js';
 import ingestHandler from '../../../api/orin/ingest.js';
 import preferencesHandler from '../../../api/orin/preferences.js';
+import categoriesHandler from '../../../api/orin/categories.js';
+import contributionsHandler from '../../../api/orin/contributions.js';
 
 const entry = { source: 'arxiv', url: 'https://arxiv.org/abs/2601.12345', title: 'A GPU paper', excerpt: 'Untrusted extracted text', author: '', topics: ['ROCm'] };
 const response = () => ({ headers: {}, statusCode: 200, setHeader(key, value) { this.headers[key] = value; }, status(code) { this.statusCode = code; return this; }, json(body) { this.body = body; return this; } });
@@ -36,12 +38,20 @@ test('model grouping cannot reference articles that were not ingested', () => {
 });
 
 test('read and write endpoints reject anonymous requests before querying private storage', async () => {
-  for (const [handler, method] of [[digestHandler, 'GET'], [itemsHandler, 'PATCH']]) {
+  for (const [handler, method] of [[digestHandler, 'GET'], [itemsHandler, 'PATCH'], [contributionsHandler, 'POST']]) {
     const res = response();
     await handler({ method, headers: {}, query: {} }, res);
     assert.equal(res.statusCode, 401);
     assert.equal(res.headers['Cache-Control'], 'private, no-store');
   }
+});
+
+test('share contributions only accept POST requests', async () => {
+  const res = response();
+  await contributionsHandler({ method: 'GET', headers: {}, query: {} }, res);
+  assert.equal(res.statusCode, 405);
+  assert.equal(res.headers.Allow, 'POST');
+  assert.equal(res.headers['Cache-Control'], 'private, no-store');
 });
 
 test('GitHub identity must match the configured repository owner', async () => {
@@ -130,6 +140,79 @@ test('ranking metadata is bounded and paper identity is derived from the link', 
   assert.throws(()=>validateIngest({date:'2026-10-25',items:[{...entry,ranking:{...ranking,score:101}}]}));
   const suppressed=suppressPreviousItems(payload,[],['arxiv:2601.12345']);
   assert.equal(suppressed.items.length,0);
+});
+
+test('categories carry a bounded label plus who assigned it, and default to the model', () => {
+  assert.equal(validateCategory('  Agents  '), 'Agents');
+  for (const value of ['', 'x'.repeat(81), 7, null, undefined, true]) assert.throws(() => validateCategory(value), /Invalid category/);
+  const labeled = validateIngest({ date: '2026-10-25', items: [{ ...entry, category: ' Agents ', categorySource: 'model' }] });
+  assert.equal(labeled.items[0].category, 'Agents');
+  assert.equal(labeled.items[0].categorySource, 'model');
+  const bare = validateIngest({ date: '2026-10-25', items: [{ ...entry, category: 'Research' }] });
+  assert.equal(bare.items[0].categorySource, 'model', 'collector labels default to the model source');
+  const items = [{ ...entry, category: 'Agents' }];
+  for (const broken of [{ ...entry, category: 'Agents', categorySource: 'browser' }, { ...entry, categorySource: 'user' }]) {
+    assert.throws(() => validateIngest({ date: '2026-10-25', items: [broken] }));
+  }
+});
+
+test('category/admin endpoints authenticate before touching private storage', async () => {
+  const original = process.env.ORIN_INGEST_TOKEN;
+  const originalUrl = process.env.ORIN_DATABASE_URL;
+  delete process.env.ORIN_DATABASE_URL;
+  const res = response();
+  await categoriesHandler({ method: 'GET', headers: {}, query: {} }, res);
+  assert.equal(res.statusCode, 401);
+  try {
+    process.env.ORIN_INGEST_TOKEN = 'a'.repeat(40);
+    const collectorRes = response();
+    await categoriesHandler({ method: 'GET', headers: { authorization: `Bearer ${'a'.repeat(40)}` } }, collectorRes);
+    assert.equal(collectorRes.statusCode, 503);
+    assert.equal(collectorRes.body.error, 'ORIN database is not configured');
+  } finally {
+    if (original === undefined) delete process.env.ORIN_INGEST_TOKEN; else process.env.ORIN_INGEST_TOKEN = original;
+    if (originalUrl === undefined) delete process.env.ORIN_DATABASE_URL; else process.env.ORIN_DATABASE_URL = originalUrl;
+  }
+});
+
+test('category reads allowed without errors while taxonomy writes stay owner-only and bounded', async () => {
+  const originalFetch = global.fetch;
+  global.fetch = async () => ({ ok: true, json: async () => ({ login: process.env.GITHUB_REPOSITORY_OWNER || 'sfeng01-tech' }) });
+  const ownerHeaders = { host: 'portfolio.example', 'x-forwarded-proto': 'https', origin: process.env.APP_ORIGIN?.replace(/\/$/, '') || 'https://portfolio.example', cookie: 'portfolio_github_token=valid', 'content-type': 'application/json' };
+  try {
+    // Body validation happens before any database access, so an unconfigured
+    // database never masks a malformed payload.
+    for (const [method, body] of [['POST', { label: '' }], ['POST', { label: 'x'.repeat(81) }], ['POST', {}], ['DELETE', { label: 9 }]]) {
+      const res = response();
+      await categoriesHandler({ method, headers: ownerHeaders, body }, res);
+      assert.equal(res.statusCode, 400);
+    }
+    // Same-origin enforcement still applies to browser taxonomy writes.
+    const res = response();
+    await categoriesHandler({ method: 'POST', headers: { ...ownerHeaders, origin: 'https://attacker.example' }, body: { label: 'Agents' } }, res);
+    assert.equal(res.statusCode, 403);
+  } finally { global.fetch = originalFetch; }
+});
+
+test('owner category edits validate label work before reaching the database', async () => {
+  const originalFetch = global.fetch;
+  const originalUrl = process.env.ORIN_DATABASE_URL;
+  delete process.env.ORIN_DATABASE_URL;
+  global.fetch = async () => ({ ok: true, json: async () => ({ login: process.env.GITHUB_REPOSITORY_OWNER || 'sfeng01-tech' }) });
+  try {
+    for (const category of [5, true, { label: 'Agents' }, 'x'.repeat(81)]) {
+      const res = response();
+      await itemsHandler({ method: 'PATCH', headers: { host: 'portfolio.example', 'x-forwarded-proto': 'https', origin: process.env.APP_ORIGIN?.replace(/\/$/, '') || 'https://portfolio.example', cookie: 'portfolio_github_token=valid', 'content-type': 'application/json' }, body: { id: 'a'.repeat(64), category } }, res);
+      assert.equal(res.statusCode, 400);
+    }
+    // `category: null` is a deliberate clear, not a malformed request.
+    const res = response();
+    await itemsHandler({ method: 'PATCH', headers: { host: 'portfolio.example', 'x-forwarded-proto': 'https', origin: process.env.APP_ORIGIN?.replace(/\/$/, '') || 'https://portfolio.example', cookie: 'portfolio_github_token=valid', 'content-type': 'application/json' }, body: { id: 'a'.repeat(64), category: null } }, res);
+    assert.equal(res.statusCode, 503, 'well-formed edits proceed to storage');
+  } finally {
+    global.fetch = originalFetch;
+    if (originalUrl === undefined) delete process.env.ORIN_DATABASE_URL; else process.env.ORIN_DATABASE_URL = originalUrl;
+  }
 });
 
 

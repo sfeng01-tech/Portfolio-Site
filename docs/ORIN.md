@@ -15,7 +15,7 @@ Source failures appear explicitly in the digest. Login, verification and rate-li
 All owner endpoints require the existing HttpOnly GitHub session cookie. `PATCH` additionally requires a matching `Origin` and `Content-Type: application/json`.
 
 - `GET /api/orin/digest`: latest available digest, or `?date=YYYY-MM-DD` for a selected day. `?saved=true` includes bookmarked items across dates (up to 500). Response: `{date, availableDates, digest, items, sourceStatus}`. `availableDates` contains the last 90 digest dates.
-- `PATCH /api/orin/items`: `{id, read?: boolean, saved?: boolean}`. Returns `{id, read, saved}`. Read/bookmark state survives re-ingestion and carries across days for the same canonical URL.
+- `PATCH /api/orin/items`: `{id, read?: boolean, saved?: boolean, feedback?: -1|0|1, category?: string|null}`. Returns `{id, read, saved, feedback, category, categorySource}`. Read/bookmark/feedback state and owner categories survive re-ingestion and carry across days for the same canonical URL.
 - `POST /api/orin/ingest`: requires `Authorization: Bearer ORIN_INGEST_TOKEN` and JSON. The token is independent of browser authentication. Returns `{count, skipped, added, members, date, mode}`. Articles already included on an earlier day are suppressed server-side, while same-day retries remain valid. Group references are pruned and affected summaries cleared to avoid describing excluded articles.
 
   Same-day membership is **additive**: a run adds its items to the day and the digest text is refreshed, but items an earlier run already published for that day are not removed. A partial run — a blocked source, a spent daily cap, a model outage — therefore cannot erase a richer digest, which is what previously left a day showing six finds after a thin later run. Pass `"replace": true` to opt back into swapping the day's membership outright, which is only appropriate when correcting a known-bad day. `added` reports how many of the run's items were newly attached and `members` the day's total afterwards, so a degrading source mix is visible in the run log. Shared items are upserted without losing read/bookmark state, and historical item records and bookmarks remain retained.
@@ -54,6 +54,39 @@ Example ingestion payload (up to 100 items and 2 MB):
 ```
 
 Sources are `twitter`, `linkedin`, `reddit`, `arxiv`, `hackernews`, and `rss`. Source-specific URLs must match their service host; RSS may link to other public HTTPS hosts. Article IDs are derived server-side from canonical URLs, with fragments and common tracking parameters removed. Group URLs must reference an ingested item. Titles, excerpts, topics, timestamps, popularity metrics and model output are validated; arbitrary HTML is never required by this contract. No network fetching occurs from ingested URLs in the API.
+
+## Categories and segmentation
+
+Each artifact can carry one **category** label alongside its topics, stored inside the item JSONB as `category`
+plus `categorySource` (`user` or `model`). The taxonomy lives in the `orin_categories` table (seeded with the
+standard classification tracks) and is fully editable in the ORIN UI:
+
+- `GET /api/orin/categories`: list labels with item counts. The collector reads it with the ingestion token; the
+  browser reads it with the GitHub session.
+- `POST /api/orin/categories`: add a label (owner session, same-origin).
+- `DELETE /api/orin/categories`: remove a label that no item still uses.
+- `PATCH /api/orin/items` extended: `{id, category: "Agents" | null}` sets or clears an owner label. A user edit
+  stamps `categorySource: user`, which survives later re-ingestion, so the model never overwrites an owner's
+  decision.
+
+**Model auto-assignment.** The daily classifier (`apps/orin-collector/ranking.mjs`) receives the current taxonomy
+and assigns exactly one enum label to every classified item that has no `category` yet. Owner overrides always
+win; when the taxonomy is unavailable a run simply publishes without model categories. Items digested before the
+feature existed can be labelled with a one-off pass:
+
+```
+npm run categories:backfill --workspace=@portfolio/orin-collector       # add -- --dry-run to preview
+```
+
+(The script needs `ORIN_DATABASE_URL` and `OPENROUTER_API_KEY` and only touches the category fields.)
+
+**Grouping.** The brain reads `category` before topics and ranking tracks (`itemTopics` in `brainGraph.js`), so a
+label change — an owner edit or a model assignment — regroups segments on the next render, with no rebuild and no
+migration. `orin_search_items` in the MCP server also matches categories.
+
+Deployment note: the `orin_categories` table must exist in Neon before the categories endpoints are used
+(`apps/portfolio/server/orin-schema.sql` contains the `CREATE TABLE` plus the seed insert). The collector item
+payload gained an optional `category`/`categorySource` pair, validated by `validateIngest`.
 
 ## Live actions brain
 
@@ -99,19 +132,30 @@ A switcher in the header toggles between them; both share the same selection, fo
   silhouette and pulses travelling along the edges. Drag or use the arrow keys to rotate; it turns slowly on
   its own until you take hold of it. A greedy label placer keeps captions from overlapping each other or
   covering another neuron, and only near-side neurons are labelled.
-- **Flow** is the flat left-to-right map, which stays the precise, keyboard-navigable reading of the same data.
+- **Signal board** is an isometric neural patchbay built with [Anatomy](https://github.com/wheresryan22/anatomy).
+  Source jacks feed segmented topic relays and action lamps; every similar-topic cluster gets its own tray,
+  with its action neurons grouped into two lanes. Source ordering follows connected-topic weight to reduce
+  crossings, and coloured pulses retain each item's source. The solid base, trays, collars, neuron bodies,
+  screws and ruler are projected SVG solids rather than a flat chart or a runtime 3D dependency.
 
 The 3D view keeps the accessible panel below it as its equivalent: the canvas is a `role="img"` with a
-descriptive label, and every segment, thread and item it draws is listed as a real button in the panels and in
-the flow view. Under `prefers-reduced-motion` the brain stops rotating, the pulses freeze and the canvas only
-repaints when something changes. No 3D library is used; the whole scene is a few hundred lines of plain math.
+descriptive label, and every segment, thread and item it draws is listed as a real button in the panels and on
+the keyboard-navigable signal board. Under `prefers-reduced-motion` the brain stops rotating, the pulses freeze
+and the canvas only repaints when something changes. No 3D library is used; the whole scene is plain math.
 
 Implementation: `apps/portfolio/src/components/orin/OrinBrain.jsx` (views and panels),
 `apps/portfolio/src/components/orin/OrinBrain3D.jsx` (canvas renderer and interaction),
 `apps/portfolio/src/components/orin/brainScene.js` (pure 3D shell, neuron placement and projection),
-`apps/portfolio/src/components/orin/brainGraph.js` (pure model, topic clustering, 2D layout and
-neighbourhood logic); styles live at the end of `apps/portfolio/src/pages/orin.css`; tests are in
-`apps/portfolio/tests/orin-brain.test.js`.
+`apps/portfolio/src/components/orin/OrinBrainMachine.jsx` and `brainMachine.js` (signal-board renderer and
+geometry), `apps/portfolio/src/components/orin/brainGraph.js` (pure model, topic clustering, layout and
+neighbourhood logic), and `apps/portfolio/src/components/orin/OrinBrainMachine.css`. Anatomy's MIT-licensed
+isometric kit and licence are vendored under `apps/portfolio/src/components/orin/anatomy/`; no package was added.
+Tests are in `apps/portfolio/tests/orin-brain.test.js` and `orin-brain-machine.test.js`.
+
+For an authentication-free local visual review, run `npm run dev` and open
+`http://localhost:5173/orin-brain-preview.html?view=board`. The fixture page is only a Vite development entry,
+not a production route. Use `?view=board&theme=dark` for the dark theme or `?view=board&n=12` for a smaller
+digest; omitting `view=board` opens the 3D brain. Fixture links use `example.test` and never represent live data.
 
 ## Operational limits
 

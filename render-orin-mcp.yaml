@@ -1,0 +1,18 @@
+# Optional Render Web Service for the ORIN MCP server.
+# Set ORIN_MCP_DATABASE_URL to a read-only Neon role before deploying.
+services:
+  - type: web
+    name: orin-mcp
+    runtime: node
+    plan: free
+    buildCommand: npm ci --workspace=@portfolio/orin-mcp
+    startCommand: npm run start:http --workspace=@portfolio/orin-mcp
+    healthCheckPath: /health
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: ORIN_MCP_DATABASE_URL
+        sync: false
+      - key: ORIN_MCP_TOKEN
+        sync: false

@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import { Activity, ArrowUpRight, Bookmark, Compass, Network, Radio } from 'lucide-react';
-import { buildBrainModel, digestFreshness, displaySource, formatAge, layoutBrain, neighborhood, shortLabel } from './brainGraph';
+import { buildBrainModel, digestFreshness, displaySource, formatAge, layoutBrain, neighborhood } from './brainGraph';
 import OrinBrain3D from './OrinBrain3D';
+import OrinBrainMachine from './OrinBrainMachine';
 
 const safeUrl = (value) => {
   try {
@@ -9,27 +10,6 @@ const safeUrl = (value) => {
     return parsed.protocol === 'https:' ? parsed.href : null;
   } catch { return null; }
 };
-
-const LABEL_LIMIT = 18;
-
-function Neuron({ node, active, dimmed, showLabel, onSelect }) {
-  const className = ['orin-brain-node', `is-${node.kind}`, active ? 'is-active' : '', dimmed ? 'is-dimmed' : ''].filter(Boolean).join(' ');
-  const fill = node.kind === 'source' ? node.color : node.kind === 'topic' ? 'var(--accent)' : 'var(--ink)';
-  const caption = node.kind === 'item' ? shortLabel(node.label, LABEL_LIMIT) : node.kind === 'source' ? `${node.caption || node.label} · ${node.count}` : node.label;
-  return <g className={className} role="button" tabIndex={0} aria-pressed={active}
-    aria-label={`${node.kind === 'topic' ? 'Topic segment' : node.kind === 'source' ? 'Source neuron' : 'Action neuron'}: ${node.label}`}
-    onClick={() => onSelect(node)} onKeyDown={(event) => {
-      if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onSelect(node); }
-    }}>
-    <title>{node.kind === 'item' ? node.label : caption}</title>
-    <circle className="orin-brain-halo" cx={node.x} cy={node.y} r={node.r + 6}/>
-    <circle cx={node.x} cy={node.y} r={node.r} fill={fill} opacity={node.kind === 'item' ? (node.read ? 0.32 : 0.92) : 0.9}
-      stroke={node.saved && node.kind === 'item' ? 'var(--accent)' : 'transparent'} strokeWidth={node.saved && node.kind === 'item' ? 2.2 : 0}/>
-    {(node.kind !== 'item' || showLabel) && <text className={`orin-brain-node-label${node.kind === 'topic' ? ' is-strong' : ''}`}
-      x={node.kind === 'source' ? node.x - node.r - 12 : node.x + node.r + 12} y={node.y + 3.5}
-      textAnchor={node.kind === 'source' ? 'end' : 'start'}>{caption}</text>}
-  </g>;
-}
 
 function FocusDetail({ node, model, onSelect }) {
   if (!node) return <>
@@ -66,9 +46,9 @@ function FocusDetail({ node, model, onSelect }) {
   </>;
 }
 
-export default function OrinBrain({ items = [], groups = [], date = '', sourceStatus = [], availableDates = [] }) {
+export default function OrinBrain({ items = [], groups = [], date = '', sourceStatus = [], availableDates = [], initialView = 'brain' }) {
   const [selectedId, setSelectedId] = useState(null);
-  const [viewMode, setViewMode] = useState('brain');
+  const [viewMode, setViewMode] = useState(initialView === 'flow' ? 'flow' : 'brain');
   const model = useMemo(() => buildBrainModel({ items, groups }), [items, groups]);
   const view = useMemo(() => layoutBrain(model), [model]);
   const focus = useMemo(() => (selectedId ? neighborhood(model, selectedId) : null), [model, selectedId]);
@@ -78,7 +58,6 @@ export default function OrinBrain({ items = [], groups = [], date = '', sourceSt
   const itemsById = useMemo(() => new Map(model.items.map((node) => [node.id, node])), [model.items]);
   const sourcesById = useMemo(() => new Map(model.sources.map((node) => [node.id, node])), [model.sources]);
   const selectedNode = selectedId ? view.nodes.find((node) => node.id === selectedId) : null;
-  const selection = selectedNode ? (selectedNode.kind === 'item' ? selectedNode : model.sources.find((s) => s.id === selectedId) || model.topics.find((t) => t.id === selectedId)) : null;
   const selectionItems = !selectedNode ? [] : selectedNode.kind === 'item'
     ? [model.items.find((node) => node.id === selectedId)]
     : model.items.filter((item) => (selectedNode.kind === 'source' ? item.sourceId === selectedNode.id : item.topicIds.includes(selectedNode.id)));
@@ -91,7 +70,7 @@ export default function OrinBrain({ items = [], groups = [], date = '', sourceSt
         <div className="eyebrow"><Activity size={14}/> LIVE ACTIONS BRAIN</div>
         <div className="orin-brain-views" role="group" aria-label="Brain view">
           <button type="button" aria-pressed={viewMode === 'brain'} onClick={() => setViewMode('brain')}>3D brain</button>
-          <button type="button" aria-pressed={viewMode === 'flow'} onClick={() => setViewMode('flow')}>Flow</button>
+          <button type="button" aria-pressed={viewMode === 'flow'} onClick={() => setViewMode('flow')}>Signal board</button>
         </div>
         <div className={`orin-brain-live${freshness.stale ? ' is-stalled' : ''}`}>
           <i aria-hidden="true"/> {date ? `SYNCED ${date}` : 'AWAITING SIGNAL'}
@@ -114,24 +93,7 @@ export default function OrinBrain({ items = [], groups = [], date = '', sourceSt
     {!model.items.length ? <div className="orin-state"><Compass size={27} strokeWidth={1.2}/><h3>No signal to trace yet.</h3><p>The brain lights up once a collection run publishes a digest.</p></div> : <>
       {viewMode === 'brain'
         ? <OrinBrain3D model={model} selection={selectedId} focus={focus} showItemLabels={showItemLabels} onSelect={toggle}/>
-        : <div className="orin-brain-mapwrap">
-        <svg className="orin-brain-map" viewBox={`0 0 ${view.width} ${view.height}`} role="img"
-          aria-label={`${model.stats.sources} sources feeding ${model.stats.segments} topic segments across ${model.stats.items} items`}
-          onClick={(event) => { if (event.target === event.currentTarget) setSelectedId(null); }}>
-          <g className="orin-brain-links">
-            {view.links.map((link, index) => <g key={link.id} className={!focus || focus.has(link.from) || focus.has(link.to) ? '' : 'is-dimmed'}>
-              <path className={`orin-brain-link is-${link.kind}`} d={link.d} style={{ strokeWidth: Math.min(2.4, 0.8 + link.weight * 0.35) }}/>
-              <path className="orin-brain-flow" d={link.d} pathLength={1}
-                style={{ '--flow-duration': `${2.4 + (index % 7) * 0.42}s`, '--flow-delay': `${-(index * 0.19)}s` }}/>
-            </g>)}
-          </g>
-          <g className="orin-brain-nodes">
-            {view.nodes.map((node) => <Neuron key={node.id} node={node} active={selectedId === node.id} showLabel={showItemLabels}
-              dimmed={Boolean(focus) && !focus.has(node.id)} onSelect={toggle}/>)}
-          </g>
-        </svg>
-        <p className="orin-brain-axis" aria-hidden="true"><span>sources</span><span>topic segments</span><span>actions</span></p>
-      </div>}
+        : <OrinBrainMachine model={model} focus={focus} selectedId={selectedId} onSelect={toggle} onClear={() => setSelectedId(null)}/>}
 
       <div className="orin-brain-panel">
         <div className="orin-brain-card">

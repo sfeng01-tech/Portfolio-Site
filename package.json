@@ -8,7 +8,8 @@
   },
   "workspaces": [
     "apps/portfolio",
-    "apps/orin-collector"
+    "apps/orin-collector",
+    "apps/orin-mcp"
   ],
   "scripts": {
     "dev": "npm run dev --workspace=@portfolio/site",
@@ -18,7 +19,11 @@
     "dev:server": "npm run dev:server --workspace=@portfolio/site",
     "test:portfolio": "npm run test --workspace=@portfolio/site",
     "test:orin": "npm run test --workspace=@portfolio/orin-collector",
-    "test": "npm run test:portfolio && npm run test:orin",
+    "test:orin-mcp": "npm run test --workspace=@portfolio/orin-mcp",
+    "test": "npm run test:portfolio && npm run test:orin && npm run test:orin-mcp",
+    "mcp:orin": "npm run start --workspace=@portfolio/orin-mcp",
+    "mcp:orin:http": "npm run start:http --workspace=@portfolio/orin-mcp",
+    "mcp:orin:remote": "npm run start:remote --workspace=@portfolio/orin-mcp",
     "collect": "npm run collect --workspace=@portfolio/orin-collector"
   }
 }

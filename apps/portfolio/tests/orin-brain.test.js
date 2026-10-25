@@ -75,6 +75,20 @@ test('items without topics fall back to a shared segment', () => {
   assert.equal(model.topics[0].count, 2);
 });
 
+test('an owner or model category regroups the item ahead of topics and tracks', () => {
+  const moved = item('h', 'reddit', 'Quantization quality tradeoffs', {
+    topics: ['GPU kernels'], ranking: { score: 64, tracks: ['GPU kernels'] },
+    category: 'Agents', categorySource: 'user',
+  });
+  const model = buildBrainModel({ items: [moved] });
+  assert.deepEqual(model.topics.map((topic) => topic.label), ['Agents']);
+  assert.deepEqual(model.items[0].topicIds, ['topic:0']);
+  // A category is the strongest grouping signal even when it sits alone.
+  const mixed = buildBrainModel({ items: [moved, digestItems[2]] });
+  assert.equal(mixed.topics.some((topic) => topic.label === 'Agents'), true);
+  assert.equal(mixed.topics.some((topic) => topic.label === 'Quantization'), true);
+});
+
 test('layoutBrain produces bounded, serializable node and link geometry', () => {
   const model = buildBrainModel({ items: digestItems, groups: [{ title: 'Kernel work', summary: '', urls: ['https://example.test/a'] }] });
   const view = layoutBrain(model);

@@ -35,6 +35,16 @@ export function paperIdFor(value) {
   const id = url.pathname.replace(prefix, '').replace(/\.pdf$/, '').replace(/v\d+$/, '');
   return /^(?:\d{4}\.\d{4,5}|[a-z-]+(?:\.[A-Z]{2})?\/\d{7})$/.test(id) ? `arxiv:${id}` : undefined;
 }
+// Category labels power the brain grouping and the classifier taxonomy. They
+// travel inside the item JSONB, so only bounds are enforced here; membership in
+// the editable taxonomy is enforced where the label is chosen (browser picker,
+// collector classification schema).
+export function validateCategory(value) {
+  if (typeof value !== 'string' || !value.trim() || value.length > 80 || /[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(value)) throw fail('Invalid category');
+  return value.trim();
+}
+export const CATEGORY_SOURCES = ['user', 'model'];
+
 export function validateRanking(value) {
   if (value === undefined) return undefined;
   const tracks = ['GPU kernels', 'Quantization', 'Inference', 'Training', 'Agents', 'AI hardware', 'Research'];
@@ -63,7 +73,13 @@ export function validateIngest(body) {
       }
     }
     if (item.topics !== undefined && (!Array.isArray(item.topics) || item.topics.length > 20)) throw fail('Invalid topics');
-    return { ranking: validateRanking(item.ranking), paperId: paperIdFor(url), id: itemId(url), source: item.source, url, title: string(item.title, 500), excerpt: string(item.excerpt ?? item.text, 12000, true), author: string(item.author, 200, true), publishedAt: timestamp(item.publishedAt), collectedAt: timestamp(item.collectedAt), metrics, topics: (item.topics || []).map(topic => string(topic, 100)) };
+    // Model-assigned or user label, always paired with its source; the label
+    // content itself is bounded here and pattern-free on purpose so the
+    // taxonomy can evolve without API releases.
+    if (item.category === undefined && item.categorySource !== undefined) throw fail('Invalid category source');
+    if (item.categorySource !== undefined && !CATEGORY_SOURCES.includes(item.categorySource)) throw fail('Invalid category source');
+    const category = item.category === undefined ? undefined : validateCategory(item.category);
+    return { ranking: validateRanking(item.ranking), paperId: paperIdFor(url), id: itemId(url), source: item.source, url, title: string(item.title, 500), excerpt: string(item.excerpt ?? item.text, 12000, true), author: string(item.author, 200, true), publishedAt: timestamp(item.publishedAt), collectedAt: timestamp(item.collectedAt), metrics, topics: (item.topics || []).map(topic => string(topic, 100)), ...(category === undefined ? {} : { category, categorySource: item.categorySource ?? 'model' }) };
   });
   const uniqueItems = [...new Map(items.map(item => [item.id, item])).values()];
   const knownUrls = new Set(uniqueItems.map(item => item.url));

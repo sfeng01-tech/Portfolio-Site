@@ -27,6 +27,8 @@ test('Node adapter serves SPA, private APIs and bounded JSON without leaking fil
     assert.match(session.headers.get('cache-control'), /no-store/);
     const digest = await fetch(`${base}/api/orin/digest`);
     assert.equal(digest.status, 401);
+    const contribution = await fetch(`${base}/api/orin/contributions`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' });
+    assert.equal(contribution.status, 401);
     const unknown = await fetch(`${base}/api/nonexistent`);
     assert.equal(unknown.status, 404);
     assert.deepEqual(await unknown.json(), { error: 'API route not found' });

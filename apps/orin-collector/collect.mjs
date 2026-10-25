@@ -144,7 +144,17 @@ async function main() {
         if (!Array.isArray(preferences.examples)) throw new Error('Invalid preferences');
         examples = preferences.examples;
       } catch { console.info('Personal feedback unavailable this run; ranking uses configured interests.'); }
-      const ranked = await rankItems(candidates, config, { apiKey, examples, date });
+      // The owner's editable taxonomy drives model-assigned categories; a
+      // missing taxonomy only skips category labels, never the digest itself.
+      let categories = [];
+      try {
+        const response = await fetch(new URL('/api/orin/categories', endpointUrl), { redirect: 'error', signal: AbortSignal.timeout(15_000), headers: { Authorization: `Bearer ${token}` } });
+        if (!response.ok) throw new Error('Categories unavailable');
+        const taxonomy = JSON.parse(await boundedText(response, 100_000));
+        if (!Array.isArray(taxonomy.categories)) throw new Error('Invalid categories');
+        categories = taxonomy.categories.map(row => typeof row === 'string' ? row.trim() : row?.label).filter(label => typeof label === 'string' && label.trim()).slice(0, 60);
+      } catch { console.info('Category taxonomy unavailable this run; items publish without model categories.'); }
+      const ranked = await rankItems(candidates, config, { apiKey, examples, categories, date });
       items = ranked.items;
       payload.items = items;
       payload.rankingStatus = ranked.status;

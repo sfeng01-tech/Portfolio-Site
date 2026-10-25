@@ -4,6 +4,7 @@ This repository is an npm-workspaces monorepo containing:
 
 - `apps/portfolio`: the React 18 + Vite portfolio front end and its optional Node HTTP server.
 - `apps/orin-collector`: the independently scheduled ORIN content collector.
+- `apps/orin-mcp`: the local read-only ORIN MCP server for agent access.
 - `api/`: root-level serverless API handlers used by Vercel.
 - `docs/`: operational and setup documentation.
 
@@ -19,7 +20,9 @@ Run commands from the repository root unless a task clearly belongs to one works
 - `npm test`: run the full repository test suite.
 - `npm run test:portfolio`: run only the portfolio tests.
 - `npm run test:orin`: run only the ORIN collector tests.
+- `npm run test:orin-mcp`: run only the ORIN MCP tests.
 - `npm run collect`: run the ORIN collector.
+- `npm run mcp:orin`: start the local ORIN MCP server.
 
 For a local ORIN dry run, use:
 
@@ -37,6 +40,8 @@ npm run collect --workspace=@portfolio/orin-collector -- --once --rss-only --dry
 - Use ES modules. Both workspace packages declare `"type": "module"`.
 - Prefer the existing React patterns: function components, hooks, Tailwind utility classes, and the current component/data organization.
 - Treat the portfolio server and API handlers as deployment-sensitive. Verify environment-variable access and host/port handling before changing them.
+- Keep `apps/orin-mcp` strictly read-only. Prefer `ORIN_MCP_DATABASE_URL` backed by a Neon role with only `SELECT` permissions.
+- Keep local stdio in `server.mjs`, Render Streamable HTTP in `http.mjs`, and the remote stdio bridge in `client.mjs` separated by transport boundary.
 - Follow the README deployment notes before making hosting changes. The Render static service cannot execute the API handlers; ORIN requires a Node web service or compatible serverless hosting.
 
 ## Testing and verification

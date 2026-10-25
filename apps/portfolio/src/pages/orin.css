@@ -31,6 +31,25 @@
 .orin-groups p { font-size:12px; line-height:1.8; color:var(--muted); }
 .orin-groups article>div:last-child { display:flex; flex-wrap:wrap; gap:12px; margin-top:15px; }
 .orin-groups a { display:flex; gap:3px; align-items:center; font:10px monospace; color:var(--accent); }
+.orin-archive { padding:35px 0 10px; }
+.orin-archive h2 { font-size:32px; font-weight:500; letter-spacing:-1px; margin:15px 0; }
+.orin-archive>p { font-size:14px; line-height:1.8; color:var(--muted); max-width:680px; }
+.orin-archive ul { list-style:none; margin-top:24px; }
+.orin-archive li + li { border-top:1px solid var(--line); }
+.orin-archive button { display:flex; align-items:center; justify-content:space-between; gap:18px; width:100%; padding:18px 14px; text-align:left; }
+.orin-archive button:hover { background:rgb(var(--surface-rgb)); }
+.orin-archive button[aria-current=true] { background:rgb(var(--surface-rgb)); box-shadow:inset 3px 0 0 var(--accent); }
+.orin-archive button span:first-child { font-size:15px; color:var(--ink); }
+.orin-archive button span:last-child { font:10px monospace; color:var(--accent); }
+.orin-archive-empty { font-size:13px; color:var(--muted); }
+.orin-share { padding:35px 0; max-width:640px; }
+.orin-share h2 { font-size:32px; font-weight:500; letter-spacing:-1px; margin:15px 0 24px; }
+.orin-share form { display:grid; gap:16px; }
+.orin-share label { display:grid; gap:8px; font:10px monospace; letter-spacing:.8px; text-transform:uppercase; color:var(--muted); }
+.orin-share input, .orin-share select, .orin-share textarea { background:rgb(var(--surface-rgb)); border:1px solid var(--line); border-radius:5px; color:var(--ink); font-size:13px; padding:12px; }
+.orin-share textarea { min-height:120px; resize:vertical; }
+.orin-share button[type=submit] { justify-self:start; }
+.orin-share>p { margin-top:18px; font-size:12px; color:var(--muted); }
 .orin-filterbar { display:flex; align-items:center; justify-content:space-between; gap:14px; border-bottom:1px solid var(--line); padding:15px 0; flex-wrap:wrap; }
 .orin-source-filters { display:flex; gap:5px; flex-wrap:wrap; }
 .orin-source-filters button { font-size:11px; padding:8px 10px; border-radius:4px; color:var(--muted); }
@@ -46,6 +65,13 @@
 .orin-item>p { font-size:14px; line-height:1.85; color:var(--muted); max-width:800px; }
 .orin-item.is-read h3 { color:var(--muted); }
 .orin-item-bottom { display:flex; gap:16px; justify-content:space-between; align-items:center; margin-top:18px; }
+.orin-item-file { display:flex; flex-direction:column; align-items:flex-start; gap:9px; min-width:0; }
+.orin-category { display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
+.orin-category-select { max-width:180px; background:transparent; font:10px monospace; letter-spacing:.4px; color:var(--muted); border:1px solid var(--line); border-radius:4px; padding:7px 9px; }
+.orin-category-form { display:flex; align-items:center; gap:5px; }
+.orin-category-form input { background:transparent; border:1px solid var(--line); border-radius:4px; font-size:11px; padding:7px 9px; width:150px; color:var(--ink); }
+.orin-category-form button { font:10px monospace; border:1px solid var(--line); border-radius:4px; padding:7px 9px; color:var(--muted); }
+.orin-category-form button[type=submit]:disabled { opacity:.5; cursor:not-allowed; }
 .orin-topics { display:flex; gap:6px; flex-wrap:wrap; }
 .orin-topics span { font:9px monospace; border:1px solid var(--line); border-radius:3px; padding:5px 7px; color:var(--muted); }
 .orin-item-actions { display:flex; align-items:center; gap:9px; flex-shrink:0; }

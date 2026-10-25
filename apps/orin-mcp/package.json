@@ -1,0 +1,18 @@
+{
+  "name": "@portfolio/orin-mcp",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=20.19"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "start:http": "node http.mjs",
+    "start:remote": "node client.mjs",
+    "test": "node --test *.test.mjs"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.2.0"
+  }
+}

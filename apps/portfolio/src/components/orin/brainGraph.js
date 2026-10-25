@@ -21,6 +21,7 @@ export const SOURCE_LABELS = Object.freeze({
   alphaxiv: 'alphaXiv',
   substack: 'Substack',
   rss: 'Articles',
+  shared: 'Shared with me',
 });
 
 export const displaySource = (source) => SOURCE_LABELS[source] || String(source ?? 'Unknown');
@@ -169,6 +170,10 @@ function compareItems(left, right) {
 }
 
 function itemTopics(item) {
+  // An explicit category (owner-edited or model-assigned) defines the segment
+  // on its own, so editing a label immediately regroups the brain.
+  const category = String(item.category ?? '').trim();
+  if (category) return [category];
   const declared = Array.isArray(item.topics) ? item.topics.map((topic) => String(topic).trim()).filter(Boolean) : [];
   const tracks = Array.isArray(item.ranking?.tracks) ? item.ranking.tracks.map((track) => String(track).trim()).filter(Boolean) : [];
   const topics = declared.length ? declared : tracks;
@@ -329,8 +334,24 @@ export function layoutBrain(model, {
   const offset = Math.max(0, (height - contentHeight) / 2);
   const nodes = new Map();
   const sourceSpan = height - paddingY * 2;
-  model.sources.forEach((node, index) => {
-    const y = model.sources.length === 1 ? height / 2 : paddingY + (sourceSpan * index) / (model.sources.length - 1);
+  const topicOrder = new Map(model.topics.map((topic, index) => [topic.id, index]));
+  const sourceWeights = new Map();
+  for (const edge of model.edges) {
+    if (edge.kind !== 'source-topic') continue;
+    const weights = sourceWeights.get(edge.from) || [];
+    weights.push({ order: topicOrder.get(edge.to) || 0, weight: edge.weight });
+    sourceWeights.set(edge.from, weights);
+  }
+  const sourceOrder = [...model.sources].sort((left, right) => {
+    const rank = (source) => {
+      const weights = sourceWeights.get(source.id) || [];
+      const total = weights.reduce((sum, entry) => sum + entry.weight, 0);
+      return total ? weights.reduce((sum, entry) => sum + entry.order * entry.weight, 0) / total : model.topics.length;
+    };
+    return rank(left) - rank(right) || left.source.localeCompare(right.source);
+  });
+  sourceOrder.forEach((node, index) => {
+    const y = sourceOrder.length === 1 ? height / 2 : paddingY + (sourceSpan * index) / (sourceOrder.length - 1);
     nodes.set(node.id, { ...node, kind: 'source', x: paddingX, y: round(y), r: radiusFor('source', node) });
   });
   model.topics.forEach((node) => {
