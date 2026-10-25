@@ -2,11 +2,12 @@ import { paperIdentity, relevance, selectItems } from './core.mjs';
 import { boundedText } from './sources.mjs';
 
 export const TRACKS = ['GPU kernels', 'Quantization', 'Inference', 'Training', 'Agents', 'AI hardware', 'Research'];
-export const RANKING_DEFAULTS = { enabled: true, model: 'google/gemini-2.5-flash-lite', maxCandidates: 120, budgetFraction: 0.4, discoveryFraction: 0.15 };
+export const RANKING_DEFAULTS = { enabled: true, model: 'xiaomi/mimo-v2.6-flash', fallbackModels: ['deepseek/deepseek-v4.1-flash-1017', 'google/gemini-2.5-flash-lite'], maxCandidates: 120, budgetFraction: 0.4, discoveryFraction: 0.15 };
 
 export function rankingConfig(config) {
   const value = { ...RANKING_DEFAULTS, ...config.ranking };
   if (typeof value.enabled !== 'boolean' || typeof value.model !== 'string' || !value.model.trim() || value.model.length > 150
+      || !Array.isArray(value.fallbackModels) || value.fallbackModels.length > 2 || value.fallbackModels.some(model => typeof model !== 'string' || !model.trim() || model.length > 150)
       || !Number.isInteger(value.maxCandidates) || value.maxCandidates < 1 || value.maxCandidates > 200
       || !(value.budgetFraction > 0 && value.budgetFraction <= 0.6) || !(value.discoveryFraction >= 0 && value.discoveryFraction <= 0.3)) throw new Error('Invalid ranking configuration');
   return value;
@@ -115,42 +116,69 @@ export async function rankItems(items, config, { apiKey, examples = [], seen = {
   if (!options.enabled) return fallback('LLM ranking disabled');
   if (!apiKey) return fallback('No model key; keyword ranking used');
   let reservedUsd = 0;
+  const attempts = [];
+  let catalog;
   try {
     const response = await fetchImpl('https://openrouter.ai/api/v1/models', { redirect: 'error', signal: AbortSignal.timeout(30_000) });
     if (!response.ok) throw new Error('Model catalog unavailable');
-    const catalog = JSON.parse(await boundedText(response, 15_000_000));
-    const model = catalog.data?.find(row => row.id === options.model);
-    if (!model || !['structured_outputs', 'response_format'].every(p => model.supported_parameters?.includes(p)) || model.reasoning?.mandatory) throw new Error('Classifier needs structured outputs and optional reasoning');
-    const rates = [Number(model.pricing?.prompt), Number(model.pricing?.completion), Number(model.pricing?.request || 0)];
-    if (rates.some(rate => !Number.isFinite(rate) || rate < 0)) throw new Error('Classifier prices unavailable');
-    const feedback = examples.filter(row => [1, -1].includes(row.feedback) && typeof row.title === 'string' && typeof row.excerpt === 'string').slice(0, 12).map(row => ({ feedback: row.feedback, title: row.title.slice(0, 300), excerpt: row.excerpt.slice(0, 240) }));
-    let shortlist = candidates.slice(0, options.maxCandidates), plan;
-    // Preflight the entire plan before any metered call, using UTF-8 bytes as a conservative token bound.
-    const maxTokens = 4096;
-    while (shortlist.length) {
-      plan = [];
-      for (let i = 0; i < shortlist.length; i += 30) {
-        const batch = shortlist.slice(i, i + 30), request = classificationRequest(batch, config, feedback);
-        const inputBound = Buffer.byteLength(JSON.stringify({ messages: request.messages, response_format: request.responseFormat }));
-        plan.push({ batch, ...request, inputBound, estimate: inputBound * rates[0] + maxTokens * rates[1] + rates[2] });
-      }
-      if (plan.every(row => row.inputBound + maxTokens <= model.context_length) && plan.reduce((sum, row) => sum + row.estimate, 0) <= config.maxRunUsd * options.budgetFraction) break;
-      shortlist = shortlist.slice(0, Math.max(0, shortlist.length - 10));
-    }
-    if (!shortlist.length) throw new Error('Classifier plan exceeds budget or context');
-    const classifications = [];
-    for (const row of plan) {
-      reservedUsd += row.estimate; // Reserve even failed/invalid metered responses; never retry automatically.
-      const response = await fetchImpl('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST', redirect: 'error', signal: AbortSignal.timeout(60_000), headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json', 'X-Title': 'ORIN research ranking' },
-        body: JSON.stringify({ model: options.model, messages: row.messages, temperature: 0, max_tokens: maxTokens, reasoning: { enabled: false }, response_format: row.responseFormat, provider: { require_parameters: true, sort: 'price', max_price: { prompt: rates[0] * 1e6, completion: rates[1] * 1e6 } } }),
-      });
-      if (!response.ok) throw new Error(`Classifier HTTP ${response.status}`);
-      const result = JSON.parse(await boundedText(response, 1_000_000));
-      classifications.push(...row.decode(JSON.parse(result.choices?.[0]?.message?.content)));
-    }
-    return { items: selectClassified(shortlist, classifications, config, options), reservedUsd, status: { method: 'llm', model: options.model, classified: shortlist.length, candidates: candidates.length, feedbackExamples: feedback.length, message: `Classified ${shortlist.length} of ${candidates.length} fresh candidates` } };
+    catalog = JSON.parse(await boundedText(response, 15_000_000));
   } catch {
-    return { ...fallback('Classifier unavailable, invalid or over budget; keyword ranking used'), reservedUsd };
+    return fallback('Model catalog unavailable; keyword ranking used');
   }
+  const feedback = examples.filter(row => row && [1, -1].includes(row.feedback) && typeof row.title === 'string' && typeof row.excerpt === 'string').slice(0, 12).map(row => ({ feedback: row.feedback, title: row.title.slice(0, 300), excerpt: row.excerpt.slice(0, 240) }));
+  const modelIds = [...new Set([options.model, ...options.fallbackModels])];
+  const rankingBudget = config.maxRunUsd * options.budgetFraction;
+  for (const modelId of modelIds) {
+    const attempt = { model: modelId, status: 'unavailable' };
+    attempts.push(attempt);
+    try {
+      const model = catalog.data?.find(row => row.id === modelId);
+      if (!model || !['structured_outputs', 'response_format'].every(p => model.supported_parameters?.includes(p)) || model.reasoning?.mandatory) throw new Error('Model unavailable or incompatible');
+      const rates = [Number(model.pricing?.prompt), Number(model.pricing?.completion), Number(model.pricing?.request || 0)];
+      if (rates.some(rate => !Number.isFinite(rate) || rate < 0)) throw new Error('Model prices unavailable');
+      let shortlist = candidates.slice(0, options.maxCandidates), plan;
+      const maxTokens = 4096;
+      // Every fallback shares the ORIGINAL ranking budget, including failed calls.
+      // Restart a complete plan so scores from different models are never mixed.
+      while (shortlist.length) {
+        plan = [];
+        for (let i = 0; i < shortlist.length; i += 30) {
+          const batch = shortlist.slice(i, i + 30), request = classificationRequest(batch, config, feedback);
+          const inputBound = Buffer.byteLength(JSON.stringify({ messages: request.messages, response_format: request.responseFormat }));
+          plan.push({ batch, ...request, inputBound, estimate: inputBound * rates[0] + maxTokens * rates[1] + rates[2] });
+        }
+        if (plan.every(row => row.inputBound + maxTokens <= model.context_length) && plan.reduce((sum, row) => sum + row.estimate, 0) <= rankingBudget - reservedUsd) break;
+        shortlist = shortlist.slice(0, Math.max(0, shortlist.length - 10));
+      }
+      if (!shortlist.length) throw new Error('Remaining budget or context cannot fit model');
+      const classifications = [];
+      for (const row of plan) {
+        reservedUsd += row.estimate;
+        const response = await fetchImpl('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST', redirect: 'error', signal: AbortSignal.timeout(60_000), headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json', 'X-Title': 'ORIN research ranking' },
+          body: JSON.stringify({ model: modelId, messages: row.messages, temperature: 0, max_tokens: maxTokens, reasoning: { enabled: false }, response_format: row.responseFormat, provider: { require_parameters: true, sort: 'price', max_price: { prompt: rates[0] * 1e6, completion: rates[1] * 1e6 } } }),
+        });
+        if (!response.ok) {
+          // Another model cannot fix an invalid key or an exhausted account balance.
+          if ([401, 402].includes(response.status)) {
+            attempt.message = `OpenRouter HTTP ${response.status}`;
+            return { ...fallback('OpenRouter authentication or credits unavailable; keyword ranking used'), reservedUsd, attempts };
+          }
+          throw new Error(`Model HTTP ${response.status}`);
+        }
+        const result = JSON.parse(await boundedText(response, 1_000_000));
+        classifications.push(...row.decode(JSON.parse(result.choices?.[0]?.message?.content)));
+      }
+      attempt.status = 'ok';
+      return { items: selectClassified(shortlist, classifications, config, options), reservedUsd, attempts, status: {
+        method: 'llm', model: modelId, classified: shortlist.length, candidates: candidates.length, feedbackExamples: feedback.length,
+        message: `Classified ${shortlist.length} of ${candidates.length} fresh candidates using ${modelId}${modelId !== options.model ? ` (fallback; ${options.model} unavailable, invalid or over remaining budget)` : ''}`.slice(0, 500),
+      } };
+    } catch (error) {
+      // One attempt per configured model, with no retry of the same model.
+      // Use fixed diagnostics rather than provider bodies that could contain data.
+      attempt.message = /^Model HTTP \d+$/.test(error.message) ? error.message : 'Unavailable, invalid response, or insufficient remaining budget/context';
+    }
+  }
+  return { ...fallback('All configured classifiers unavailable, invalid or over budget; keyword ranking used'), reservedUsd, attempts };
 }

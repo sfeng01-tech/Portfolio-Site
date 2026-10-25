@@ -46,7 +46,7 @@ The collector and ingestion endpoint now support up to 40 source checks per run;
 
 ## Feedback-aware classification and selection
 
-Orin uses **`google/gemini-2.5-flash-lite` through OpenRouter** for classification and the configured GLM model for digest synthesis. This replaces TF-IDF/SVM-style preference features with scores based on supplied text. It is an initial model choice, not a claim that any model is an ideal judge of research quality. The score measures personal relevance; it does not verify findings or assess scientific validity. [OpenRouter structured outputs](https://openrouter.ai/docs/guides/features/structured-outputs).
+Orin uses **`xiaomi/mimo-v2.6-flash` through OpenRouter** for classification, followed by `deepseek/deepseek-v4.1-flash-1017` and `google/gemini-2.5-flash-lite` as ordered fallbacks. Digest synthesis uses the configured GLM model. This replaces TF-IDF/SVM-style preference features with scores based on supplied text. It is an initial model choice, not a claim that any model is an ideal judge of research quality. The score measures personal relevance; it does not verify findings or assess scientific validity. [OpenRouter structured outputs](https://openrouter.ai/docs/guides/features/structured-outputs).
 
 Before applying the old keyword gate, the worker removes stale/seen entries and deduplicates explicit arXiv identifiers across arXiv, Hugging Face Papers and alphaXiv, ignoring version suffixes. It balances the candidate pool across sources, then classifies up to 120 candidates in batches of 30, using titles and the first 700 excerpt characters. Zero-keyword candidates are eligible. This bounds coverage: entries outside the capped pool or relevant details beyond the excerpt can still be missed. Freshness remains 72 hours. New ingested records persist paper identities for cross-day suppression; historical records without that field are not backfilled automatically.
 
@@ -59,14 +59,15 @@ Configuration defaults:
 ```json
 "ranking": {
   "enabled": true,
-  "model": "google/gemini-2.5-flash-lite",
+  "model": "xiaomi/mimo-v2.6-flash",
+  "fallbackModels": ["deepseek/deepseek-v4.1-flash-1017", "google/gemini-2.5-flash-lite"],
   "maxCandidates": 120,
   "budgetFraction": 0.4,
   "discoveryFraction": 0.15
 }
 ```
 
-`budgetFraction` reserves at most 40% of the existing `maxRunUsd` for classification. The worker checks current catalog support, prices and context before metered requests and trims the candidate plan to fit. It reserves the conservative estimate even for failed paid responses, subtracts it from the digest budget, and never automatically retries. This is a per-invocation price-based guard, not an account-wide spending cap. A missing key, unsupported model, over-budget plan, rate limit or invalid/incomplete schema falls back to keyword ranking; Collection notes explain the selection method. A feedback-fetch failure still allows classification using configured interests. `--dry-run` and `--no-model` never call the classifier. Set `ranking.enabled=false` to retain keyword selection.
+`budgetFraction` reserves at most 40% of the existing `maxRunUsd` for classification. The worker checks current catalog support, prices and context before metered requests and trims the candidate plan to fit. It reserves the conservative estimate even for failed paid responses, subtracts it from the digest budget, and never retries the same model. This is a per-invocation price-based guard, not an account-wide spending cap. An unavailable/incompatible model, rate limit, timeout, server error or invalid/incomplete response advances once to the next configured model. All attempts share the original classification allowance; the next complete plan may classify fewer candidates to fit the remaining budget. Partial scores are discarded before switching models. Missing keys, an unavailable catalog, exhausted model choices or insufficient remaining budget use keyword ranking. Authentication/credit errors (HTTP 401/402) stop model failover because changing models cannot fix the account.  Collection notes explain the selection method and identify the model used. A feedback-fetch failure still allows classification using configured interests. `--dry-run` and `--no-model` never call the classifier. Set `ranking.enabled=false` to retain keyword selection.
 
 On October 25, 2026, a small opt-in live smoke evaluation selected all six relevant synthetic examples, excluded two irrelevant examples and rejected an irrelevant prompt-injection example (9 total). Its conservative reservation was $0.002025, not the measured charge. This checks wiring and obvious relevance, not performance on real reader preferences or subtle papers. Continue judging recommendations with explicit feedback. Re-run it with:
 
@@ -80,7 +81,7 @@ The same existing OpenRouter key is used for both stages. If `ORIN_CONFIG` overr
 
 ## Comparing classifier models
 
-A reproducible comparison of Gemini 2.5 Flash Lite, DeepSeek V4.1 Flash 1017 and MiMo V2.6 Flash on 60 real papers is saved in [the comparison report](../apps/orin-collector/benchmarks/REPORT.md). Reference labels were assigned by Codex before the requests and remain provisional until the user reviews them. The report preserves failed/experimental passes and separates observed charges (including cache discounts) from normalized uncached estimates. MiMo is the most promising next model to trial on that sample; the configured Gemini model is unchanged.
+A reproducible comparison of Gemini 2.5 Flash Lite, DeepSeek V4.1 Flash 1017 and MiMo V2.6 Flash on 60 real papers is saved in [the comparison report](../apps/orin-collector/benchmarks/REPORT.md). Reference labels were assigned by Codex before the requests and remain provisional until the user reviews them. The report preserves failed/experimental passes and separates observed charges (including cache discounts) from normalized uncached estimates. Following that comparison, the user selected MiMo as the primary classifier, with DeepSeek then Gemini as availability fallbacks. Digest synthesis still uses GLM.
 
 The comparison exposed canonical-ID copying errors and overly long explanations. Classification now sends short batch-local IDs with an enum, bounds display reasons locally, then strictly validates IDs, coverage, scores and tracks before restoring canonical IDs. No freshness, source or spending limits were relaxed.
 
