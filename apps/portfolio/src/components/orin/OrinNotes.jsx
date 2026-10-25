@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Bold, ChevronLeft, ChevronRight, Clock3, Eraser, History, Italic, Link2,
+  Bold, ChevronLeft, Clock3, Eraser, History, Italic, Link2,
   List, ListOrdered, Plus, Quote, Redo2, Trash2, Type, Underline as UnderlineIcon, Undo2
 } from 'lucide-react';
 import { countWords, notePlainText, sanitizeNoteHtml, titleFromHtml } from '../../utils/noteSanitizer';
@@ -30,7 +30,7 @@ export default function OrinNotes() {
   const [versions, setVersions] = useState([]);
   const [saveState, setSaveState] = useState('saved');
   const [historyOpen, setHistoryOpen] = useState(false);
-  const [listOpen, setListOpen] = useState(true);
+  const [view, setView] = useState('list'); // 'list' is the landing view; the editor opens on demand
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const editorRef = useRef(null);
@@ -41,10 +41,7 @@ export default function OrinNotes() {
   // Document list, styled after Google Docs' "Document tabs" sidebar.
   useEffect(() => {
     request('/api/orin/notes')
-      .then(payload => {
-        setNotes(payload.notes || []);
-        if (payload.notes?.length) openNote(payload.notes[0].id);
-      })
+      .then(payload => setNotes(payload.notes || []))
       .catch(err => setError(err.message));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -59,13 +56,22 @@ export default function OrinNotes() {
     setVersions([]);
     setHistoryOpen(false);
     setActiveId(id);
+    setView('editor');
     try {
       const payload = await request(`/api/orin/notes?id=${id}`);
       setNote(payload.note);
       setVersions(payload.versions || []);
-      if (editorRef.current) editorRef.current.innerHTML = payload.note.content;
     } catch (err) { setError(err.message); }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Mount a note into the editor when its id changes. Keyed on the id (not on
+  // every note update) so autosave-driven state never rewrites what you type.
+  const loadedId = useRef('');
+  useEffect(() => {
+    if (!note || loadedId.current === note.id) return;
+    loadedId.current = note.id;
+    if (editorRef.current) editorRef.current.innerHTML = note.content || '';
+  }, [note]);
 
   const flushSave = useCallback(async ({ snapshot = false } = {}) => {
     const id = activeId;
@@ -120,15 +126,20 @@ export default function OrinNotes() {
     scheduleSave();
   }, [scheduleSave]);
 
-  const renameNote = async () => {
-    const next = window.prompt('Rename note', note?.title || '');
-    if (next === null) return;
-    const title = next.trim().slice(0, 200);
-    setNote(previous => previous ? { ...previous, title } : previous);
+  // The title field behaves like Google Docs': it holds the stored title,
+  // or stays empty with the first document line shown when unrenamed.
+  const [titleDraft, setTitleDraft] = useState('');
+  useEffect(() => { setTitleDraft(note?.title || ''); }, [note?.id, note?.title]);
+
+  const commitTitle = async () => {
+    if (!note) return;
+    const next = titleDraft.trim().slice(0, 200);
+    if (next === (note.title || '')) { setTitleDraft(note.title || ''); return; }
     setSaveState('saving');
     try {
-      const payload = await request('/api/orin/notes', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: activeId, title }) });
+      const payload = await request('/api/orin/notes', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: activeId, title: next }) });
       setSaveState('saved');
+      setNote(previous => previous ? { ...previous, title: payload.note.title } : previous);
       setNotes(previous => previous.map(item => item.id === activeId
         ? { ...item, title: payload.note.title || titleFromHtml(editorRef.current?.innerHTML || '') }
         : item));
@@ -148,10 +159,15 @@ export default function OrinNotes() {
       const payload = await request('/api/orin/notes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: '' }) });
       const fresh = { id: payload.note.id, title: '', excerpt: '', wordCount: 0, updatedAt: payload.note.createdAt };
       setNotes(previous => [fresh, ...previous]);
-      if (editorRef.current) editorRef.current.innerHTML = '';
       openNote(payload.note.id);
-      editorRef.current?.focus();
     } catch (err) { setError(err.message); }
+  };
+
+  // Going back to the list never loses work: unsaved edits are captured
+  // synchronously here, before the editor unmounts.
+  const leaveEditor = () => {
+    if (dirty.current) flushSave({ snapshot: true });
+    setView('list');
   };
 
   const deleteNote = async id => {
@@ -165,6 +181,7 @@ export default function OrinNotes() {
         setActiveId('');
         setHistoryOpen(false);
         dirty.current = '';
+        setView('list');
       }
       setMessage('Note deleted.');
     } catch (err) { setError(err.message); }
@@ -203,7 +220,6 @@ export default function OrinNotes() {
 
   useEffect(() => { if (historyOpen && saveState === 'saved') refreshVersions(); }, [saveState, historyOpen, refreshVersions]);
 
-  const displayTitle = note ? (note.title?.trim() || titleFromHtml(editorRef.current?.innerHTML || '') || 'Untitled note') : 'Untitled note';
   const status = { saving: 'Saving…', saved: 'All changes saved', dirty: 'Editing…' }[saveState] || 'All changes saved';
 
   const grouped = useMemo(() => {
@@ -215,35 +231,53 @@ export default function OrinNotes() {
     return [...groups.entries()];
   }, [versions]);
 
-  return <section className="orin-docs" aria-label="Notes">
-    <div className={`orin-docs-list ${listOpen ? 'is-open' : 'is-closed'}`}>
-      {listOpen ? <>
-        <div className="orin-docs-list-head">
-          <button className="orin-icon" onClick={() => setListOpen(false)} aria-label="Hide note list"><ChevronLeft size={16}/></button>
-          <span className="orin-docs-list-title">My notes</span>
-          <button className="orin-icon" onClick={createNote} aria-label="New note"><Plus size={18}/></button>
-        </div>
-        {notes.length === 0 && <p className="orin-docs-empty">Notes you write will appear here.</p>}
-        <ul>{notes.map(item => <li key={item.id} className={item.id === activeId ? 'is-active' : ''}>
-          <button className="orin-docs-list-open" onClick={() => openNote(item.id)}>
-            <Type size={14}/>
-            <span>{item.title || item.excerpt || 'Untitled note'}</span>
-            <small>{item.wordCount ? `${item.wordCount} words` : ''}</small>
-          </button>
-          {item.id === activeId
-            ? <button className="orin-icon" onClick={() => deleteNote(item.id)} aria-label="Delete note"><Trash2 size={14}/></button>
-            : <button className="orin-icon" onClick={() => deleteNote(item.id)} aria-label="Delete note" tabIndex={-1}><Trash2 size={14}/></button>}
-        </li>)}</ul>
-      </> : <button className="orin-icon" onClick={() => setListOpen(true)} aria-label="Show note list"><ChevronRight size={16}/></button>}
+  if (view === 'list') return <section className="orin-notes-home" aria-label="Notes">
+    <div className="orin-editor-head">
+      <div className="eyebrow">MY NOTES</div>
+      <h2>Write and remember.</h2>
+      <p>Every note autosaves as you type, and each settled state keeps a version you can restore.</p>
     </div>
+    {error && <div role="alert" className="orin-error">{error}</div>}
+    {message && <p role="status" className="orin-docs-note-message">{message}</p>}
+    <div className="orin-notes-actions">
+      <button className="button-primary orin-reminders-add" onClick={createNote} disabled={saveState === 'saving'}><Plus size={15}/> New note</button>
+      {notes.length > 0 && <span className="orin-reminders-count">{notes.length} note{notes.length === 1 ? '' : 's'} · newest first</span>}
+    </div>
+    {notes.length === 0
+      ? <div className="orin-editor-empty"><Type size={26} strokeWidth={1.3}/><strong>No notes yet</strong><p>The first one takes a second — start with an empty page.</p></div>
+      : <ul className="orin-notes-cards">
+        {notes.map(item => <li key={item.id}>
+          <button className="orin-notes-card" onClick={() => openNote(item.id)}>
+            <strong>{item.title || 'Untitled note'}</strong>
+            {item.title && item.excerpt ? <span>{item.excerpt}</span> : null}
+            <small>{item.updatedAt ? displaySaved(item.updatedAt) : ''}{item.wordCount ? ` · ${item.wordCount} words` : ''}</small>
+          </button>
+          <button className="orin-icon" onClick={() => deleteNote(item.id)} aria-label="Delete note"><Trash2 size={15}/></button>
+        </li>)}
+      </ul>}
+  </section>;
 
+  return <section className="orin-docs" aria-label="Notes">
     <div className="orin-docs-canvas">
       {error && <div role="alert" className="orin-error">{error}</div>}
       {message && <p role="status" className="orin-docs-note-message">{message}</p>}
       {!note ? <div className="orin-docs-editor-state">{error ? 'Open a different note or try again.' : 'Create a note to start writing.'}</div> : <>
         <div className="orin-docs-titlebar">
-          <h1 aria-label="Document title">{displayTitle}</h1>
-          <button className="orin-docs-rename" onClick={renameNote}>rename</button>
+          <button className="orin-docs-back" onClick={leaveEditor} aria-label="All notes"><ChevronLeft size={18}/></button>
+          <input
+            className="orin-docs-titleinput"
+            value={titleDraft}
+            placeholder="Untitled note"
+            aria-label="Document title"
+            maxLength={200}
+            disabled={!note}
+            onChange={event => setTitleDraft(event.target.value)}
+            onBlur={commitTitle}
+            onKeyDown={event => {
+              if (event.key === 'Enter') { event.preventDefault(); event.target.blur(); }
+              if (event.key === 'Escape') { setTitleDraft(note?.title || ''); event.target.blur(); }
+            }}
+          />
           <div className="orin-docs-title-actions">
             <span className={`orin-docs-saved ${saveState}`} role="status">{status}</span>
             <button className={`orin-docs-history-toggle ${historyOpen ? 'is-active' : ''}`} onClick={() => setHistoryOpen(value => !value)}><History size={15}/> Version history</button>

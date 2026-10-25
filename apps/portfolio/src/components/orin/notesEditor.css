@@ -1,5 +1,7 @@
-/* ORIN notes editor — modeled on the Google Docs layout captured with REA:
-   doc list sidebar, title bar, pill toolbar, and a white "sheet" on a canvas. */
+/* ORIN notes editor — one color language, shared with the rest of ORIN.
+   Tokens come from index.css so light/dark themes and the theme toggle work.
+   Hierarchy: paper < surface < line; labels: ink > secondary > muted;
+   accent is reserved for state and selection, never for decoration. */
 
 .orin-docs {
   display: flex;
@@ -9,131 +11,259 @@
   width: 100%;
 }
 
-/* Document list (Docs calls this "Document tabs") */
-.orin-docs-list {
-  flex: 0 0 230px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 12px 10px;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
+/* Notes home — the list is the landing view; the editor opens from it */
+.orin-notes-home { display: flex; flex-direction: column; min-height: 560px; }
+.orin-notes-actions { display: flex; align-items: center; gap: 14px; margin: 0 0 14px; }
+.orin-notes-cards {
+  list-style: none; margin: 0; padding: 0;
+  border: 1px solid var(--line); border-radius: 12px;
+  background: rgb(var(--surface-rgb)); overflow: hidden;
 }
-.orin-docs-list.is-closed { flex-basis: 46px; align-items: center; }
-.orin-docs-list-head { display: flex; align-items: center; justify-content: space-between; padding: 2px 4px 10px; }
-.orin-docs-list-title { font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255, 255, 255, 0.65); }
-.orin-docs-list ul { list-style: none; margin: 0; padding: 0; overflow-y: auto; }
-.orin-docs-list li { display: flex; align-items: center; gap: 4px; border-radius: 999px; padding: 2px 6px 2px 2px; }
-.orin-docs-list li:hover { background: rgba(255, 255, 255, 0.07); }
-.orin-docs-list li.is-active { background: rgba(138, 180, 248, 0.18); }
-.orin-docs-list li.is-active .orin-docs-list-open { color: #fefeff; }
-.orin-docs-list-open { flex: 1; display: flex; align-items: center; gap: 8px; min-width: 0; background: none; border: 0; color: inherit; text-align: left; padding: 6px 8px; font-size: 14px; cursor: pointer; }
-.orin-docs-list-open span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.orin-docs-list-open small { color: rgba(255, 255, 255, 0.45); font-size: 11px; flex: none; }
-.orin-docs-empty { font-size: 13px; color: rgba(255, 255, 255, 0.5); padding: 0 8px; }
+.orin-notes-cards li { display: flex; align-items: stretch; }
+.orin-notes-cards li + li { border-top: 1px solid rgb(var(--line-rgb) / .6); }
+.orin-notes-cards li:hover { background: rgb(var(--line-rgb) / .3); }
+.orin-notes-card {
+  flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px;
+  align-items: flex-start; text-align: left; padding: 13px 16px;
+  background: none; border: 0; cursor: pointer; font: inherit; color: inherit;
+}
+.orin-notes-card strong { font-size: 15.5px; font-weight: 600; color: var(--ink); letter-spacing: -0.01em; }
+.orin-notes-card span { font-size: 13px; color: var(--muted); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.orin-notes-card small { font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.orin-notes-cards .orin-icon { align-self: center; margin: 0 10px; flex-shrink: 0; color: var(--muted); }
+.orin-notes-cards .orin-icon:hover { color: var(--accent); }
+.orin-docs-empty { font-size: 13px; color: var(--muted); padding: 0 8px; }
 
-/* Canvas + title bar */
+/* Shared head rhythm for both editors: eyebrow, title, supporting line */
+.orin-editor-head { padding: 4px 0 20px; max-width: 640px; }
+.orin-editor-head .eyebrow { margin-bottom: 12px; }
+.orin-editor-head h2 {
+  font-size: 30px; font-weight: 600; line-height: 1.15;
+  letter-spacing: -0.02em; margin: 0 0 8px; color: var(--ink);
+}
+.orin-editor-head p { color: var(--muted); font-size: 15px; line-height: 1.6; margin: 0; }
+
+/* Title bar — the title is an inline field, like Google Docs: plain text that
+   grows a subtle underline on hover and an accent edge while focused. */
 .orin-docs-canvas { flex: 1; display: flex; flex-direction: column; position: relative; min-width: 0; }
-.orin-docs-titlebar { display: flex; align-items: baseline; gap: 10px; padding: 2px 4px 10px; }
-.orin-docs-titlebar h1 { font-size: 26px; font-weight: 600; margin: 0; color: #f4f6fb; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.orin-docs-rename { background: none; border: 0; color: rgba(255, 255, 255, 0.45); font-size: 12px; cursor: pointer; }
-.orin-docs-rename:hover { color: rgba(255, 255, 255, 0.8); }
-.orin-docs-title-actions { margin-left: auto; display: flex; align-items: center; gap: 12px; }
-.orin-docs-saved { font-size: 12.5px; color: rgba(255, 255, 255, 0.55); }
-.orin-docs-saved.dirty { color: #ffd66e; }
-.orin-docs-saved.saving { color: #8ab4f8; }
-.orin-docs-history-toggle { display: inline-flex; gap: 6px; align-items: center; font-size: 13px; padding: 6px 12px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.18); background: transparent; color: inherit; cursor: pointer; }
-.orin-docs-history-toggle.is-active { background: #fde293; border-color: #fde293; color: #1d2105; }
+.orin-docs-titlebar { display: flex; align-items: center; gap: 10px; padding: 0 4px 10px; }
+.orin-docs-back {
+  flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: 999px; border: 0; background: transparent;
+  color: var(--secondary); cursor: pointer;
+}
+.orin-docs-back:hover { background: rgb(var(--line-rgb) / .4); color: var(--ink); }
+.orin-docs-titleinput {
+  flex: 1; min-width: 0;
+  font-size: 26px; font-weight: 600; color: var(--ink);
+  letter-spacing: -0.02em; background: transparent; border: 0;
+  border-bottom: 1px solid transparent; padding: 2px 0 4px; outline: none;
+  text-overflow: ellipsis;
+}
+.orin-docs-titleinput::placeholder { color: var(--muted); font-style: italic; font-weight: 500; }
+.orin-docs-titleinput:hover { border-bottom-color: var(--line); }
+.orin-docs-titleinput:focus-visible { border-bottom-color: var(--accent); }
+.orin-docs-title-actions { margin-left: auto; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.orin-docs-saved { font-size: 12.5px; color: var(--muted); }
+.orin-docs-saved.saving { color: var(--muted); }
+.orin-docs-saved.dirty { color: var(--secondary); }
+.orin-docs-history-toggle {
+  display: inline-flex; gap: 6px; align-items: center; font-size: 13px;
+  padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line);
+  background: transparent; color: var(--secondary); cursor: pointer;
+}
+.orin-docs-history-toggle:hover { background: rgb(var(--line-rgb) / .35); color: var(--ink); }
+.orin-docs-history-toggle.is-active { background: color-mix(in srgb, var(--accent) 14%, transparent); border-color: var(--accent); color: var(--accent); }
 
-/* Pill toolbar */
+/* Floating toolbar — a light material; blur keeps it quiet over the sheet */
 .orin-docs-toolbar {
   display: flex; align-items: center; gap: 4px; padding: 6px 10px;
-  border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06); backdrop-filter: blur(8px);
+  border-radius: 999px;
+  background: rgb(var(--surface-rgb) / .72);
+  backdrop-filter: blur(18px) saturate(1.4);
+  box-shadow: inset 0 0 0 1px var(--line), 0 1px 10px rgb(0 0 0 / .06);
 }
-.orin-docs-toolbar > button { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; border: 0; background: transparent; color: rgba(255, 255, 255, 0.85); cursor: pointer; }
-.orin-docs-toolbar > button:hover { background: rgba(255, 255, 255, 0.12); }
-.orin-docs-toolbar > button:disabled { opacity: 0.4; cursor: default; }
-.orin-docs-select { height: 32px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.14); background: rgba(0, 0, 0, 0.25); color: #f4f6fb; font-size: 13px; padding: 0 8px; }
-.orin-docs-sep { width: 1px; height: 22px; background: rgba(255, 255, 255, 0.14); margin: 0 4px; }
+.orin-docs-toolbar > button {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 8px; border: 0;
+  background: transparent; color: var(--secondary); cursor: pointer;
+}
+.orin-docs-toolbar > button:hover { background: rgb(var(--line-rgb) / .5); color: var(--ink); }
+.orin-docs-toolbar > button:active { transform: scale(.94); }
+.orin-docs-toolbar > button:disabled { opacity: .4; cursor: default; }
+.orin-docs-select {
+  height: 32px; border-radius: 8px;
+  border: 1px solid var(--line); background: rgb(var(--paper-rgb) / .5);
+  color: var(--ink); font-size: 13px; padding: 0 8px; cursor: pointer;
+}
+.orin-docs-sep { width: 1px; height: 22px; background: var(--line); margin: 0 4px; }
 
-/* The sheet */
+/* The sheet — an elevated page on the paper canvas, in both themes */
 .orin-docs-content { overflow-y: auto; flex: 1; padding: 18px 8px 40px; min-height: 0; }
 .orin-docs-page {
   width: min(100%, 850px); min-height: 1100px; margin: 0 auto;
-  background: #fdfcff; color: #202124; border-radius: 2px;
-  box-shadow: 0 2px 22px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  background: rgb(var(--paper-rgb));
+  color: var(--ink);
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgb(0 0 0 / .08), 0 8px 26px rgb(0 0 0 / .12);
   padding: 72px 90px;
-  font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-  font-size: 14.5px; line-height: 1.7; outline: none;
+  font-size: 14.5px; line-height: 1.75; outline: none;
 }
-.orin-docs-page:empty::before { content: 'Start writing…'; color: #b9bec9; }
-.orin-docs-page h1 { font-size: 26px; margin: 0.6em 0 0.35em; font-weight: 600; }
-.orin-docs-page h2 { font-size: 21px; margin: 0.6em 0 0.35em; font-weight: 600; }
-.orin-docs-page h3 { font-size: 17px; margin: 0.6em 0 0.3em; font-weight: 600; }
-.orin-docs-page p { margin: 0 0 0.7em; }
-.orin-docs-page blockquote { border-left: 3px solid #8ab4f8; margin: 0.6em 0; padding: 2px 18px; color: #43506b; font-style: italic; }
-.orin-docs-page pre { background: #f1f3f7; border-radius: 6px; padding: 10px 14px; font-family: 'SFMono-Regular', Menlo, monospace; font-size: 13px; white-space: pre-wrap; }
-.orin-docs-page a { color: #0b57d0; }
-.orin-docs-page:focus { box-shadow: 0 2px 22px rgba(0, 0, 0, 0.45), 0 0 0 1.5px rgba(138, 180, 248, 0.7); }
+.orin-docs-page:empty::before { content: 'Start writing…'; color: var(--muted); font-style: italic; }
+.orin-docs-page h1 { font-size: 26px; line-height: 1.25; letter-spacing: -0.02em; margin: 0.6em 0 0.35em; font-weight: 600; }
+.orin-docs-page h2 { font-size: 21px; line-height: 1.3; letter-spacing: -0.01em; margin: 0.6em 0 0.35em; font-weight: 600; }
+.orin-docs-page h3 { font-size: 17px; line-height: 1.4; margin: 0.6em 0 0.3em; font-weight: 600; }
+.orin-docs-page p { margin: 0 0 0.7em; letter-spacing: 0; }
+.orin-docs-page blockquote { border-left: 3px solid var(--accent); margin: 0.6em 0; padding: 2px 18px; color: var(--secondary); font-style: italic; }
+.orin-docs-page pre { background: rgb(var(--line-rgb) / .3); border-radius: 6px; padding: 10px 14px; font-family: 'SFMono-Regular', Menlo, monospace; font-size: 13px; white-space: pre-wrap; letter-spacing: 0; line-height: 1.6; }
+.orin-docs-page a { color: var(--accent); text-underline-offset: 2px; }
+.orin-docs-page:focus-visible { box-shadow: 0 8px 26px rgb(0 0 0 / .12), 0 0 0 2px var(--accent); }
 
-.orin-docs-footer { display: flex; justify-content: space-between; font-size: 12px; color: rgba(255, 255, 255, 0.45); padding: 6px 12px 0; border-top: 1px solid rgba(255, 255, 255, 0.08); margin-top: 4px; }
-.orin-docs-editor-state { padding: 40px 8px; color: rgba(255, 255, 255, 0.55); font-size: 14px; }
-.orin-docs-note-message { font-size: 13px; color: rgba(255, 255, 255, 0.6); padding: 4px 8px; }
+.orin-docs-footer {
+  display: flex; justify-content: space-between; gap: 12px;
+  font-size: 12px; color: var(--muted);
+  padding: 8px 12px 0; border-top: 1px solid var(--line); margin-top: 4px;
+}
+.orin-docs-editor-state { padding: 40px 8px; color: var(--muted); font-size: 14px; }
+.orin-docs-note-message { font-size: 13px; color: var(--secondary); padding: 4px 8px; }
 
-/* Version history panel */
+/* Version history — a sheet arriving from the right edge */
 .orin-docs-history {
   position: absolute; top: 0; right: 0; bottom: 0; width: min(330px, 90%);
-  background: #2a2d34; color: #eceff4; z-index: 5;
-  border-left: 1px solid rgba(255, 255, 255, 0.14); border-radius: 0 12px 12px 12px;
-  box-shadow: -14px 0 30px rgba(0, 0, 0, 0.35);
+  background: rgb(var(--surface-rgb) / .85);
+  backdrop-filter: blur(24px) saturate(1.4);
+  color: var(--ink); z-index: 5;
+  border-left: 1px solid var(--line);
+  border-radius: 0 12px 12px 12px;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / .06), -16px 0 34px rgb(0 0 0 / .16);
   padding: 16px; overflow-y: auto;
+  animation: orin-history-in 260ms cubic-bezier(.23,1,.32,1);
 }
+@keyframes orin-history-in { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: none; } }
 .orin-docs-history-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-.orin-docs-history-hint { font-size: 12px; color: rgba(255, 255, 255, 0.5); margin: 0 0 10px; }
-.orin-docs-history .eyebrow { color: #9aa7bd; }
+.orin-docs-history-head strong { font-size: 14px; letter-spacing: -0.01em; }
+.orin-docs-history-hint { font-size: 12px; color: var(--muted); margin: 0 0 10px; }
+.orin-docs-history .eyebrow { color: var(--muted); }
 .orin-docs-history ul { list-style: none; margin: 4px 0 12px; padding: 0; }
 .orin-docs-history li { display: flex; flex-direction: column; gap: 1px; padding: 7px 10px; border-radius: 10px; }
-.orin-docs-history li:hover { background: rgba(255, 255, 255, 0.07); }
-.orin-docs-history li span { font-size: 13.5px; }
-.orin-docs-history li small { color: rgba(255, 255, 255, 0.5); font-size: 11.5px; }
-.orin-docs-history li button { align-self: flex-start; margin-top: 3px; border: 1px solid rgba(255, 255, 255, 0.2); background: transparent; color: inherit; font-size: 11.5px; border-radius: 6px; padding: 2px 9px; cursor: pointer; }
-.orin-docs-history li button:hover { background: rgba(255, 255, 255, 0.12); }
+.orin-docs-history li:hover { background: rgb(var(--line-rgb) / .4); }
+.orin-docs-history li span { font-size: 13.5px; font-variant-numeric: tabular-nums; }
+.orin-docs-history li small { color: var(--muted); font-size: 11.5px; }
+.orin-docs-history li button {
+  align-self: flex-start; margin-top: 3px;
+  border: 1px solid var(--line); background: transparent; color: var(--secondary);
+  font-size: 11.5px; border-radius: 6px; padding: 2px 9px; cursor: pointer;
+}
+.orin-docs-history li button:hover { color: var(--accent); border-color: var(--accent); }
 
 /* Reminders ---------------------------------------------------------------- */
 .orin-reminders { max-width: 760px; }
-.orin-reminders-head h2 { margin: 6px 0 4px; }
-.orin-reminders-head p { color: rgba(255, 255, 255, 0.6); margin: 0 0 10px; }
-.orin-reminders-permission { display: inline-flex; gap: 8px; align-items: center; border: 1px solid rgba(255, 255, 255, 0.2); background: transparent; color: inherit; border-radius: 999px; padding: 7px 14px; font-size: 13px; cursor: pointer; }
-.orin-reminders-permission:hover { background: rgba(255, 255, 255, 0.08); }
-.orin-reminders-on { color: #7ee2a8; display: inline-flex; gap: 6px; align-items: center; font-size: 13px; }
-.orin-reminders-on.is-muted { color: rgba(255, 255, 255, 0.45); }
+.orin-reminders-permission {
+  display: inline-flex; gap: 8px; align-items: center;
+  border: 1px solid var(--line); background: transparent; color: var(--secondary);
+  border-radius: 999px; padding: 7px 14px; font-size: 13px; cursor: pointer;
+}
+.orin-reminders-permission:hover { background: rgb(var(--line-rgb) / .35); color: var(--ink); }
+.orin-reminders-on { color: var(--secondary); display: inline-flex; gap: 6px; align-items: center; font-size: 13px; }
+.orin-reminders-on.is-muted { color: var(--muted); }
 
-.orin-reminders-form { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: end; padding: 14px; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; background: rgba(255, 255, 255, 0.04); margin-bottom: 14px; }
-.orin-reminders-form label { display: flex; flex-direction: column; gap: 5px; font-size: 12.5px; color: rgba(255, 255, 255, 0.6); }
-.orin-reminders-form input { border: 1px solid rgba(255, 255, 255, 0.16); background: rgba(0, 0, 0, 0.25); color: #f4f6fb; border-radius: 10px; padding: 8px 10px; font-size: 14px; }
-.orin-reminders-form label:first-child input { min-width: 260px; }
-.orin-reminders-days { display: flex; gap: 4px; border: 0; padding: 0; }
-.orin-reminders-days button { border: 1px solid rgba(255, 255, 255, 0.16); background: transparent; color: rgba(255, 255, 255, 0.65); border-radius: 999px; font-size: 11.5px; padding: 7px 9px; cursor: pointer; }
-.orin-reminders-days button[aria-pressed="true"] { background: #8ab4f8; color: #11162c; border-color: #8ab4f8; }
+/* Composer — reads like a sentence: "Remind me to … at …". Fields sit on the
+   surface card with a consistent 14px rhythm; controls are 38–44px tall. */
+.orin-reminders-form {
+  padding: 16px; border-radius: 12px;
+  background: rgb(var(--surface-rgb)); border: 1px solid var(--line);
+  margin-bottom: 22px;
+}
+.orin-reminders-composer { display: flex; flex-wrap: wrap; gap: 14px 16px; align-items: flex-end; }
+.orin-reminders-field { display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--muted); }
+.orin-reminders-field span { letter-spacing: 0.05em; text-transform: uppercase; font-weight: 500; }
+.orin-reminders-field.is-wide { flex: 1 1 260px; }
+.orin-reminders-field.is-time input { width: 118px; font-variant-numeric: tabular-nums; }
+.orin-reminders-field input, .orin-reminders-field input[type='time'] {
+  border: 1px solid var(--line); background: rgb(var(--paper-rgb) / .55); color: var(--ink);
+  border-radius: 8px; padding: 9px 10px; font-size: 14px; min-height: 38px;
+}
+.orin-reminders-field input:focus-visible { border-color: var(--accent); outline: none; }
+.orin-reminders-field input::placeholder { color: var(--muted); }
 
-.orin-reminders-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-.orin-reminders-list li { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 14px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.09); }
-.orin-reminders-list li.is-off { opacity: 0.55; }
-.orin-reminders-toggle { border: 0; background: transparent; color: #8ab4f8; cursor: pointer; width: 32px; height: 32px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; }
-.orin-reminders-toggle:hover { background: rgba(138, 180, 248, 0.15); }
-.orin-reminders-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
-.orin-reminders-time { font-size: 17px; font-weight: 600; font-variant-numeric: tabular-nums; color: #f4f6fb; }
-.orin-reminders-label { font-size: 14px; color: #dfe4ee; }
-.orin-reminders-days-list { font-size: 11.5px; color: rgba(255, 255, 255, 0.45); }
-.orin-reminders-last { font-size: 11.5px; color: rgba(255, 255, 255, 0.4); }
-.orin-reminders-now { display: inline-flex; gap: 4px; align-items: center; color: #7ee2a8; font-size: 12.5px; background: rgba(126, 226, 168, 0.12); border-radius: 999px; padding: 4px 10px; }
-.orin-reminders-empty { color: rgba(255, 255, 255, 0.5); font-size: 14px; }
-.orin-reminders-count { font-size: 12.5px; color: rgba(255, 255, 255, 0.5); }
+.orin-reminders-days { display: flex; flex-direction: column; gap: 6px; border: 0; padding: 0; margin: 0; }
+.orin-reminders-days-caption { font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; font-weight: 500; color: var(--muted); padding: 0; }
+.orin-reminders-days-row { display: flex; gap: 5px; }
+.orin-reminders-days-row button {
+  min-width: 38px; min-height: 38px; border: 1px solid var(--line);
+  background: transparent; color: var(--secondary); border-radius: 999px;
+  font-size: 12px; padding: 0 10px; cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+.orin-reminders-days-row button:hover { background: rgb(var(--line-rgb) / .35); color: var(--ink); }
+.orin-reminders-days-row button[aria-pressed='true'] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.orin-reminders-add { display: inline-flex; align-items: center; gap: 6px; min-height: 38px; border-radius: 8px; padding: 0 14px; }
+.orin-reminders-form-hint { margin: 10px 2px 0; font-size: 12.5px; color: var(--muted); }
+
+/* Grouped sections — eyebrow headers, quiet rows on hairline dividers */
+.orin-reminders-section { margin: 0 0 18px; }
+.orin-reminders-section-head { display: flex; align-items: baseline; gap: 8px; padding: 0 2px 8px; }
+.orin-reminders-section .eyebrow { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); }
+.orin-reminders-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.orin-reminders-list li {
+  display: flex; align-items: center; gap: 14px; padding: 10px 12px;
+  border-radius: 9px; border: 0;
+}
+.orin-reminders-list li + li { border-top: 1px solid rgb(var(--line-rgb) / .6); }
+.orin-reminders-list li:hover { background: rgb(var(--line-rgb) / .3); }
+.orin-reminders-list li.is-off .orin-reminders-body > * { color: var(--muted); }
+.orin-reminders-list li.is-off .orin-reminders-time { text-decoration: line-through; text-decoration-color: rgb(var(--line-rgb)); }
+.orin-reminders-toggle {
+  border: 0; background: transparent; color: var(--muted); cursor: pointer;
+  width: 38px; height: 38px; border-radius: 999px; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.orin-reminders-list li:not(.is-off) .orin-reminders-toggle { color: var(--secondary); }
+.orin-reminders-toggle:hover { background: rgb(var(--line-rgb) / .45); color: var(--ink); }
+.orin-reminders-body { display: flex; flex-direction: column; gap: 1px; min-width: 0; flex: 1; }
+.orin-reminders-time { font-size: 17px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--ink); letter-spacing: -0.01em; }
+.orin-reminders-label { font-size: 14px; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.orin-reminders-days-list { font-size: 11.5px; color: var(--muted); }
+.orin-reminders-last { font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums; flex-shrink: 0; }
+.orin-reminders-now {
+  display: inline-flex; gap: 4px; align-items: center;
+  color: var(--accent); background: color-mix(in srgb, var(--accent) 13%, transparent);
+  border-radius: 999px; padding: 4px 10px; font-size: 12.5px; flex-shrink: 0;
+}
+.orin-editor-empty {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  color: var(--muted); padding: 40px 16px; text-align: center;
+  border: 1px dashed var(--line); border-radius: 12px; font-size: 14px;
+}
+.orin-editor-empty strong { color: var(--secondary); font-weight: 500; letter-spacing: -0.01em; }
+.orin-editor-empty p { margin: 0; }
+.orin-reminders-count { font-size: 12.5px; color: var(--muted); margin: 4px 2px 0; }
+.orin-reminders .orin-error, .orin-docs .orin-error { position: static; margin: 8px 0; }
+
+@media (max-width: 720px) {
+  .orin-reminders-composer { align-items: stretch; flex-direction: column; }
+  .orin-reminders-field.is-time input { width: 100%; }
+  .orin-reminders-days-row { flex-wrap: wrap; }
+  .orin-reminders-list li { flex-wrap: wrap; row-gap: 4px; }
+  .orin-reminders-last { display: none; }
+}
 
 @media (max-width: 900px) {
-  .orin-docs { flex-direction: column; }
-  .orin-docs-list { flex: none; max-height: 180px; }
   .orin-docs-page { padding: 40px 28px; min-height: 600px; }
   .orin-docs-history { position: fixed; inset: 0; width: 100%; border-radius: 0; }
+  .orin-docs-toolbar { flex-wrap: wrap; border-radius: 12px; }
+}
+
+/* The editor honors the site theme; these only adapt the *materials*. */
+@media (prefers-reduced-transparency: reduce) {
+  .orin-docs-toolbar, .orin-docs-history { background: rgb(var(--surface-rgb)); backdrop-filter: none; }
+  .orin-docs-select, .orin-reminders-form input { background: rgb(var(--paper-rgb)); }
+}
+@media (prefers-contrast: more) {
+  .orin-docs-list, .orin-docs-toolbar, .orin-reminders-form, .orin-reminders-list li, .orin-docs-history {
+    background: rgb(var(--paper-rgb));
+    border-color: var(--ink);
+  }
+  .orin-docs-page { box-shadow: 0 0 0 1px var(--ink); }
+  .orin-docs-saved, .orin-docs-history li small, .orin-reminders-days-list, .orin-reminders-last { color: var(--secondary); }
 }

@@ -115,12 +115,48 @@ export default function OrinReminders() {
 
   const now = clock();
   const today = weekdayKey();
-  const dueToday = useMemo(() => reminders.filter(item => item.days?.includes(today)), [reminders, today]);
-  const sorted = useMemo(() => [...reminders].sort((a, b) => (a.time || '').localeCompare(b.time || '')), [reminders]);
+  const clockLabel = `${now} PT`;
+  const allDays = useMemo(() => DAYS.map(([key]) => key), []);
+
+  const sortKey = item => `${item.time || '99:99'}-${item.label || ''}`;
+  const enabled = useMemo(() => reminders.filter(item => item.enabled).sort((a, b) => sortKey(a).localeCompare(sortKey(b))), [reminders]);
+
+  // "Ringing today" = it is this minute right now, or it already rang today.
+  const dueNow = useMemo(() => enabled.filter(item => {
+    if (!item.days?.includes(today)) return false;
+    const rangToday = Boolean(item.lastFiredAt && item.lastFiredAt.slice(0, 10) === todayKey());
+    return rangToday || item.time === now;
+  }), [enabled, today, now]);
+
+  const paused = useMemo(() => reminders.filter(item => !item.enabled).sort((a, b) => sortKey(a).localeCompare(sortKey(b))), [reminders]);
+  const dueNowIds = useMemo(() => new Set(dueNow.map(item => item.id)), [dueNow]);
+  const upcoming = useMemo(() => enabled.filter(item => !dueNowIds.has(item.id)), [enabled, dueNowIds]);
+
+  const daySummary = item => {
+    const picked = item.days || [];
+    if (!picked.length) return 'No days';
+    if (allDays.every(day => picked.includes(day))) return 'Every day';
+    return picked.map(key => DAYS.find(([candidate]) => candidate === key)?.[1]).join(' ');
+  };
+
+  const reminderRow = item => <li key={item.id} className={item.enabled ? '' : 'is-off'}>
+    <button className="orin-reminders-toggle" onClick={() => patch(item.id, { enabled: !item.enabled })}
+      aria-pressed={item.enabled} aria-label={item.enabled ? 'Pause reminder' : 'Resume reminder'}>
+      {item.enabled ? <Bell size={15}/> : <BellOff size={15}/>}
+    </button>
+    <div className="orin-reminders-body">
+      <span className="orin-reminders-time">{item.time}</span>
+      <span className="orin-reminders-label">{item.label}</span>
+      <span className="orin-reminders-days-list">{daySummary(item)}</span>
+    </div>
+    {item.lastFiredAt && <span className="orin-reminders-last" title={item.lastFiredAt}>Last rang {item.lastFiredAt.slice(0, 10)}</span>}
+    {dueNowIds.has(item.id) && <span className="orin-reminders-now"><Check size={13}/> now</span>}
+    <button className="orin-icon" onClick={() => remove(item.id)} aria-label="Delete reminder"><Trash2 size={15}/></button>
+  </li>;
 
   return <section className="orin-reminders" aria-label="Daily reminders">
-    <div className="orin-reminders-head">
-      <div className="eyebrow"><AlarmClock size={15}/> EVERY DAY, ON TIME</div>
+    <div className="orin-editor-head">
+      <div className="eyebrow"><AlarmClock size={13}/> EVERY DAY, ON TIME</div>
       <h2>Ask ORIN to nudge you.</h2>
       <p>Set a time and weekdays; a notification rings while this page is open.</p>
       {permission !== 'granted' && <button className="orin-reminders-permission" onClick={async () => {
@@ -134,39 +170,45 @@ export default function OrinReminders() {
     </div>
 
     <form className="orin-reminders-form" onSubmit={create}>
-      <label>Remind me to
-        <input required maxLength={200} value={label} onChange={event => setLabel(event.target.value)} placeholder="review the daily digest"/>
-      </label>
-      <label>At
-        <input required type="time" value={time} onChange={event => setTime(event.target.value)}/>
-      </label>
-      <fieldset className="orin-reminders-days">
-        <legend className="sr-only">Days</legend>
-        {DAYS.map(([key, short]) => <button type="button" key={key} aria-pressed={days.includes(key)} onClick={() => toggleDay(key)}>{short}</button>)}
-      </fieldset>
-      <button className="button-primary" disabled={busy || !label.trim()}><Plus size={15}/>{busy ? 'Setting…' : 'Add reminder'}</button>
+      <div className="orin-reminders-composer">
+        <label className="orin-reminders-field is-wide">
+          <span>Remind me to</span>
+          <input required maxLength={200} value={label} onChange={event => setLabel(event.target.value)} placeholder="review the daily digest"/>
+        </label>
+        <label className="orin-reminders-field is-time">
+          <span>At</span>
+          <input required type="time" value={time} onChange={event => setTime(event.target.value)}/>
+        </label>
+        <fieldset className="orin-reminders-days">
+          <legend className="orin-reminders-days-caption">Repeats</legend>
+          <div className="orin-reminders-days-row">
+            {DAYS.map(([key, short]) => <button type="button" key={key} aria-pressed={days.includes(key)} onClick={() => toggleDay(key)}>{short}</button>)}
+          </div>
+        </fieldset>
+        <button className="button-primary orin-reminders-add" disabled={busy || !label.trim()}><Plus size={15}/>{busy ? 'Setting…' : 'Add'}</button>
+      </div>
+      <p className="orin-reminders-form-hint">A notification rings at this time while this page is open, on the days you picked.</p>
     </form>
 
     {error && <div role="alert" className="orin-error">{error}</div>}
-    {message && <p role="status">{message}</p>}
+    {message && <p role="status" className="orin-reminders-note-message">{message}</p>}
 
-    <ul className="orin-reminders-list">
-      {sorted.map(item => <li key={item.id} className={item.enabled ? '' : 'is-off'}>
-        <button className="orin-reminders-toggle" onClick={() => patch(item.id, { enabled: !item.enabled })}
-          aria-pressed={item.enabled} aria-label={item.enabled ? 'Pause reminder' : 'Resume reminder'}>
-          {item.enabled ? <Bell size={15}/> : <BellOff size={15}/>}
-        </button>
-        <div className="orin-reminders-body">
-          <span className="orin-reminders-time">{item.time}</span>
-          <span className="orin-reminders-label">{item.label}</span>
-          <span className="orin-reminders-days-list">{item.days?.map(key => DAYS.find(([candidate]) => candidate === key)?.[1]).join(' ')}</span>
-        </div>
-        {item.lastFiredAt && <span className="orin-reminders-last" title={item.lastFiredAt}>Last rang {item.lastFiredAt.slice(0, 10)}</span>}
-        {item.days?.includes(today) && item.time === now && <span className="orin-reminders-now"><Check size={13}/> now</span>}
-        <button className="orin-icon" onClick={() => remove(item.id)} aria-label="Delete reminder"><Trash2 size={15}/></button>
-      </li>)}
-    </ul>
-    {reminders.length === 0 && <p className="orin-reminders-empty">No reminders yet. The first one takes a minute.</p>}
-    {dueToday.length > 0 && <p className="orin-reminders-count" role="status">{dueToday.filter(item => item.enabled).length} scheduled today · {reminders.length} total</p>}
+    {reminders.length === 0
+      ? <div className="orin-editor-empty"><AlarmClock size={26} strokeWidth={1.3}/><strong>No reminders yet</strong><p>The first one takes a minute — pick a time above.</p></div>
+      : <>
+        {dueNow.length > 0 && <section className="orin-reminders-section">
+          <div className="orin-reminders-section-head"><span className="eyebrow">RINGING TODAY · {clockLabel}</span></div>
+          <ul className="orin-reminders-list">{dueNow.map(reminderRow)}</ul>
+        </section>}
+        {upcoming.length > 0 && <section className="orin-reminders-section">
+          <div className="orin-reminders-section-head"><span className="eyebrow">SCHEDULED · {upcoming.length}</span></div>
+          <ul className="orin-reminders-list">{upcoming.map(reminderRow)}</ul>
+        </section>}
+        {paused.length > 0 && <section className="orin-reminders-section">
+          <div className="orin-reminders-section-head"><span className="eyebrow">PAUSED · {paused.length}</span></div>
+          <ul className="orin-reminders-list">{paused.map(reminderRow)}</ul>
+        </section>}
+        <p className="orin-reminders-count" role="status">{enabled.filter(item => item.days?.includes(today)).length} due today · {reminders.length} total</p>
+      </>}
   </section>;
 }
