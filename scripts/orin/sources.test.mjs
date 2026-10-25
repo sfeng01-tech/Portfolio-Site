@@ -124,7 +124,7 @@ test('paper sources reject unexpected endpoints and malformed responses without 
 });
 
 test('Substack supports publication feeds and explicit custom domains, rejecting unrelated links', async () => {
-  for (const host of ['example.substack.com', 'latent.space', 'magazine.sebastianraschka.com']) {
+  for (const host of ['example.substack.com', 'latent.space', 'magazine.sebastianraschka.com', 'cameronrwolfe.substack.com', 'www.interconnects.ai', 'newsletter.ruder.io', 'thegradientpub.substack.com']) {
     const items = await collectFeed({ source: 'substack', url: `https://${host}/feed` }, { fetchImpl: async () => new Response(`<rss><channel><item><title>GPU systems</title><link>https://${host}/p/gpu</link><description>AI research</description></item><item><title>Wrong host</title><link>https://evil.test/p/gpu</link><description>AI</description></item></channel></rss>`) });
     assert.equal(items.length, 1);
     assert.equal(items[0].source, 'substack');

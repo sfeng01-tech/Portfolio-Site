@@ -105,7 +105,7 @@ test('previous-day articles are suppressed and stale summaries are removed', () 
 });
 
 test('research and Substack sources pass ingestion with matching provenance', () => {
-  for (const [source, url] of [['huggingface', 'https://huggingface.co/papers/2610.12345'], ['alphaxiv', 'https://www.alphaxiv.org/abs/2610.12345'], ['substack', 'https://example.substack.com/p/gpu'], ['substack', 'https://latent.space/p/gpu'], ['substack', 'https://magazine.sebastianraschka.com/p/gpu']]) {
+  for (const [source, url] of [['huggingface', 'https://huggingface.co/papers/2610.12345'], ['alphaxiv', 'https://www.alphaxiv.org/abs/2610.12345'], ['substack', 'https://example.substack.com/p/gpu'], ['substack', 'https://latent.space/p/gpu'], ['substack', 'https://www.interconnects.ai/p/gpu'], ['substack', 'https://newsletter.ruder.io/p/gpu'], ['substack', 'https://magazine.sebastianraschka.com/p/gpu']]) {
     const payload = validateIngest({ date: '2026-10-25', items: [{ ...entry, source, url }] });
     assert.equal(payload.items[0].source, source);
     assert.throws(() => safeUrl('https://evil.test/p/gpu', source));
