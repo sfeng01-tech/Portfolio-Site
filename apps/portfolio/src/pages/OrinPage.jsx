@@ -59,7 +59,7 @@ export default function OrinPage() {
     setPending(previous => new Set(previous).add(item.id));
     try {
       await request('/api/orin/items', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: item.id, [field]: value }) });
-      setData(previous => ({ ...previous, items: previous.items.map(current => current.id === item.id ? { ...current, [field]: !current[field] } : current).filter(current => tab !== 'saved' || current.saved) }));
+      setData(previous => ({ ...previous, items: previous.items.map(current => current.id === item.id ? { ...current, [field]: value } : current).filter(current => tab !== 'saved' || current.saved) }));
     } catch (err) { setError(err.message); }
     finally { setPending(previous => { const next = new Set(previous); next.delete(item.id); return next; }); }
   }

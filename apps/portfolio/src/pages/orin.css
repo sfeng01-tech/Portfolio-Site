@@ -63,5 +63,5 @@
 
 .orin-ranking { font-size: .85rem; opacity: .8; }
 .orin-ranking span { font-weight: 600; margin-right: .35rem; }
-.orin-item-actions { flex-wrap: wrap; }
-.orin-item-actions button[aria-pressed="true"] { color: var(--accent, #678b70); }
+.orin-item-actions { flex-wrap: wrap; flex-shrink: 1; }
+@media(max-width:600px) { .orin-item-actions { width:100%; } }
