@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS orin_categories (
 -- can be model-assigned and grouped from the first run. Add or remove labels
 -- freely; the collector and brain view read the table on every run.
 INSERT INTO orin_categories (label)
-VALUES ('GPU kernels'), ('Quantization'), ('Inference'), ('Training'), ('Agents'), ('AI hardware'), ('Research')
+VALUES ('GPU kernels'), ('Quantization'), ('Inference'), ('Training'), ('Agents'), ('AI hardware'), ('Research'), ('Reference Projects'), ('Books')
 ON CONFLICT (label) DO NOTHING;
 COMMIT;
 -- Categories added later by hand (outside the API) must satisfy the label
