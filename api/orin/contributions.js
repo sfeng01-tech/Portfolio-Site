@@ -1,3 +1,4 @@
+import { youtubeMetadata } from '../../apps/portfolio/server/youtube.js';
 import { orinSql, privateResponse, requireOrinOwner, safeUrl, sendError, validDate, validateCategory, itemId } from '../../apps/portfolio/server/orin.js';
 
 const localDay = () => new Intl.DateTimeFormat('en-CA', {
@@ -72,6 +73,7 @@ export default async function handler(req, res) {
     }
 
     const now = new Date().toISOString();
+    const metadata = itemUrl ? await youtubeMetadata(itemUrl) : null;
     const item = {
       id,
       source: 'shared',
@@ -82,6 +84,7 @@ export default async function handler(req, res) {
       publishedAt: now,
       collectedAt: now,
       contribution,
+      ...(metadata || {}),
       topics: category ? [category] : [],
       ...(category ? { category, categorySource: 'user' } : {})
     };

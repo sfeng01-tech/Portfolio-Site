@@ -71,13 +71,16 @@ export default async function handler(req, res) {
         INSERT INTO orin_items (id, item)
         SELECT row.id, row.item
         FROM jsonb_to_recordset(${JSON.stringify(itemRows)}::jsonb) AS row(id text, item jsonb)
-        ON CONFLICT (id) DO UPDATE SET item = (
+        ON CONFLICT (id) DO UPDATE SET item = CASE WHEN orin_items.item->>'source' = 'shared' THEN orin_items.item ELSE (
           CASE
             WHEN orin_items.item->>'categorySource' = 'user' AND NOT (orin_items.item ? 'category')
               THEN EXCLUDED.item - 'category'
             ELSE EXCLUDED.item
           END
         ) || jsonb_strip_nulls(jsonb_build_object(
+          'deleted', orin_items.item->'deleted',
+          'title', CASE WHEN orin_items.item->>'titleSource' = 'user' THEN orin_items.item->'title' ELSE NULL END,
+          'titleSource', CASE WHEN orin_items.item->>'titleSource' = 'user' THEN orin_items.item->'titleSource' ELSE NULL END,
           'feedback', orin_items.item->'feedback',
           'category', CASE
             WHEN orin_items.item->>'categorySource' = 'user' AND orin_items.item ? 'category'
@@ -89,7 +92,7 @@ export default async function handler(req, res) {
               THEN orin_items.item->'categorySource'
             ELSE NULL
           END
-        )), updated_at = now()
+        )) END, updated_at = now()
       `);
       statements.push(sql`
         INSERT INTO orin_digest_items (day, item_id)
