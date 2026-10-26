@@ -89,13 +89,22 @@ export function validateReminderDays(value) {
   return value;
 }
 
+export function validateReminderDate(value, { nullable = false } = {}) {
+  if ((value === undefined || value === null) && nullable) return value;
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) throw fail('Invalid reminder date');
+  const parsed = new Date(`${value}T00:00:00.000Z`);
+  if (Number.isNaN(parsed.valueOf()) || parsed.toISOString().slice(0, 10) !== value) throw fail('Invalid reminder date');
+  return value;
+}
+
 export function validateReminderCreate(body) {
   if (!body || typeof body !== 'object') throw fail('Invalid reminder payload');
   const label = validateReminderLabel(body.label);
   const time = validateReminderTime(body.time);
-  const days = validateReminderDays(body.days) ?? [...REMINDER_DAYS];
+  const dueDate = validateReminderDate(body.dueDate, { nullable: true });
+  const days = dueDate ? [] : validateReminderDays(body.days) ?? [...REMINDER_DAYS];
   if (body.enabled !== undefined && typeof body.enabled !== 'boolean') throw fail('Invalid reminder enabled');
-  return { label, time, days, enabled: body.enabled ?? true };
+  return { label, time, days, dueDate: dueDate ?? null, enabled: body.enabled ?? true };
 }
 
 export function validateReminderPatch(body) {
@@ -104,6 +113,7 @@ export function validateReminderPatch(body) {
   const label = body.label === undefined ? undefined : validateReminderLabel(body.label);
   const time = body.time === undefined ? undefined : validateReminderTime(body.time);
   const days = body.days === undefined ? undefined : validateReminderDays(body.days);
+  const dueDate = body.dueDate === undefined ? undefined : validateReminderDate(body.dueDate, { nullable: true });
   const enabled = body.enabled === undefined ? undefined : Boolean(body.enabled);
   let firedAt;
   if (body.firedAt !== undefined) {
@@ -112,10 +122,10 @@ export function validateReminderPatch(body) {
     }
     firedAt = new Date(body.firedAt).toISOString();
   }
-  if (label === undefined && time === undefined && days === undefined && enabled === undefined && firedAt === undefined) {
+  if (label === undefined && time === undefined && days === undefined && dueDate === undefined && enabled === undefined && firedAt === undefined) {
     throw fail('An empty reminder update');
   }
-  return { id, ...(label === undefined ? {} : { label }), ...(time === undefined ? {} : { time }), ...(days === undefined ? {} : { days }), ...(enabled === undefined ? {} : { enabled }), ...(firedAt === undefined ? {} : { firedAt }) };
+  return { id, ...(label === undefined ? {} : { label }), ...(time === undefined ? {} : { time }), ...(days === undefined ? {} : { days }), ...(dueDate === undefined ? {} : { dueDate }), ...(enabled === undefined ? {} : { enabled }), ...(firedAt === undefined ? {} : { firedAt }) };
 }
 
 // Plain-text excerpt for list views; the richest formatting collapses into

@@ -17,16 +17,16 @@ export default async function handler(req, res) {
     // strings as parameters, so SQL fragments stay written out inline.
     if (req.method === 'GET') {
       const sql = await orinSql();
-      const rows = await sql`SELECT id, label, to_char(time_of_day, 'HH24:MI') AS time, days, enabled, last_fired_at AS "lastFiredAt", created_at AS "createdAt" FROM orin_reminders ORDER BY enabled DESC, time_of_day, created_at`;
+      const rows = await sql`SELECT id, label, to_char(time_of_day, 'HH24:MI') AS time, days, due_date::text AS "dueDate", enabled, last_fired_at AS "lastFiredAt", created_at AS "createdAt" FROM orin_reminders ORDER BY enabled DESC, due_date NULLS LAST, time_of_day, created_at`;
       return res.status(200).json({ reminders: rows });
     }
     if (req.method === 'POST') {
       const create = validateReminderCreate(req.body || {});
       const sql = await orinSql();
       const [reminder] = await sql`
-        INSERT INTO orin_reminders (label, time_of_day, days, enabled)
-        VALUES (${create.label}, ${create.time}::time, ${JSON.stringify(create.days)}::jsonb, ${create.enabled})
-        RETURNING id, label, to_char(time_of_day, 'HH24:MI') AS time, days, enabled, last_fired_at AS "lastFiredAt", created_at AS "createdAt"`;
+        INSERT INTO orin_reminders (label, time_of_day, days, due_date, enabled)
+        VALUES (${create.label}, ${create.time}::time, ${JSON.stringify(create.days)}::jsonb, ${create.dueDate}::date, ${create.enabled})
+        RETURNING id, label, to_char(time_of_day, 'HH24:MI') AS time, days, due_date::text AS "dueDate", enabled, last_fired_at AS "lastFiredAt", created_at AS "createdAt"`;
       return res.status(201).json({ reminder });
     }
     if (req.method === 'DELETE') {
@@ -43,11 +43,12 @@ export default async function handler(req, res) {
         label = COALESCE(${patch.label ?? null}, label),
         time_of_day = COALESCE(${patch.time ?? null}::time, time_of_day),
         days = COALESCE(${patch.days === undefined ? null : JSON.stringify(patch.days)}::jsonb, days),
+        due_date = CASE WHEN ${patch.dueDate === undefined ? null : true}::boolean THEN ${patch.dueDate ?? null}::date ELSE due_date END,
         enabled = COALESCE(${patch.enabled === undefined ? null : patch.enabled}::boolean, enabled),
         last_fired_at = COALESCE(${patch.firedAt === undefined ? null : patch.firedAt}::timestamptz, last_fired_at),
         updated_at = now()
       WHERE id = ${patch.id}
-      RETURNING id, label, to_char(time_of_day, 'HH24:MI') AS time, days, enabled, last_fired_at AS "lastFiredAt", created_at AS "createdAt"`;
+      RETURNING id, label, to_char(time_of_day, 'HH24:MI') AS time, days, due_date::text AS "dueDate", enabled, last_fired_at AS "lastFiredAt", created_at AS "createdAt"`;
     if (!reminder) return res.status(404).json({ error: 'Reminder not found' });
     return res.status(200).json({ reminder });
   } catch (error) { return sendError(res, error); }

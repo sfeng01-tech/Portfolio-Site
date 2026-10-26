@@ -77,17 +77,19 @@ CREATE TABLE IF NOT EXISTS orin_note_versions (
 );
 CREATE INDEX IF NOT EXISTS orin_note_versions_by_note
   ON orin_note_versions (note_id, created_at DESC);
--- Daily reminders repeat on selected weekdays at a fixed clock time. The
--- browser fires the notification and stamps last_fired_at so a reload cannot
--- ring the same reminder twice; the table is the source of truth.
+-- Reminders repeat on selected weekdays or fire once on due_date at a fixed
+-- clock time. The browser fires notifications and stamps last_fired_at.
 CREATE TABLE IF NOT EXISTS orin_reminders (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   label text NOT NULL CHECK (char_length(label) BETWEEN 1 AND 200),
   time_of_day time NOT NULL,
   days jsonb NOT NULL DEFAULT '["mon","tue","wed","thu","fri","sat","sun"]'::jsonb,
+  due_date date,
   enabled boolean NOT NULL DEFAULT true,
   last_fired_at timestamptz,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
+-- Existing installations keep their weekday reminders and gain optional dates.
+ALTER TABLE orin_reminders ADD COLUMN IF NOT EXISTS due_date date;
 COMMIT;

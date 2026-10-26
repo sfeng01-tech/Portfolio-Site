@@ -58,6 +58,7 @@ test('reminders accept a fixed clock time and a unique weekday subset', () => {
     label: 'Review the digest',
     time: '07:30',
     days: ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'],
+    dueDate: null,
     enabled: true
   });
   assert.deepEqual(validateReminderDays(['sat', 'sun']), ['sat', 'sun']);

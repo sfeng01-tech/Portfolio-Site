@@ -179,6 +179,7 @@
 .orin-reminders-field span { letter-spacing: 0.05em; text-transform: uppercase; font-weight: 500; }
 .orin-reminders-field.is-wide { flex: 1 1 260px; }
 .orin-reminders-field.is-time input { width: 118px; font-variant-numeric: tabular-nums; }
+.orin-reminders-field.is-date input { min-width: 160px; }
 .orin-reminders-field input, .orin-reminders-field input[type='time'] {
   border: 1px solid var(--line); background: rgb(var(--paper-rgb) / .55); color: var(--ink);
   border-radius: 8px; padding: 9px 10px; font-size: 14px; min-height: 38px;

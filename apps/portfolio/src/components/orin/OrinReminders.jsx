@@ -14,6 +14,15 @@ const clock = () => new Intl.DateTimeFormat('en-GB', {
   timeZone: 'America/Los_Angeles', hour: '2-digit', minute: '2-digit', hour12: false
 }).format(new Date());
 const todayKey = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles' }).format(new Date());
+const pacificDate = value => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles' }).format(new Date(value));
+const dateLabel = value => new Intl.DateTimeFormat('en-US', {
+  timeZone: 'UTC', month: 'short', day: 'numeric', year: 'numeric'
+}).format(new Date(`${value}T12:00:00Z`));
+const addPacificDay = value => {
+  const next = new Date(`${value}T12:00:00Z`);
+  next.setUTCDate(next.getUTCDate() + 1);
+  return next.toISOString().slice(0, 10);
+};
 const weekdayKey = (iso = todayKey()) => ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][new Date(`${iso}T12:00:00`).getDay()];
 
 async function request(url, options) {
@@ -35,6 +44,8 @@ export default function OrinReminders() {
   const [permission, setPermission] = useState(typeof Notification !== 'undefined' ? Notification.permission : 'unsupported');
   const [label, setLabel] = useState('');
   const [time, setTime] = useState('09:00');
+  const [schedule, setSchedule] = useState('weekly');
+  const [date, setDate] = useState(todayKey);
   const [days, setDays] = useState(DAYS.map(([key]) => key));
   const [busy, setBusy] = useState(false);
   const [fired, setFired] = useState(new Set());
@@ -60,10 +71,11 @@ export default function OrinReminders() {
       const now = clock();
       const day = weekdayKey();
       for (const reminder of reminders) {
-        if (!reminder.enabled || !reminder.days?.includes(day) || reminder.time !== now) continue;
+        const scheduledToday = reminder.dueDate ? reminder.dueDate === todayKey() : reminder.days?.includes(day);
+        if (!reminder.enabled || !scheduledToday || reminder.time !== now) continue;
         const key = `${reminder.id}-${todayKey()}`;
         if (fired.has(key) || firing.current.has(key)) continue;
-        if (reminder.lastFiredAt && reminder.lastFiredAt.slice(0, 10) === todayKey()) continue;
+        if (reminder.lastFiredAt && pacificDate(reminder.lastFiredAt) === todayKey()) continue;
         firing.current.add(key);
         try {
           new Notification('ORIN reminder', { body: reminder.label, tag: key });
@@ -91,11 +103,13 @@ export default function OrinReminders() {
     try {
       const payload = await request('/api/orin/reminders', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ label, time, days })
+        body: JSON.stringify({ label, time, days: schedule === 'weekly' ? days : [], dueDate: schedule === 'date' ? date : null })
       });
-      setReminders(previous => [...previous, payload.reminder].sort((a, b) => a.time.localeCompare(b.time)));
+      setReminders(previous => [...previous, payload.reminder]);
       setLabel('');
-      setMessage(`Reminder set for ${payload.reminder.time}`);
+      setMessage(payload.reminder.dueDate
+        ? `Reminder set for ${dateLabel(payload.reminder.dueDate)} at ${payload.reminder.time}`
+        : `Repeating reminder set for ${payload.reminder.time}`);
     } catch (err) { report(err); }
     finally { setBusy(false); }
   };
@@ -126,16 +140,18 @@ export default function OrinReminders() {
 
   const now = clock();
   const today = weekdayKey();
+  const minDate = schedule === 'date' && time <= now ? addPacificDay(todayKey()) : todayKey();
   const clockLabel = `${now} PT`;
   const allDays = useMemo(() => DAYS.map(([key]) => key), []);
 
-  const sortKey = item => `${item.time || '99:99'}-${item.label || ''}`;
+  const sortKey = item => `${item.dueDate || '9999-99-99'}-${item.time || '99:99'}-${item.label || ''}`;
   const enabled = useMemo(() => reminders.filter(item => item.enabled).sort((a, b) => sortKey(a).localeCompare(sortKey(b))), [reminders]);
 
   // "Ringing today" = it is this minute right now, or it already rang today.
   const dueNow = useMemo(() => enabled.filter(item => {
-    if (!item.days?.includes(today)) return false;
-    const rangToday = Boolean(item.lastFiredAt && item.lastFiredAt.slice(0, 10) === todayKey());
+    const scheduledToday = item.dueDate ? item.dueDate === todayKey() : item.days?.includes(today);
+    if (!scheduledToday) return false;
+    const rangToday = Boolean(item.lastFiredAt && pacificDate(item.lastFiredAt) === todayKey());
     return rangToday || item.time === now;
   }), [enabled, today, now]);
 
@@ -158,18 +174,20 @@ export default function OrinReminders() {
     <div className="orin-reminders-body">
       <span className="orin-reminders-time">{item.time}</span>
       <span className="orin-reminders-label">{item.label}</span>
-      <span className="orin-reminders-days-list">{daySummary(item)}</span>
+      <span className="orin-reminders-days-list">{item.dueDate
+        ? `${item.dueDate < todayKey() ? 'Past date · ' : 'Once · '}${dateLabel(item.dueDate)}`
+        : daySummary(item)}</span>
     </div>
-    {item.lastFiredAt && <span className="orin-reminders-last" title={item.lastFiredAt}>Last rang {item.lastFiredAt.slice(0, 10)}</span>}
+    {item.lastFiredAt && <span className="orin-reminders-last" title={item.lastFiredAt}>Last rang {pacificDate(item.lastFiredAt)}</span>}
     {dueNowIds.has(item.id) && <span className="orin-reminders-now"><Check size={13}/> now</span>}
     <button className="orin-icon" onClick={() => remove(item.id)} aria-label="Delete reminder"><Trash2 size={15}/></button>
   </li>;
 
   return <section className="orin-reminders" aria-label="Daily reminders">
     <div className="orin-editor-head">
-      <div className="eyebrow"><AlarmClock size={13}/> EVERY DAY, ON TIME</div>
+      <div className="eyebrow"><AlarmClock size={13}/> ON YOUR SCHEDULE</div>
       <h2>Ask ORIN to nudge you.</h2>
-      <p>Set a time and weekdays; a notification rings while this page is open.</p>
+      <p>Set a time and choose weekdays or a specific date; notifications ring while this page is open.</p>
       {permission !== 'granted' && <button className="orin-reminders-permission" onClick={async () => {
         if (typeof Notification === 'undefined') return setError('This browser does not support notifications.');
         const decision = await Notification.requestPermission();
@@ -190,15 +208,25 @@ export default function OrinReminders() {
           <span>At</span>
           <input required type="time" value={time} onChange={event => setTime(event.target.value)}/>
         </label>
-        <fieldset className="orin-reminders-days">
-          <legend className="orin-reminders-days-caption">Repeats</legend>
+        <fieldset className="orin-reminders-days orin-reminders-schedule">
+          <legend className="orin-reminders-days-caption">Schedule</legend>
+          <div className="orin-reminders-days-row">
+            <button type="button" aria-pressed={schedule === 'weekly'} onClick={() => setSchedule('weekly')}>Repeats</button>
+            <button type="button" aria-pressed={schedule === 'date'} onClick={() => setSchedule('date')}>One date</button>
+          </div>
+        </fieldset>
+        {schedule === 'weekly' ? <fieldset className="orin-reminders-days">
+          <legend className="orin-reminders-days-caption">On these days</legend>
           <div className="orin-reminders-days-row">
             {DAYS.map(([key, short]) => <button type="button" key={key} aria-pressed={days.includes(key)} onClick={() => toggleDay(key)}>{short}</button>)}
           </div>
-        </fieldset>
+        </fieldset> : <label className="orin-reminders-field is-date">
+          <span>On date</span>
+          <input required type="date" min={minDate} value={date} onChange={event => setDate(event.target.value)}/>
+        </label>}
         <button className="button-primary orin-reminders-add" disabled={busy || !label.trim()}><Plus size={15}/>{busy ? 'Setting…' : 'Add'}</button>
       </div>
-      <p className="orin-reminders-form-hint">A notification rings at this time while this page is open, on the days you picked.</p>
+      <p className="orin-reminders-form-hint">A notification rings at this time while this page is open, on the selected date or weekdays.</p>
     </form>
 
     {error && <div role="alert" className="orin-error">{error}</div>}
@@ -219,7 +247,7 @@ export default function OrinReminders() {
           <div className="orin-reminders-section-head"><span className="eyebrow">PAUSED · {paused.length}</span></div>
           <ul className="orin-reminders-list">{paused.map(reminderRow)}</ul>
         </section>}
-        <p className="orin-reminders-count" role="status">{enabled.filter(item => item.days?.includes(today)).length} due today · {reminders.length} total</p>
+        <p className="orin-reminders-count" role="status">{enabled.filter(item => item.dueDate ? item.dueDate === todayKey() : item.days?.includes(today)).length} due today · {reminders.length} total</p>
       </>}
   </section>;
 }
