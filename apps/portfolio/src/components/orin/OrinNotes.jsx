@@ -4,6 +4,7 @@ import {
   List, ListOrdered, Plus, Quote, Redo2, Trash2, Type, Underline as UnderlineIcon, Undo2
 } from 'lucide-react';
 import { countWords, notePlainText, sanitizeNoteHtml, titleFromHtml } from '../../utils/noteSanitizer';
+import { useAuth } from '../../contexts/AuthContext';
 import './notesEditor.css';
 
 const displaySaved = iso => new Date(iso).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
@@ -11,7 +12,11 @@ const displaySaved = iso => new Date(iso).toLocaleString('en-US', { month: 'shor
 async function request(url, options) {
   const response = await fetch(url, { credentials: 'same-origin', ...options, headers: { Accept: 'application/json', ...options?.headers } });
   const payload = await response.json().catch(() => ({}));
-  if (!response.ok || payload.error) throw new Error(payload.error || 'The notes editor needs the server API.');
+  if (!response.ok || payload.error) {
+    const error = new Error(payload.error || 'The notes editor needs the server API.');
+    error.status = response.status;
+    throw error;
+  }
   return payload;
 }
 
@@ -24,6 +29,7 @@ const STYLE_BLOCK = { paragraph: 'p', heading1: 'h1', heading2: 'h2', heading3: 
 const SAVE_DEBOUNCE_MS = 900;
 
 export default function OrinNotes() {
+  const { expireSession } = useAuth();
   const [notes, setNotes] = useState([]);
   const [activeId, setActiveId] = useState('');
   const [note, setNote] = useState(null);
@@ -38,13 +44,17 @@ export default function OrinNotes() {
   const saving = useRef(false);
   const dirty = useRef('');
 
+  const report = useCallback(err => {
+    if (err?.status === 401) { expireSession(); return; }
+    setError(err.message);
+  }, [expireSession]);
+
   // Document list, styled after Google Docs' "Document tabs" sidebar.
   useEffect(() => {
     request('/api/orin/notes')
       .then(payload => setNotes(payload.notes || []))
-      .catch(err => setError(err.message));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+      .catch(report);
+  }, [report]);
 
   const openNote = useCallback(async id => {
     saveTimer.current && clearTimeout(saveTimer.current);
@@ -61,8 +71,8 @@ export default function OrinNotes() {
       const payload = await request(`/api/orin/notes?id=${id}`);
       setNote(payload.note);
       setVersions(payload.versions || []);
-    } catch (err) { setError(err.message); }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    } catch (err) { report(err); }
+  }, [report]);
 
   // Mount a note into the editor when its id changes. Keyed on the id (not on
   // every note update) so autosave-driven state never rewrites what you type.
@@ -94,9 +104,9 @@ export default function OrinNotes() {
       setNotes(previous => previous.map(item => item.id === id
         ? { ...item, title: title || item.title, excerpt: text.slice(0, 200), wordCount: payload.note.wordCount, updatedAt: payload.note.updatedAt }
         : item));
-    } catch (err) { setSaveState('dirty'); setError(err.message); }
+    } catch (err) { setSaveState('dirty'); report(err); }
     finally { saving.current = false; }
-  }, [activeId]);
+  }, [activeId, report]);
 
   const scheduleSave = useCallback(now => {
     if (!activeId) return;
@@ -143,7 +153,7 @@ export default function OrinNotes() {
       setNotes(previous => previous.map(item => item.id === activeId
         ? { ...item, title: payload.note.title || titleFromHtml(editorRef.current?.innerHTML || '') }
         : item));
-    } catch (err) { setSaveState('dirty'); setError(err.message); }
+    } catch (err) { setSaveState('dirty'); report(err); }
   };
 
   const insertLink = () => {
@@ -160,7 +170,7 @@ export default function OrinNotes() {
       const fresh = { id: payload.note.id, title: '', excerpt: '', wordCount: 0, updatedAt: payload.note.createdAt };
       setNotes(previous => [fresh, ...previous]);
       openNote(payload.note.id);
-    } catch (err) { setError(err.message); }
+    } catch (err) { report(err); }
   };
 
   // Going back to the list never loses work: unsaved edits are captured
@@ -184,7 +194,7 @@ export default function OrinNotes() {
         setView('list');
       }
       setMessage('Note deleted.');
-    } catch (err) { setError(err.message); }
+    } catch (err) { report(err); }
   };
 
   const restoreVersion = async versionId => {
@@ -198,7 +208,7 @@ export default function OrinNotes() {
       if (editorRef.current) editorRef.current.innerHTML = payload.note.content;
       setNotes(previous => previous.map(item => item.id === activeId ? { ...item, title: payload.note.title, wordCount: payload.note.wordCount, updatedAt: payload.note.updatedAt } : item));
       setMessage('Version restored.');
-    } catch (err) { setError(err.message); }
+    } catch (err) { report(err); }
   };
 
   const refreshVersions = useCallback(async () => {

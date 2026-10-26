@@ -1,5 +1,6 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AlarmClock, Bell, BellOff, Check, Plus, Trash2 } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 import './notesEditor.css';
 
 // Weekday keys are timezone-neutral and shared with the database check.
@@ -18,11 +19,16 @@ const weekdayKey = (iso = todayKey()) => ['sun', 'mon', 'tue', 'wed', 'thu', 'fr
 async function request(url, options) {
   const response = await fetch(url, { credentials: 'same-origin', ...options, headers: { Accept: 'application/json', ...options?.headers } });
   const payload = await response.json().catch(() => ({}));
-  if (!response.ok || payload.error) throw new Error(payload.error || 'The reminders editor needs the server API.');
+  if (!response.ok || payload.error) {
+    const error = new Error(payload.error || 'The reminders editor needs the server API.');
+    error.status = response.status;
+    throw error;
+  }
   return payload;
 }
 
 export default function OrinReminders() {
+  const { expireSession } = useAuth();
   const [reminders, setReminders] = useState([]);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
@@ -34,11 +40,16 @@ export default function OrinReminders() {
   const [fired, setFired] = useState(new Set());
   const firing = useRef(new Set());
 
+  const report = useCallback(err => {
+    if (err?.status === 401) { expireSession(); return; }
+    setError(err.message);
+  }, [expireSession]);
+
   useEffect(() => {
     request('/api/orin/reminders')
       .then(payload => setReminders(payload.reminders || []))
-      .catch(err => setError(err.message));
-  }, []);
+      .catch(report);
+  }, [report]);
 
   // Fire each reminder when its clock time arrives on an enabled weekday. The
   // server's last_fired_at is the durable record; the in-memory set keeps the
@@ -63,14 +74,14 @@ export default function OrinReminders() {
             body: JSON.stringify({ id: reminder.id, firedAt: new Date().toISOString() })
           });
           setReminders(previous => previous.map(item => item.id === reminder.id ? { ...item, lastFiredAt: new Date().toISOString() } : item));
-        } catch (err) { setError(err.message); }
+        } catch (err) { report(err); }
         finally { firing.current.delete(key); }
       }
     };
     check();
     const timer = setInterval(check, 20_000);
     return () => clearInterval(timer);
-  }, [reminders, fired]);
+  }, [reminders, fired, report]);
 
   const create = async event => {
     event.preventDefault();
@@ -85,7 +96,7 @@ export default function OrinReminders() {
       setReminders(previous => [...previous, payload.reminder].sort((a, b) => a.time.localeCompare(b.time)));
       setLabel('');
       setMessage(`Reminder set for ${payload.reminder.time}`);
-    } catch (err) { setError(err.message); }
+    } catch (err) { report(err); }
     finally { setBusy(false); }
   };
 
@@ -96,14 +107,14 @@ export default function OrinReminders() {
         body: JSON.stringify({ id, ...updates })
       });
       setReminders(previous => previous.map(item => item.id === id ? { ...item, ...payload.reminder } : item));
-    } catch (err) { setError(err.message); }
+    } catch (err) { report(err); }
   };
 
   const remove = async id => {
     try {
       await request(`/api/orin/reminders?id=${id}`, { method: 'DELETE' });
       setReminders(previous => previous.filter(item => item.id !== id));
-    } catch (err) { setError(err.message); }
+    } catch (err) { report(err); }
   };
 
   const toggleDay = key => {
