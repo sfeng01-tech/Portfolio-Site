@@ -15,6 +15,7 @@ import ContactPage from './pages/ContactPage';
 
 const LoginPage = lazy(() => import('./pages/admin/LoginPage'));
 const OrinPage = lazy(() => import('./pages/OrinPage'));
+const OrinVideosPage = lazy(() => import('./pages/OrinVideosPage'));
 const DashboardPage = lazy(() => import('./pages/admin/DashboardPage'));
 const BlogAdmin = lazy(() => import('./pages/admin/BlogAdmin'));
 const BlogEditor = lazy(() => import('./pages/admin/BlogEditor'));
@@ -29,13 +30,13 @@ const RouteFallback = () => (
 
 // Static portfolio hosting delegates the private route to its Node service.
 // The Node deployment leaves this build variable unset and renders ORIN locally.
-function OrinEntry() {
+function OrinEntry({ path = '/orin', children }) {
   const target = import.meta.env.VITE_ORIN_ORIGIN;
   const external = target && target !== window.location.origin;
   useEffect(() => {
-    if (external) window.location.replace(`${target.replace(/\/$/, '')}/orin`);
+    if (external) window.location.replace(`${target.replace(/\/$/, '')}${path}`);
   }, [target, external]);
-  return external ? <RouteFallback /> : <OrinPage />;
+  return external ? <RouteFallback /> : (children || <OrinPage />);
 }
 
 function App() {
@@ -110,6 +111,12 @@ function App() {
               <>
                 <Navigation />
                 <OrinEntry />
+              </>
+            } />
+            <Route path="/orin/videos" element={
+              <>
+                <Navigation />
+                <OrinEntry path="/orin/videos"><OrinVideosPage /></OrinEntry>
               </>
             } />
             <Route path="/admin/login" element={<LoginPage />} />

@@ -67,6 +67,9 @@ export default async function handler(req, res) {
       if (!existing) return res.status(404).json({ error: 'Unknown category' });
       category = existing.label;
     }
+    if (!category && itemUrl && ['youtube.com', 'm.youtube.com', 'youtu.be'].includes(new URL(itemUrl).hostname.replace(/^www\./, ''))) {
+      category = 'YouTube';
+    }
 
     const now = new Date().toISOString();
     const item = {
