@@ -34,12 +34,12 @@
 .orin-brain-machine-viewport { width:100%; }
 .orin-brain-machine-map { display:block; width:100%; height:auto; }
 .orin-brain-machine .iso-plate-corners { inset:19px 22px; }
-.orin-brain-machine .iso-plate-corner { font-size:9px; letter-spacing:.09em; }
+.orin-brain-machine .iso-plate-corner { font-size:0.625rem; letter-spacing:.09em; }
 .orin-brain-machine .iso-plate-corner[data-corner="fig"] { color:var(--accent); }
 .orin-brain-machine .iso-plate-corner[data-corner="title"] { text-transform:uppercase; }
 .orin-brain-machine .iso-plate-corner[data-corner="readout"] { max-width:48%; overflow:hidden; text-overflow:ellipsis; }
 .orin-brain-machine-caption { margin-top:2px; }
-.orin-brain-machine .orin-brain-axis { margin:11px 4px 0; font-size:8.5px; }
+.orin-brain-machine .orin-brain-axis { margin:11px 4px 0; font-size:0.53125rem; }
 .orin-brain-machine .iso-halo { filter:blur(6px); }
 .orin-brain-tray .iso-top { fill:color-mix(in srgb,var(--ink) 3%,var(--paper)); }
 .orin-brain-hit { fill:transparent; stroke:none; }
@@ -57,7 +57,7 @@
 .orin-brain-machine .orin-brain-node:hover .orin-brain-body .iso-edge,
 .orin-brain-machine .orin-brain-node:focus-visible .orin-brain-body .iso-edge { stroke:var(--accent); stroke-width:1.35; }
 .orin-brain-machine .orin-brain-node:focus-visible .orin-brain-hit { fill:color-mix(in srgb,var(--accent) 7%,transparent); stroke:var(--accent); stroke-width:.7; }
-.orin-brain-machine .orin-brain-node-label { stroke:rgb(var(--surface-rgb)); stroke-width:3.5px; font-size:9px; }
+.orin-brain-machine .orin-brain-node-label { stroke:rgb(var(--surface-rgb)); stroke-width:3.5px; font-size:0.625rem; }
 .orin-brain-machine .orin-brain-link { stroke:color-mix(in srgb,var(--muted) 28%,transparent); }
 .orin-brain-machine .orin-brain-link.is-source-topic { stroke:color-mix(in srgb,var(--muted) 30%,transparent); }
 .orin-brain-machine .orin-brain-flow { stroke:var(--flow-color,var(--accent)); opacity:.88; }
@@ -70,5 +70,5 @@
   .orin-brain-machine .iso-plate-corner[data-corner="readout"] { bottom:0; max-width:44%; }
   .orin-brain-machine-viewport { overflow-x:auto; overscroll-behavior-x:contain; scrollbar-width:thin; }
   .orin-brain-machine-map { width:660px; max-width:none; }
-  .orin-brain-machine .orin-brain-axis { font-size:7.5px; letter-spacing:.5px; }
+  .orin-brain-machine .orin-brain-axis { font-size:0.46875rem; letter-spacing:.5px; }
 }

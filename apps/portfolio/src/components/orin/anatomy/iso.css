@@ -82,13 +82,13 @@
 .iso-figure{margin:32px 0 36px}
 .iso-plate{position:relative;padding:52px 24px;border-radius:0;background:var(--anatomy-card);box-shadow:0 0 0 1px var(--anatomy-mid);--anatomy-paper:var(--anatomy-card)}
 .iso-plate-corners{position:absolute;inset:18px 20px;pointer-events:none}
-.iso-plate-corner{position:absolute;color:var(--anatomy-muted);font-family:var(--anatomy-mono);font-size:10.5px;line-height:1;letter-spacing:.04em;white-space:nowrap}
+.iso-plate-corner{position:absolute;color:var(--anatomy-muted);font-family:var(--anatomy-mono);font-size:0.65625rem;line-height:1;letter-spacing:.04em;white-space:nowrap}
 .iso-plate-corner[data-corner="fig"]{top:0;left:0;color:var(--anatomy-text)}
 .iso-plate-corner[data-corner="title"]{top:0;right:0;text-transform:uppercase;letter-spacing:.1em}
 .iso-plate-corner[data-corner="hint"]{bottom:0;left:0;text-transform:uppercase;letter-spacing:.1em}
 .iso-plate-corner[data-corner="readout"]{right:0;bottom:0;color:var(--anatomy-text);font-variant-numeric:tabular-nums}
 .iso-plate .iso-svg{margin:0 auto}
-.iso-legend{display:grid;gap:8px;margin-top:12px;color:var(--anatomy-muted);font-size:13px;line-height:1.55}
+.iso-legend{display:grid;gap:8px;margin-top:12px;color:var(--anatomy-muted);font-size:0.8125rem;line-height:1.55}
 .iso-keys{display:flex;flex-wrap:wrap;gap:6px 18px}
 .iso-key{display:inline-flex;align-items:center;gap:7px}
 .iso-swatch{width:16px;height:10px;flex:none;overflow:visible}
