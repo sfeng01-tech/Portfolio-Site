@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Calendar, Compass, ExternalLink, Lock, Play, Youtube as YoutubeIcon } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import OrinItemControls from '../components/orin/OrinItemControls';
+import { youtubeId } from '../../server/youtube.js';
 import './orin.css';
 
 const safeUrl = (value) => {
@@ -9,22 +11,6 @@ const safeUrl = (value) => {
   try {
     const parsed = new URL(value);
     return parsed.protocol === 'https:' ? parsed.href : null;
-  } catch {
-    return null;
-  }
-};
-
-const videoId = (value) => {
-  if (!value) return null;
-  try {
-    const parsed = new URL(value);
-    const host = parsed.hostname.replace(/^www\./, '');
-    if (host === 'youtu.be') return parsed.pathname.split('/').filter(Boolean)[0] || null;
-    if (host !== 'youtube.com' && host !== 'm.youtube.com') return null;
-    if (parsed.searchParams.get('v')) return parsed.searchParams.get('v');
-    const parts = parsed.pathname.split('/').filter(Boolean);
-    if (['shorts', 'live', 'embed'].includes(parts[0])) return parts[1] || null;
-    return null;
   } catch {
     return null;
   }
@@ -39,7 +25,7 @@ const formatDate = (value) => {
 };
 
 export default function OrinVideosPage() {
-  const { user, loading, error: authError, login, logout } = useAuth();
+  const { user, loading, error: authError, login } = useAuth();
   const [items, setItems] = useState([]);
   const [busy, setBusy] = useState(true);
   const [error, setError] = useState('');
@@ -70,7 +56,7 @@ export default function OrinVideosPage() {
   }, [user]);
 
   const tiles = useMemo(
-    () => items.map(item => ({ ...item, id: videoId(item.url), link: safeUrl(item.url) })),
+    () => items.map(item => ({ ...item, videoId: youtubeId(item.url), link: safeUrl(item.url) })),
     [items]
   );
 
@@ -79,7 +65,6 @@ export default function OrinVideosPage() {
       <div className="orin-topbar">
         <Link className="orin-icon" to="/orin" aria-label="Back to ORIN"><ArrowLeft size={17} /></Link>
         <span className="orin-private"><Lock size={12} /> PERSONAL SPACE</span>
-        {user && <button onClick={logout} className="orin-icon" aria-label="Sign out">Sign out</button>}
       </div>
       <main id="main-content" className="orin-main">
         <section className="orin-videos">
@@ -100,9 +85,9 @@ export default function OrinVideosPage() {
               {busy ? <div className="orin-state" role="status">Loading videos…</div> : tiles.length ? (
                 <div className="orin-video-grid">
                   {tiles.map(item => (
-                    <article key={item.id || item.url} className="orin-video-tile">
+                    <article key={item.id} className="orin-video-tile">
                       <a className="orin-video-thumb" href={item.link || '#'} target={item.link ? '_blank' : undefined} rel={item.link ? 'noopener noreferrer' : undefined} aria-label={item.title}>
-                        {item.id ? <img src={thumbUrl(item.id)} alt="" loading="lazy" /> : <Compass size={27} strokeWidth={1.2} />}
+                        {item.videoId ? <img src={thumbUrl(item.videoId)} alt="" loading="lazy" /> : <Compass size={27} strokeWidth={1.2} />}
                         <span><Play size={22} /></span>
                       </a>
                       <div className="orin-video-copy">
@@ -112,6 +97,7 @@ export default function OrinVideosPage() {
                           <span><Calendar size={14} />{formatDate(item.publishedAt || item.collectedAt)}</span>
                           {item.link && <a href={item.link} target="_blank" rel="noopener noreferrer">Open <ExternalLink size={14} /></a>}
                         </div>
+                        <OrinItemControls item={item} captionOnly onUpdate={updated => setItems(previous => previous.map(current => current.id === updated.id ? updated : current))} onDelete={id => setItems(previous => previous.filter(current => current.id !== id))}/>
                       </div>
                     </article>
                   ))}

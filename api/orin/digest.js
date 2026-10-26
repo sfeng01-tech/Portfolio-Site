@@ -1,3 +1,5 @@
+import { repairYoutubeTitles } from '../../apps/portfolio/server/youtube.js';
+import { visibleItems, visibleDigest } from '../../apps/portfolio/server/orin-content.js';
 import { orinSql, privateResponse, requireOrinOwner, sendError, validDate, validateCategory } from '../../apps/portfolio/server/orin.js';
 
 export default async function handler(req, res) {
@@ -16,30 +18,31 @@ export default async function handler(req, res) {
       const rows = await sql`
         SELECT item, is_read, saved
         FROM orin_items
-        WHERE item->>'category' = 'YouTube'
+        WHERE NOT COALESCE((item->>'deleted')::boolean, false) AND (item->>'category' = 'YouTube'
            OR item->>'url' LIKE '%youtube.com/%'
-           OR item->>'url' LIKE '%youtu.be/%'
+           OR item->>'url' LIKE '%youtu.be/%')
         ORDER BY COALESCE((item->>'publishedAt')::timestamptz, updated_at) DESC
         LIMIT 500
       `;
+      await repairYoutubeTitles(rows, sql);
       return res.status(200).json({
         date: null,
         availableDates,
         digest: null,
         digestStatus: null,
-        items: rows.map(row => ({ ...row.item, read: row.is_read, saved: row.saved })),
+        items: visibleItems(rows),
         sourceStatus: [],
         kind
       });
     }
     if (category) {
-      const rows = await sql`SELECT item, is_read, saved FROM orin_items WHERE item->>'category' = ${category} ORDER BY COALESCE((item->>'publishedAt')::timestamptz, updated_at) DESC LIMIT 500`;
+      const rows = await sql`SELECT item, is_read, saved FROM orin_items WHERE NOT COALESCE((item->>'deleted')::boolean, false) AND item->>'category' = ${category} ORDER BY COALESCE((item->>'publishedAt')::timestamptz, updated_at) DESC LIMIT 500`;
       return res.status(200).json({
         date: null,
         availableDates,
         digest: null,
         digestStatus: null,
-        items: rows.map(row => ({ ...row.item, read: row.is_read, saved: row.saved })),
+        items: visibleItems(rows),
         sourceStatus: [],
         category
       });
@@ -48,8 +51,9 @@ export default async function handler(req, res) {
     if (!date) return res.status(200).json({ date: null, availableDates, digest: null, items: [], sourceStatus: [] });
     const [entry] = await sql`SELECT digest, digest_status, source_status FROM orin_digests WHERE day = ${date}`;
     const rows = req.query?.saved === 'true'
-      ? await sql`SELECT item, is_read, saved FROM orin_items WHERE saved = true ORDER BY updated_at DESC LIMIT 500`
+      ? await sql`SELECT item, is_read, saved FROM orin_items WHERE saved = true AND NOT COALESCE((item->>'deleted')::boolean, false) ORDER BY updated_at DESC LIMIT 500`
       : await sql`SELECT i.item, i.is_read, i.saved FROM orin_items i JOIN orin_digest_items d ON d.item_id = i.id WHERE d.day = ${date} ORDER BY COALESCE((i.item->'ranking'->>'score')::integer, -1) DESC, i.item->>'source', i.item->>'title'`;
-    return res.status(200).json({ date, availableDates, digest: entry?.digest || null, digestStatus: entry?.digest_status || null, items: rows.map(row => ({ ...row.item, read: row.is_read, saved: row.saved })), sourceStatus: entry?.source_status || [] });
+    await repairYoutubeTitles(rows, sql);
+    return res.status(200).json({ date, availableDates, digest: visibleDigest(entry?.digest || null, rows), digestStatus: entry?.digest_status || null, items: visibleItems(rows), sourceStatus: entry?.source_status || [] });
   } catch (error) { return sendError(res, error); }
 }
