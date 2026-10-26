@@ -24,7 +24,7 @@
 .site-header { position:fixed; inset:0 0 auto; z-index:50; background:rgb(var(--paper-rgb) / .95); border-bottom:1px solid var(--line); backdrop-filter:blur(12px) saturate(1.4); }
 .nav-shell { max-width:1280px; padding:0 40px; margin:auto; height:80px; display:flex; align-items:center; gap:22px; }
 .brand { display:flex; align-items:center; gap:13px; flex-shrink:0; }
-.brand-mark { font-size:20rem; font-weight:700; letter-spacing:-3px; line-height:1; }
+.brand-mark { font-size:2rem; font-weight:700; letter-spacing:-3px; line-height:1; }
 .brand-mark span { color:var(--accent); }
 .brand-name { font-size:0.8125rem; font-weight:600; letter-spacing:-.2px; }
 .desktop-links { margin-left:auto; display:flex; gap:20px; }
@@ -45,7 +45,7 @@
 .status-dot { display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--accent); flex-shrink:0; }
 .hero-copy h1 { margin:25px 0; font-size:clamp(2.625rem,4.7vw,4rem); font-weight:500; letter-spacing:-.055em; line-height:1.09; }
 .hero-copy h1 span { font-family:Georgia,'Times New Roman',serif; font-style:italic; font-weight:400; color:var(--accent); letter-spacing:-.045em; }
-.hero-description { font-size:10rem; color:#62665b; line-height:1.8; max-width:420px; }
+.hero-description { font-size:1rem; color:#62665b; line-height:1.8; max-width:420px; }
 .hero-actions { display:flex; align-items:center; gap:24px; margin-top:28px; }
 .button-primary,.button-quiet { display:inline-flex; align-items:center; justify-content:center; gap:12px; font-size:0.75rem; font-weight:500; min-height:44px; transition:transform 140ms var(--ease-out), background-color 160ms ease; }
 .button-primary { background:var(--ink); color:var(--paper); padding:0 19px; border-radius:5px; box-shadow:0 1px 2px #292b261a,inset 0 1px 0 #ffffff15; }
@@ -85,7 +85,7 @@
 .model-glyph { font-size:3.25rem; font-family:Georgia,serif; font-style:italic; letter-spacing:-4px; color:#7e8573; }
 .model-glyph>span { font-family:Arial,sans-serif; font-size:2.3125rem; font-style:normal; font-weight:500; color:#4c5641; }
 .model-glyph>small { display:block; font:0.625rem monospace; letter-spacing:1.5px; margin-top:2px; text-align:center; }
-.selected-project h3 { font-size:10rem; font-weight:600; letter-spacing:-.4px; margin-bottom:9px; }
+.selected-project h3 { font-size:1rem; font-weight:600; letter-spacing:-.4px; margin-bottom:9px; }
 .selected-project p { font-size:0.75rem; line-height:1.8; color:var(--muted); min-height:65px; }
 .project-tags { display:flex; flex-wrap:wrap; gap:5px; margin-top:18px; }
 .project-tags span { font-family:monospace; font-size:0.625rem; background:#f0f0e9; color:#646d59; padding:5px 7px; border-radius:3px; }

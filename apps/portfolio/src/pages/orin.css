@@ -5,13 +5,13 @@
 .orin-private { display:flex; align-items:center; gap:7px; font:0.625rem monospace; letter-spacing:1px; color:var(--muted); }
 .orin-main { max-width:960px; margin:auto; }
 .orin-intro { padding:30px 0 38px; }
-.orin-intro h1 { font-size:50rem; font-weight:500; letter-spacing:-6px; line-height:1; margin-top:20px; }
+.orin-intro h1 { font-size:5rem; font-weight:500; letter-spacing:-6px; line-height:1; margin-top:20px; }
 .orin-intro h1 span { color:var(--accent); }
 .orin-intro>p { color:var(--muted); font-family:Georgia,serif; font-style:italic; font-size:1.3125rem; margin-top:15px; }
 .orin-gate { padding:46px 24px; border:1px solid var(--line); border-radius:9px; background:rgb(var(--surface-rgb)); text-align:center; }
 .orin-lock { width:60px; height:60px; border:1px solid var(--line); border-radius:50%; display:grid; place-items:center; margin:0 auto 25px; color:var(--accent); }
 .orin-gate .eyebrow { justify-content:center; }
-.orin-gate h2 { font-size:20rem; line-height:1.2; letter-spacing:-1px; margin:18px auto; font-weight:400; }
+.orin-gate h2 { font-size:2rem; line-height:1.2; letter-spacing:-1px; margin:18px auto; font-weight:400; }
 .orin-gate>p { max-width:400px; margin:0 auto 25px; font-size:0.875rem; line-height:1.8; color:var(--muted); }
 .orin-gate small { display:block; margin-top:20px; color:var(--muted); font-size:0.6875rem; }
 .orin-toolbar { display:flex; align-items:center; gap:12px; border-block:1px solid var(--line); padding:14px 0; }
@@ -22,17 +22,17 @@
 .orin-date input { background:transparent; border:1px solid var(--line); border-radius:4px; padding:7px; font:0.6875rem monospace; color:var(--muted); max-width:150px; }
 .orin-icon { width:40px; height:40px; display:grid; place-items:center; border:1px solid var(--line); border-radius:5px; flex-shrink:0; }
 .orin-brief { padding:35px 0; }
-.orin-brief h2 { font-size:20rem; font-weight:500; margin:15px 0; letter-spacing:-1px; }
+.orin-brief h2 { font-size:2rem; font-weight:500; margin:15px 0; letter-spacing:-1px; }
 .orin-brief>p { font-size:0.9375rem; line-height:1.8; max-width:740px; color:var(--muted); }
 .orin-counts { display:flex; gap:20px; font:0.625rem monospace; color:var(--accent); margin-top:20px; }
 .orin-groups { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:14px; margin-bottom:28px; }
 .orin-groups article { padding:22px; background:rgb(var(--surface-rgb)); border:1px solid var(--line); border-radius:7px; }
-.orin-groups h3 { font-size:10rem; margin:13px 0 10px; }
+.orin-groups h3 { font-size:1rem; margin:13px 0 10px; }
 .orin-groups p { font-size:0.75rem; line-height:1.8; color:var(--muted); }
 .orin-groups article>div:last-child { display:flex; flex-wrap:wrap; gap:12px; margin-top:15px; }
 .orin-groups a { display:flex; gap:3px; align-items:center; font:0.625rem monospace; color:var(--accent); }
 .orin-archive { padding:35px 0 10px; }
-.orin-archive h2 { font-size:20rem; font-weight:500; letter-spacing:-1px; margin:15px 0; }
+.orin-archive h2 { font-size:2rem; font-weight:500; letter-spacing:-1px; margin:15px 0; }
 .orin-archive>p { font-size:0.875rem; line-height:1.8; color:var(--muted); max-width:680px; }
 .orin-archive ul { list-style:none; margin-top:24px; }
 .orin-archive li + li { border-top:1px solid var(--line); }
@@ -45,7 +45,7 @@
 .orin-archive .orin-archive-back:hover { background:rgb(var(--surface-rgb)); color:var(--ink); }
 .orin-archive-empty { font-size:0.8125rem; color:var(--muted); }
 .orin-share { padding:35px 0; max-width:640px; }
-.orin-share h2 { font-size:20rem; font-weight:500; letter-spacing:-1px; margin:15px 0 24px; }
+.orin-share h2 { font-size:2rem; font-weight:500; letter-spacing:-1px; margin:15px 0 24px; }
 .orin-share form { display:grid; gap:16px; }
 .orin-share label { display:grid; gap:8px; font:0.625rem monospace; letter-spacing:.8px; text-transform:uppercase; color:var(--muted); }
 .orin-share input, .orin-share select, .orin-share textarea { background:rgb(var(--surface-rgb)); border:1px solid var(--line); border-radius:5px; color:var(--ink); font-size:0.8125rem; padding:12px; }
@@ -144,7 +144,7 @@
 .orin-brain-node-label.is-strong { fill:var(--ink); }
 .orin-brain-panel { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; margin-top:22px; }
 .orin-brain-card { display:flex; flex-direction:column; gap:12px; padding:18px; border:1px solid var(--line); border-radius:8px; background:rgb(var(--surface-rgb)); }
-.orin-brain-card h4 { font-size:10rem; font-weight:500; letter-spacing:-.3px; }
+.orin-brain-card h4 { font-size:1rem; font-weight:500; letter-spacing:-.3px; }
 .orin-brain-list { display:flex; flex-direction:column; gap:1px; }
 .orin-brain-list button { display:flex; align-items:center; gap:9px; width:100%; text-align:left; padding:7px; border-radius:5px; font-size:0.75rem; color:var(--ink); }
 .orin-brain-list button:hover { background:rgb(var(--paper-rgb) / .8); }
