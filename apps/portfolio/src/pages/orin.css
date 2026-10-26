@@ -52,6 +52,15 @@
 .orin-share textarea { min-height:120px; resize:vertical; }
 .orin-share button[type=submit] { justify-self:start; }
 .orin-share>p { margin-top:18px; font-size:0.75rem; color:var(--muted); }
+.orin-share-pdf label { display:grid; gap:8px; font:0.625rem monospace; letter-spacing:.8px; text-transform:uppercase; color:var(--muted); }
+.orin-share-pdf input[type=file] { background:rgb(var(--surface-rgb)); border:1px solid var(--line); border-radius:5px; color:var(--ink); font-size:0.8125rem; padding:10px 12px; cursor:pointer; }
+.orin-share-pdf input[type=file]::file-selector-button { background:transparent; border:1px solid var(--line); border-radius:5px; color:var(--ink); font:inherit; padding:6px 10px; margin-right:10px; cursor:pointer; }
+.orin-share-pdf input[type=file]::file-selector-button:hover { border-color:var(--ink); }
+.orin-share-pdf-hint { font:0.625rem monospace; letter-spacing:.4px; text-transform:none; color:var(--muted); }
+.orin-share-pdf-file { display:flex; align-items:center; gap:8px; font-size:0.75rem; color:var(--ink); border:1px solid var(--line); border-radius:5px; padding:8px 12px; }
+.orin-share-pdf-file span { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.orin-share-pdf-file button { background:transparent; border:none; color:var(--muted); font-size:0.6875rem; letter-spacing:.4px; text-transform:uppercase; cursor:pointer; }
+.orin-share-pdf-file button:hover { color:var(--ink); }
 .orin-filterbar { display:flex; align-items:center; justify-content:space-between; gap:14px; border-bottom:1px solid var(--line); padding:15px 0; flex-wrap:wrap; }
 .orin-source-filters { display:flex; gap:5px; flex-wrap:wrap; }
 .orin-source-filters button { font-size:0.6875rem; padding:8px 10px; border-radius:4px; color:var(--muted); }

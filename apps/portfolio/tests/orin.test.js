@@ -54,6 +54,33 @@ test('share contributions only accept POST requests', async () => {
   assert.equal(res.headers['Cache-Control'], 'private, no-store');
 });
 
+test('PDF contributions validate the extracted text before database access', async () => {
+  const originalFetch = global.fetch;
+  const originalUrl = process.env.ORIN_DATABASE_URL;
+  global.fetch = async () => ({ ok: true, json: async () => ({ login: process.env.GITHUB_REPOSITORY_OWNER || 'sfeng01-tech' }) });
+  delete process.env.ORIN_DATABASE_URL;
+  const ownerHeaders = { host: 'portfolio.example', 'x-forwarded-proto': 'https', origin: 'https://portfolio.example', cookie: 'portfolio_github_token=valid', 'content-type': 'application/json' };
+  const pdf = { name: 'gpu-paper.pdf', text: 'x'.repeat(120) };
+  try {
+    for (const body of [{}, { url: '' }, { pdf: 'yes' }, { pdf: [] },
+      { pdf: {} }, { pdf: { ...pdf, name: '' } }, { pdf: { ...pdf, name: 'x'.repeat(301) } },
+      { pdf: { ...pdf, name: 'bad\u0007name.pdf' } }, { pdf: { ...pdf, text: '' } },
+      { pdf: { ...pdf, text: 'too short' } }, { pdf: { ...pdf, text: 'x'.repeat(12001) } },
+      { pdf: { ...pdf, text: 'x'.repeat(200) }, url: 'https://arxiv.org/abs/2601.12345' }]) {
+      const res = response();
+      await contributionsHandler({ method: 'POST', headers: ownerHeaders, body }, res);
+      assert.equal(res.statusCode, 400, `expected 400 for ${JSON.stringify(body).slice(0, 60)}`);
+    }
+    // A well-formed PDF share passes validation and only fails on storage.
+    const res = response();
+    await contributionsHandler({ method: 'POST', headers: ownerHeaders, body: { pdf, date: '2026-10-25' } }, res);
+    assert.equal(res.statusCode, 503);
+  } finally {
+    global.fetch = originalFetch;
+    if (originalUrl === undefined) delete process.env.ORIN_DATABASE_URL; else process.env.ORIN_DATABASE_URL = originalUrl;
+  }
+});
+
 test('GitHub identity must match the configured repository owner', async () => {
   const originalFetch = global.fetch;
   global.fetch = async () => ({ ok: true, json: async () => ({ login: 'someone-else' }) });
