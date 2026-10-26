@@ -18,7 +18,13 @@ services:
         sync: false
       - key: GITHUB_CLIENT_SECRET
         sync: false
+      - key: AUTH_SESSION_SECRET
+        sync: false
       - key: ORIN_DATABASE_URL
         sync: false
       - key: ORIN_INGEST_TOKEN
         sync: false
+      # Optional: a separate database/role for OAuth sessions. Defaults to
+      # ORIN_DATABASE_URL. Apply apps/portfolio/server/orin-schema.sql first.
+      # - key: AUTH_DATABASE_URL
+      #   sync: false

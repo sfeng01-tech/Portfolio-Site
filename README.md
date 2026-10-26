@@ -163,4 +163,6 @@ For questions or issues, please open an issue on GitHub.
 
 Visit `/orin` for the owner-only daily digest. Projects and Experience are currently hidden through `apps/portfolio/src/config/publicSections.js`, with their source retained.
 
-See [ORIN hosting and database setup](docs/ORIN.md) and [daily collection, model choices, and pricing](docs/ORIN-SOURCES.md). The current Render static service cannot execute API handlers; ORIN needs a Node web service (`npm start`) or compatible serverless hosting. `render-node.yaml` is an optional Node service blueprint; the existing static configuration remains unchanged.
+GitHub sign-in uses a server-side session: the browser holds only an opaque HttpOnly cookie, the GitHub token is encrypted at rest in Postgres, and sign-out revokes it. Set `AUTH_SESSION_SECRET` (32+ random characters) and apply `apps/portfolio/server/orin-schema.sql`; sessions use `AUTH_DATABASE_URL` when present and otherwise `ORIN_DATABASE_URL`.
+
+See [ORIN hosting and database setup](docs/ORIN.md) and [daily collection, model choices, and pricing](docs/ORIN-SOURCES.md). The current Render static service cannot execute API handlers; ORIN needs a Node web service (`npm start`) or compatible serverless hosting. `render-node.yaml` is an optional Node service blueprint; the existing static configuration remains unchanged. Unknown `/api/*` routes return JSON 404 instead of the SPA, and both hosting paths send a strict Content Security Policy.

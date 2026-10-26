@@ -108,7 +108,7 @@ export const githubFetch = (path, token, options = {}) => fetch(
 );
 
 const readRequestSession = async (req) => {
-  if (localAuthBypassEnabled()) return { ...localBypassAuth(), scope: 'repo' };
+  if (localAuthBypassEnabled()) return { ...localBypassAuth(), scope: 'repo', bypass: true };
   const sessionId = parseCookies(req)[SESSION_COOKIE];
   if (!sessionId) return null;
   return readSession(sessionId);
@@ -122,7 +122,8 @@ const hasRepositoryScope = (scope) => {
 export const getAuthorizedUser = async (req) => {
   const auth = await readRequestSession(req);
   if (!auth) return null;
-  if (!isPortalAllowedUser(auth.user.login)) return null;
+  // The local bypass identity is deliberately outside the deployment allowlists.
+  if (!auth.bypass && !isPortalAllowedUser(auth.user.login)) return null;
   // Admin edits require repository write access. An ORIN-only identity session
   // (read:user) must not inherit the portfolio write surface.
   if (!hasRepositoryScope(auth.scope)) return null;
@@ -132,7 +133,7 @@ export const getAuthorizedUser = async (req) => {
 export const getAuthorizedOrinUser = async (req) => {
   const auth = await readRequestSession(req);
   if (!auth) return null;
-  if (!isOrinAllowedUser(auth.user.login)) return null;
+  if (!auth.bypass && !isOrinAllowedUser(auth.user.login)) return null;
   return { token: auth.token, user: auth.user };
 };
 

@@ -1,26 +1,10 @@
-import React, { useState } from 'react';
-import { Linkedin, Github, Twitter, Send } from 'lucide-react';
+import React from 'react';
+import { Linkedin, Github, Twitter, Mail, ArrowUpRight } from 'lucide-react';
+
+const socialLink = 'w-12 h-12 bg-dark-bg border border-dark-border rounded-lg flex items-center justify-center text-dark-text-secondary hover:text-dark-text-primary hover:border-dark-text-muted transition-colors';
 
 const Contact = ({ profile }) => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    message: ''
-  });
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Form submission logic would go here
-    console.log('Form submitted:', formData);
-    alert('Form submitted! (This is a demo - integrate with your backend)');
-  };
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
+  const emailHref = profile.email ? `mailto:${profile.email}` : '';
 
   return (
     <section id="contact" className="section-padding bg-dark-surface">
@@ -45,7 +29,8 @@ const Contact = ({ profile }) => {
                     href={profile.linkedin}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-12 h-12 bg-dark-bg border border-dark-border rounded-lg flex items-center justify-center text-dark-text-secondary hover:text-dark-text-primary hover:border-dark-text-muted transition-colors"
+                    aria-label="LinkedIn"
+                    className={socialLink}
                   >
                     <Linkedin size={20} />
                   </a>
@@ -55,7 +40,8 @@ const Contact = ({ profile }) => {
                     href={profile.github}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-12 h-12 bg-dark-bg border border-dark-border rounded-lg flex items-center justify-center text-dark-text-secondary hover:text-dark-text-primary hover:border-dark-text-muted transition-colors"
+                    aria-label="GitHub"
+                    className={socialLink}
                   >
                     <Github size={20} />
                   </a>
@@ -65,83 +51,65 @@ const Contact = ({ profile }) => {
                     href={profile.twitter}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-12 h-12 bg-dark-bg border border-dark-border rounded-lg flex items-center justify-center text-dark-text-secondary hover:text-dark-text-primary hover:border-dark-text-muted transition-colors"
+                    aria-label="X"
+                    className={socialLink}
                   >
                     <Twitter size={20} />
+                  </a>
+                )}
+                {emailHref && (
+                  <a
+                    href={emailHref}
+                    aria-label={`Email ${profile.email}`}
+                    className={socialLink}
+                  >
+                    <Mail size={20} />
                   </a>
                 )}
               </div>
             </div>
           </div>
 
-          {/* Contact Form */}
+          {/* Direct contact */}
           <div className="bg-dark-bg border border-dark-border rounded-lg p-8">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label
-                  htmlFor="name"
-                  className="block text-sm font-medium text-dark-text-secondary mb-2"
-                >
-                  Name
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                  className="w-full bg-dark-surface border border-dark-border rounded-lg px-4 py-3 text-dark-text-primary focus:outline-none focus:border-dark-text-muted transition-colors"
-                  placeholder="Your name"
-                />
-              </div>
+            <h3 className="text-xl font-bold text-dark-text-primary mb-3">Start a conversation</h3>
+            <p className="text-dark-text-secondary mb-8 leading-relaxed">
+              Email is the quickest way to reach me. Include a little context about what you have in mind and I'll get back to you.
+            </p>
 
-              <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-dark-text-secondary mb-2"
+            <div className="space-y-4">
+              {emailHref && (
+                <a
+                  href={emailHref}
+                  className="flex items-center justify-between gap-4 w-full bg-dark-text-primary text-dark-bg font-medium py-3 px-6 rounded-lg hover:bg-white transition-colors"
                 >
-                  Email
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="w-full bg-dark-surface border border-dark-border rounded-lg px-4 py-3 text-dark-text-primary focus:outline-none focus:border-dark-text-muted transition-colors"
-                  placeholder="your.email@example.com"
-                />
-              </div>
+                  <span className="flex items-center min-w-0">
+                    <Mail size={20} className="mr-3 shrink-0" />
+                    <span className="truncate">{profile.email}</span>
+                  </span>
+                  <ArrowUpRight size={18} className="shrink-0" />
+                </a>
+              )}
 
-              <div>
-                <label
-                  htmlFor="message"
-                  className="block text-sm font-medium text-dark-text-secondary mb-2"
+              {profile.linkedin && (
+                <a
+                  href={profile.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between gap-4 w-full bg-dark-surface border border-dark-border text-dark-text-primary font-medium py-3 px-6 rounded-lg hover:border-dark-text-muted transition-colors"
                 >
-                  Message
-                </label>
-                <textarea
-                  id="message"
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  required
-                  rows={6}
-                  className="w-full bg-dark-surface border border-dark-border rounded-lg px-4 py-3 text-dark-text-primary focus:outline-none focus:border-dark-text-muted transition-colors resize-none"
-                  placeholder="Your message..."
-                />
-              </div>
+                  <span className="flex items-center">
+                    <Linkedin size={20} className="mr-3" />
+                    Connect on LinkedIn
+                  </span>
+                  <ArrowUpRight size={18} />
+                </a>
+              )}
+            </div>
 
-              <button
-                type="submit"
-                className="w-full bg-dark-text-primary text-dark-bg font-medium py-3 px-6 rounded-lg hover:bg-white transition-colors flex items-center justify-center"
-              >
-                <Send size={20} className="mr-2" />
-                Send Message
-              </button>
-            </form>
+            <p className="mt-8 text-sm text-dark-text-muted">
+              I usually reply within a few days.
+            </p>
           </div>
         </div>
 

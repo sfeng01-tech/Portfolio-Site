@@ -1,12 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { requireIngestToken, requireOrinOwner, safeUrl, suppressPreviousItems, validDate, validateCategory, validateIngest } from '../server/orin.js';
+import { digestItemCount, requireIngestToken, requireOrinOwner, resolveDigestUpdate, safeUrl, suppressPreviousItems, validDate, validateCategory, validateIngest } from '../server/orin.js';
 import digestHandler from '../../../api/orin/digest.js';
 import itemsHandler from '../../../api/orin/items.js';
 import ingestHandler from '../../../api/orin/ingest.js';
+import preflightHandler from '../../../api/orin/preflight.js';
 import preferencesHandler from '../../../api/orin/preferences.js';
 import categoriesHandler from '../../../api/orin/categories.js';
 import contributionsHandler from '../../../api/orin/contributions.js';
+import { ownerHeaders, sessionCookie } from './session-helper.js';
 
 const entry = { source: 'arxiv', url: 'https://arxiv.org/abs/2601.12345', title: 'A GPU paper', excerpt: 'Untrusted extracted text', author: '', topics: ['ROCm'] };
 const response = () => ({ headers: {}, statusCode: 200, setHeader(key, value) { this.headers[key] = value; }, status(code) { this.statusCode = code; return this; }, json(body) { this.body = body; return this; } });
@@ -55,11 +57,9 @@ test('share contributions only accept POST requests', async () => {
 });
 
 test('PDF contributions validate the extracted text before database access', async () => {
-  const originalFetch = global.fetch;
   const originalUrl = process.env.ORIN_DATABASE_URL;
-  global.fetch = async () => ({ ok: true, json: async () => ({ login: process.env.GITHUB_REPOSITORY_OWNER || 'sfeng01-tech' }) });
   delete process.env.ORIN_DATABASE_URL;
-  const ownerHeaders = { host: 'portfolio.example', 'x-forwarded-proto': 'https', origin: 'https://portfolio.example', cookie: 'portfolio_github_token=valid', 'content-type': 'application/json' };
+  const headers = await ownerHeaders();
   const pdf = { name: 'gpu-paper.pdf', text: 'x'.repeat(120) };
   try {
     for (const body of [{}, { url: '' }, { pdf: 'yes' }, { pdf: [] },
@@ -68,44 +68,40 @@ test('PDF contributions validate the extracted text before database access', asy
       { pdf: { ...pdf, text: 'too short' } }, { pdf: { ...pdf, text: 'x'.repeat(12001) } },
       { pdf: { ...pdf, text: 'x'.repeat(200) }, url: 'https://arxiv.org/abs/2601.12345' }]) {
       const res = response();
-      await contributionsHandler({ method: 'POST', headers: ownerHeaders, body }, res);
+      await contributionsHandler({ method: 'POST', headers, body }, res);
       assert.equal(res.statusCode, 400, `expected 400 for ${JSON.stringify(body).slice(0, 60)}`);
     }
     // A well-formed PDF share passes validation and only fails on storage.
     const res = response();
-    await contributionsHandler({ method: 'POST', headers: ownerHeaders, body: { pdf, date: '2026-10-25' } }, res);
+    await contributionsHandler({ method: 'POST', headers, body: { pdf, date: '2026-10-25' } }, res);
     assert.equal(res.statusCode, 503);
   } finally {
-    global.fetch = originalFetch;
     if (originalUrl === undefined) delete process.env.ORIN_DATABASE_URL; else process.env.ORIN_DATABASE_URL = originalUrl;
   }
 });
 
-test('GitHub identity must match the configured repository owner', async () => {
-  const originalFetch = global.fetch;
-  global.fetch = async () => ({ ok: true, json: async () => ({ login: 'someone-else' }) });
-  try {
-    await assert.rejects(requireOrinOwner({ headers: { cookie: 'portfolio_github_token=valid-for-other-user' } }), error => error.status === 401);
-  } finally { global.fetch = originalFetch; }
+test('session identity must be an allowed ORIN user', async () => {
+  const res = response();
+  await digestHandler({ method: 'GET', query: {}, headers: { cookie: await sessionCookie({ login: 'someone-else' }) } }, res);
+  assert.equal(res.statusCode, 401);
+  assert.equal(res.body.error, 'Not authenticated');
 });
 
 test('owner mutations enforce JSON same-origin browser requests', async () => {
-  const originalFetch = global.fetch;
-  global.fetch = async () => ({ ok: true, json: async () => ({ login: process.env.GITHUB_REPOSITORY_OWNER || 'sfeng01-tech' }) });
-  const headers = { host: 'portfolio.example', cookie: 'portfolio_github_token=valid', 'content-type': 'application/json' };
-  try {
-    await assert.rejects(requireOrinOwner({ headers }, true), error => error.status === 403);
-    await assert.rejects(requireOrinOwner({ headers: { ...headers, origin: 'https://attacker.example' } }, true), error => error.status === 403);
-  } finally { global.fetch = originalFetch; }
+  const session = await sessionCookie();
+  const headers = { host: 'portfolio.example', cookie: session, 'content-type': 'application/json' };
+  await assert.rejects(requireOrinOwner({ headers }, true), error => error.status === 403);
+  await assert.rejects(requireOrinOwner({ headers: { ...headers, origin: 'https://attacker.example' } }, true), error => error.status === 403);
 });
 
-test('ingest requires a separate strong secret and does not accept a GitHub cookie', async () => {
+test('ingest requires a separate strong secret and does not accept a GitHub session', async () => {
   const original = process.env.ORIN_INGEST_TOKEN;
   try {
     delete process.env.ORIN_INGEST_TOKEN;
     assert.throws(() => requireIngestToken({ headers: {} }), error => error.status === 503);
     process.env.ORIN_INGEST_TOKEN = 'a'.repeat(40);
-    assert.throws(() => requireIngestToken({ headers: { cookie: 'portfolio_github_token=valid' } }), error => error.status === 401);
+    const session = await sessionCookie();
+    assert.throws(() => requireIngestToken({ headers: { cookie: session } }), error => error.status === 401);
     requireIngestToken({ headers: { authorization: `Bearer ${'a'.repeat(40)}` } });
     const res = response();
     await ingestHandler({ method: 'POST', headers: { authorization: 'Bearer incorrect' } }, res);
@@ -114,17 +110,14 @@ test('ingest requires a separate strong secret and does not accept a GitHub cook
 });
 
 test('owner sees explicit configuration error rather than fabricated digest data', async () => {
-  const originalFetch = global.fetch;
   const originalUrl = process.env.ORIN_DATABASE_URL;
-  global.fetch = async () => ({ ok: true, json: async () => ({ login: process.env.GITHUB_REPOSITORY_OWNER || 'sfeng01-tech' }) });
   delete process.env.ORIN_DATABASE_URL;
   try {
     const res = response();
-    await digestHandler({ method: 'GET', query: {}, headers: { cookie: 'portfolio_github_token=valid' } }, res);
+    await digestHandler({ method: 'GET', query: {}, headers: { cookie: await sessionCookie() } }, res);
     assert.equal(res.statusCode, 503);
     assert.equal(res.body.error, 'ORIN database is not configured');
   } finally {
-    global.fetch = originalFetch;
     if (originalUrl === undefined) delete process.env.ORIN_DATABASE_URL; else process.env.ORIN_DATABASE_URL = originalUrl;
   }
 });
@@ -203,56 +196,50 @@ test('category/admin endpoints authenticate before touching private storage', as
 });
 
 test('category reads allowed without errors while taxonomy writes stay owner-only and bounded', async () => {
-  const originalFetch = global.fetch;
-  global.fetch = async () => ({ ok: true, json: async () => ({ login: process.env.GITHUB_REPOSITORY_OWNER || 'sfeng01-tech' }) });
-  const ownerHeaders = { host: 'portfolio.example', 'x-forwarded-proto': 'https', origin: process.env.APP_ORIGIN?.replace(/\/$/, '') || 'https://portfolio.example', cookie: 'portfolio_github_token=valid', 'content-type': 'application/json' };
-  try {
-    // Body validation happens before any database access, so an unconfigured
-    // database never masks a malformed payload.
-    for (const [method, body] of [['POST', { label: '' }], ['POST', { label: 'x'.repeat(81) }], ['POST', {}], ['DELETE', { label: 9 }],
-      ['DELETE', { label: 'Agents', action: 'explode' }], ['DELETE', { label: 'Agents', action: 'reassign' }],
-      ['DELETE', { label: 'Agents', action: 'reassign', to: 7 }], ['DELETE', { label: 'Agents', action: 'reassign', to: 'x'.repeat(81) }],
-      ['DELETE', { label: 'Agents', to: 'Inference' }]]) {
-      const res = response();
-      await categoriesHandler({ method, headers: ownerHeaders, body }, res);
-      assert.equal(res.statusCode, 400);
-    }
-    // Unfile and reassign are explicit actions: label-only deletes never touch
-    // items, so they stay 400-free before reaching storage.
-    // Same-origin enforcement still applies to browser taxonomy writes.
+  const headers = await ownerHeaders();
+  // Body validation happens before any database access, so an unconfigured
+  // database never masks a malformed payload.
+  for (const [method, body] of [['POST', { label: '' }], ['POST', { label: 'x'.repeat(81) }], ['POST', {}], ['DELETE', { label: 9 }],
+    ['DELETE', { label: 'Agents', action: 'explode' }], ['DELETE', { label: 'Agents', action: 'reassign' }],
+    ['DELETE', { label: 'Agents', action: 'reassign', to: 7 }], ['DELETE', { label: 'Agents', action: 'reassign', to: 'x'.repeat(81) }],
+    ['DELETE', { label: 'Agents', to: 'Inference' }]]) {
     const res = response();
-    await categoriesHandler({ method: 'POST', headers: { ...ownerHeaders, origin: 'https://attacker.example' }, body: { label: 'Agents' } }, res);
-    assert.equal(res.statusCode, 403);
-  } finally { global.fetch = originalFetch; }
+    await categoriesHandler({ method, headers, body }, res);
+    assert.equal(res.statusCode, 400);
+  }
+  // Unfile and reassign are explicit actions: label-only deletes never touch
+  // items, so they stay 400-free before reaching storage.
+  // Same-origin enforcement still applies to browser taxonomy writes.
+  const res = response();
+  await categoriesHandler({ method: 'POST', headers: { ...headers, origin: 'https://attacker.example' }, body: { label: 'Agents' } }, res);
+  assert.equal(res.statusCode, 403);
 });
 
 test('owner category edits validate label work before reaching the database', async () => {
-  const originalFetch = global.fetch;
   const originalUrl = process.env.ORIN_DATABASE_URL;
   delete process.env.ORIN_DATABASE_URL;
-  global.fetch = async () => ({ ok: true, json: async () => ({ login: process.env.GITHUB_REPOSITORY_OWNER || 'sfeng01-tech' }) });
+  const headers = await ownerHeaders();
   try {
     for (const category of [5, true, { label: 'Agents' }, 'x'.repeat(81)]) {
       const res = response();
-      await itemsHandler({ method: 'PATCH', headers: { host: 'portfolio.example', 'x-forwarded-proto': 'https', origin: process.env.APP_ORIGIN?.replace(/\/$/, '') || 'https://portfolio.example', cookie: 'portfolio_github_token=valid', 'content-type': 'application/json' }, body: { id: 'a'.repeat(64), category } }, res);
+      await itemsHandler({ method: 'PATCH', headers, body: { id: 'a'.repeat(64), category } }, res);
       assert.equal(res.statusCode, 400);
     }
     // `category: null` is a deliberate clear, not a malformed request.
     const res = response();
-    await itemsHandler({ method: 'PATCH', headers: { host: 'portfolio.example', 'x-forwarded-proto': 'https', origin: process.env.APP_ORIGIN?.replace(/\/$/, '') || 'https://portfolio.example', cookie: 'portfolio_github_token=valid', 'content-type': 'application/json' }, body: { id: 'a'.repeat(64), category: null } }, res);
+    await itemsHandler({ method: 'PATCH', headers, body: { id: 'a'.repeat(64), category: null } }, res);
     assert.equal(res.statusCode, 503, 'well-formed edits proceed to storage');
   } finally {
-    global.fetch = originalFetch;
     if (originalUrl === undefined) delete process.env.ORIN_DATABASE_URL; else process.env.ORIN_DATABASE_URL = originalUrl;
   }
 });
 
 
-test('worker feedback endpoint rejects browser cookies and invalid ingestion tokens', async () => {
+test('worker feedback endpoint rejects browser sessions and invalid ingestion tokens', async () => {
   const original = process.env.ORIN_INGEST_TOKEN;
   process.env.ORIN_INGEST_TOKEN = 'a'.repeat(40);
   try {
-    for (const headers of [{cookie:'portfolio_github_token=valid'}, {authorization:'Bearer invalid'}]) {
+    for (const headers of [{ cookie: await sessionCookie() }, { authorization: 'Bearer invalid' }]) {
       const res=response();
       await preferencesHandler({method:'GET',headers},res);
       assert.equal(res.statusCode,401);
@@ -262,15 +249,12 @@ test('worker feedback endpoint rejects browser cookies and invalid ingestion tok
 });
 
 test('explicit feedback rejects booleans and out-of-range values before database access', async () => {
-  const originalFetch=global.fetch;
-  global.fetch=async()=>({ok:true,json:async()=>({login:process.env.GITHUB_REPOSITORY_OWNER||'sfeng01-tech'})});
-  try {
-    for(const feedback of [true,2,'1',null]) {
-      const res=response();
-      await itemsHandler({method:'PATCH',headers:{host:'portfolio.example','x-forwarded-proto':'https',origin:process.env.APP_ORIGIN?.replace(/\/$/,'')||'https://portfolio.example',cookie:'portfolio_github_token=valid','content-type':'application/json'},body:{id:'a'.repeat(64),feedback}},res);
-      assert.equal(res.statusCode,400);
-    }
-  } finally {global.fetch=originalFetch;}
+  const headers = await ownerHeaders();
+  for(const feedback of [true,2,'1',null]) {
+    const res=response();
+    await itemsHandler({method:'PATCH',headers,body:{id:'a'.repeat(64),feedback}},res);
+    assert.equal(res.statusCode,400);
+  }
 });
 
 test('a same-day run is additive unless it explicitly asks to replace the day', () => {
@@ -293,4 +277,85 @@ test('a same-day run is additive unless it explicitly asks to replace the day', 
   assert.equal(pruned.items.length, 1);
   assert.equal(pruned.skipped, 1);
   assert.equal(pruned.replace, false, 'additive mode is the default even when items are pruned');
+});
+
+test('digest citation coverage is derived from unique URLs', () => {
+  const second = { ...entry, url: 'https://arxiv.org/abs/2601.99999' };
+  const payload = validateIngest({ date: '2026-10-25', items: [entry, second], digest: { title: 'Reading', groups: [{ title: 'GPU', urls: [entry.url, second.url] }] } });
+  assert.equal(digestItemCount(payload.digest), 2);
+  assert.equal(digestItemCount(null), 0);
+  assert.equal(digestItemCount({}), 0);
+  assert.equal(digestItemCount({ groups: [{ urls: [entry.url, entry.url] }, { urls: [entry.url] }] }), 1);
+  assert.equal(digestItemCount({ groups: [{ urls: 'nope' }] }), 0);
+});
+
+test('a thin same-day digest cannot replace a richer one without an explicit override', () => {
+  const second = { ...entry, url: 'https://arxiv.org/abs/2601.99999', title: 'Another GPU paper' };
+  const rich = validateIngest({ date: '2026-10-25', items: [entry, second], digest: { title: 'Rich', groups: [{ title: 'GPU', urls: [entry.url] }, { title: 'More', urls: [second.url] }] } }).digest;
+  const thin = validateIngest({ date: '2026-10-25', items: [entry], digest: { title: 'Thin', groups: [{ title: 'GPU', urls: [entry.url] }] } }).digest;
+
+  const preserved = resolveDigestUpdate(rich, thin);
+  assert.equal(preserved.preserved, true);
+  assert.equal(preserved.reason, 'thinner-digest');
+  assert.equal(preserved.digest.title, 'Rich');
+
+  const replaced = resolveDigestUpdate(rich, thin, { replaceDigest: true });
+  assert.equal(replaced.preserved, false);
+  assert.equal(replaced.digest.title, 'Thin');
+
+  assert.equal(resolveDigestUpdate(null, thin).digest, thin);
+  assert.equal(resolveDigestUpdate(null, null).digest, null);
+  const empty = resolveDigestUpdate(rich, null);
+  assert.equal(empty.preserved, true);
+  assert.equal(empty.reason, 'empty-digest');
+  assert.deepEqual(resolveDigestUpdate(rich, rich).digest, rich);
+  assert.equal(resolveDigestUpdate(rich, rich).preserved, false, 'equal coverage may republish');
+});
+
+test('digest status and the replace-digest override are strictly validated', () => {
+  const ok = validateIngest({ date: '2026-10-25', items: [entry], digestStatus: { status: 'unavailable', message: 'Model timed out' } });
+  assert.deepEqual(ok.digestStatus, { status: 'unavailable', message: 'Model timed out', model: '' });
+  assert.equal(validateIngest({ date: '2026-10-25', items: [entry], digestStatus: { status: 'preserved', message: 'Kept previous digest', model: 'deepseek/deepseek-v4.1-flash-1017' } }).digestStatus.model, 'deepseek/deepseek-v4.1-flash-1017');
+  for (const broken of [null, {}, { status: 'exploded', message: 'x' }, { status: 'ok' }, { status: 'ok', message: 'x'.repeat(501) }, { status: 'ok', message: 'x', model: 'y'.repeat(151) }]) {
+    assert.throws(() => validateIngest({ date: '2026-10-25', items: [entry], digestStatus: broken }), /Invalid digest status|Invalid text field/);
+  }
+  assert.equal(validateIngest({ date: '2026-10-25', items: [entry], replaceDigest: true }).replaceDigest, true);
+  for (const broken of ['yes', 1, null]) {
+    assert.throws(() => validateIngest({ date: '2026-10-25', items: [entry], replaceDigest: broken }), /Invalid replace digest flag/);
+  }
+});
+
+test('worker preflight validates its window before touching storage', async () => {
+  const original = process.env.ORIN_INGEST_TOKEN;
+  const originalUrl = process.env.ORIN_DATABASE_URL;
+  try {
+    delete process.env.ORIN_INGEST_TOKEN;
+    const unconfigured = response();
+    await preflightHandler({ method: 'GET', query: { date: '2026-10-25' }, headers: {} }, unconfigured);
+    assert.equal(unconfigured.statusCode, 503);
+
+    process.env.ORIN_INGEST_TOKEN = 'b'.repeat(40);
+    const headers = { authorization: `Bearer ${'b'.repeat(40)}` };
+    for (const date of [undefined, '', '2026-2-1', '2026-02-30', 'yesterday']) {
+      const res = response();
+      await preflightHandler({ method: 'GET', query: { date }, headers }, res);
+      assert.equal(res.statusCode, 400, `date ${date}`);
+      assert.equal(res.body.error, 'Valid date required');
+    }
+
+    const wrongMethod = response();
+    await preflightHandler({ method: 'POST', query: {}, headers }, wrongMethod);
+    assert.equal(wrongMethod.statusCode, 405);
+    assert.equal(wrongMethod.headers.Allow, 'GET');
+
+    // A valid request reaches storage, which is unconfigured here.
+    delete process.env.ORIN_DATABASE_URL;
+    const res = response();
+    await preflightHandler({ method: 'GET', query: { date: '2026-10-25', days: '500' }, headers }, res);
+    assert.equal(res.statusCode, 503);
+    assert.equal(res.body.error, 'ORIN database is not configured');
+  } finally {
+    if (original === undefined) delete process.env.ORIN_INGEST_TOKEN; else process.env.ORIN_INGEST_TOKEN = original;
+    if (originalUrl === undefined) delete process.env.ORIN_DATABASE_URL; else process.env.ORIN_DATABASE_URL = originalUrl;
+  }
 });

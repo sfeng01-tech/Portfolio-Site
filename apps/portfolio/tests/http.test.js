@@ -21,6 +21,13 @@ test('Node adapter serves SPA, private APIs and bounded JSON without leaking fil
     const health = await fetch(`${base}/api/health`);
     assert.equal(health.status, 200);
     assert.deepEqual(await health.json(), { ok: true });
+    // Security headers apply to every response, including static assets.
+    assert.match(spa.headers.get('content-security-policy'), /default-src 'self'/);
+    assert.match(spa.headers.get('content-security-policy'), /script-src 'self'/);
+    assert.equal(spa.headers.get('x-content-type-options'), 'nosniff');
+    assert.equal(spa.headers.get('x-frame-options'), 'DENY');
+    assert.equal(spa.headers.get('referrer-policy'), 'strict-origin-when-cross-origin');
+    assert.match(spa.headers.get('permissions-policy'), /camera=\(\)/);
     const session = await fetch(`${base}/api/auth/session`);
     assert.equal(session.status, 401);
     assert.match(session.headers.get('content-type'), /application\/json/);

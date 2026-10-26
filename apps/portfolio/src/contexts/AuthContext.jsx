@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 const AuthContext = createContext();
 
@@ -40,11 +40,12 @@ export const AuthProvider = ({ children }) => {
     restoreSession();
   }, []);
 
-  const login = (returnTo) => {
+  const login = useCallback((returnTo) => {
+    setError(null);
     window.location.assign(returnTo === '/orin' ? '/api/auth/login?returnTo=%2Forin' : '/api/auth/login');
-  };
+  }, []);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       await fetch('/api/auth/logout', {
         method: 'POST',
@@ -52,8 +53,17 @@ export const AuthProvider = ({ children }) => {
       });
     } finally {
       setUser(null);
+      setError(null);
     }
-  };
+  }, []);
+
+  // Called when an authenticated request comes back 401. The server session is
+  // gone (expired, revoked, or the database lost it), so drop the local user and
+  // let the gate offer a fresh sign-in.
+  const expireSession = useCallback((message = 'Your session expired. Sign in again.') => {
+    setUser(null);
+    setError(message);
+  }, []);
 
   const value = useMemo(() => ({
     user,
@@ -61,8 +71,9 @@ export const AuthProvider = ({ children }) => {
     error,
     login,
     logout,
+    expireSession,
     isAuthenticated: Boolean(user)
-  }), [user, loading, error]);
+  }), [user, loading, error, login, logout, expireSession]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

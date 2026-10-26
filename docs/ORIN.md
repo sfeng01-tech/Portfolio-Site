@@ -2,6 +2,8 @@
 
 ORIN is a private route at `/orin`. The GitHub identity is checked on the server for every digest read and read/bookmark update. Only `GITHUB_REPOSITORY_OWNER` (default `sfeng01-tech`) can access data. The browser receives no database credentials, collector token, or OpenRouter key. Private API responses use `Cache-Control: private, no-store`.
 
+GitHub sign-in creates a **server-side session**: the browser gets only an opaque, HttpOnly `portfolio_session` cookie, while the GitHub access token is encrypted (AES-256-GCM, key derived from `AUTH_SESSION_SECRET`) and stored in `orin_auth_sessions`. Sessions expire after 8 hours, are revocable, and signing out deletes the row and revokes the token with GitHub. Sessions use `AUTH_DATABASE_URL` when set, otherwise `ORIN_DATABASE_URL`. `AUTH_SESSION_STORE=memory` is a development/test fallback that refuses to run when `NODE_ENV=production`.
+
 ## Current hosting
 
 The public portfolio is served as a Render Static Site at `https://sahil-ai-portfolio.onrender.com`. ORIN's Node web service is `https://orin-digest.onrender.com`; the static `/orin` entry redirects there. The Node adapter serves `dist` and the API handlers from the same origin, while Neon persists digests and GitHub OAuth restricts access to the repository owner. Unknown `/api/*` routes return JSON 404, not the SPA HTML.
@@ -10,17 +12,33 @@ The existing GitHub OAuth app, Render environment variables, Neon schema and Act
 
 Source failures appear explicitly in the digest. Login, verification and rate-limit pages are reported rather than bypassed.
 
+Responses from the Node adapter set a Content Security Policy plus `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, `Cross-Origin-Opener-Policy`, and HSTS on HTTPS. `vercel.json` mirrors the same policy for Vercel deployments. The theme bootstrap script lives at `/theme-init.js` so `script-src 'self'` works without an inline-script exception.
+
+## Schema migrations
+
+`apps/portfolio/server/orin-schema.sql` is additive and safe to re-run. This revision adds the `orin_auth_sessions` table, `orin_digests.digest_status`, and indexes supporting digest membership, category lookups, feedback reads, and paper-identity suppression. Apply it again before deploying the session-based auth or new ingest paths; an unmigrated database returns explicit 5xx errors rather than serving stale behavior.
+
 ## API contract
 
-All owner endpoints require the existing HttpOnly GitHub session cookie. `PATCH` additionally requires a matching `Origin` and `Content-Type: application/json`.
+All owner endpoints require the server-side ORIN session cookie. `PATCH` additionally requires a matching `Origin` and `Content-Type: application/json`. An expired or revoked session returns JSON 401, and the UI drops back to the sign-in gate instead of showing stale digest data.
 
-- `GET /api/orin/digest`: latest available digest, or `?date=YYYY-MM-DD` for a selected day. `?saved=true` includes bookmarked items across dates (up to 500). Response: `{date, availableDates, digest, items, sourceStatus}`. `availableDates` contains the last 90 digest dates.
+- `GET /api/orin/digest`: latest available digest, or `?date=YYYY-MM-DD` for a selected day. `?saved=true` includes bookmarked items across dates (up to 500). Response: `{date, availableDates, digest, digestStatus, items, sourceStatus}`. `availableDates` contains the last 90 digest dates.
 - `PATCH /api/orin/items`: `{id, read?: boolean, saved?: boolean, feedback?: -1|0|1, category?: string|null}`. Returns `{id, read, saved, feedback, category, categorySource}`. Read/bookmark/feedback state and owner categories survive re-ingestion and carry across days for the same canonical URL.
-- `POST /api/orin/ingest`: requires `Authorization: Bearer ORIN_INGEST_TOKEN` and JSON. The token is independent of browser authentication. Returns `{count, skipped, added, members, date, mode}`. Articles already included on an earlier day are suppressed server-side, while same-day retries remain valid. Group references are pruned and affected summaries cleared to avoid describing excluded articles.
+- `POST /api/orin/ingest`: requires `Authorization: Bearer ORIN_INGEST_TOKEN` and JSON. The token is independent of browser authentication. Returns `{count, skipped, added, members, date, mode, digestPreserved, digestItems}`. Articles already included on an earlier day are suppressed server-side, while same-day retries remain valid. Group references are pruned and affected summaries cleared to avoid describing excluded articles.
 
   Same-day membership is **additive**: a run adds its items to the day and the digest text is refreshed, but items an earlier run already published for that day are not removed. A partial run — a blocked source, a spent daily cap, a model outage — therefore cannot erase a richer digest, which is what previously left a day showing six finds after a thin later run. Pass `"replace": true` to opt back into swapping the day's membership outright, which is only appropriate when correcting a known-bad day. `added` reports how many of the run's items were newly attached and `members` the day's total afterwards, so a degrading source mix is visible in the run log. Shared items are upserted without losing read/bookmark state, and historical item records and bookmarks remain retained.
 
   Note that retained items from an earlier run can be absent from the newest digest's `groups`, because that synthesis only saw the latest payload. They still appear in the digest item list and in the brain.
+
+  **Digest publish guard.** A same-day retry may not replace a richer digest with a thinner one: the server compares cited-item coverage (`digest.itemCount`, derived from unique group URLs) and keeps the existing digest, reporting `digestPreserved: true` and recording `digest_status: {"status":"preserved", ...}`. Pass `"replaceDigest": true` only for a deliberate correction. A `null` digest never replaces an existing one. The ingest response also reports `digestItems` so a degrading synthesis is visible in run logs.
+
+  **Zero-item runs.** A run that collects nothing returns `mode: "skipped"` with `reason: "zero-items"` and leaves the published day, its digest, and its source status untouched.
+
+  **Digest status.** `digestStatus` (`ok`, `unavailable`, `preserved`, `skipped`) plus a message and optional model is stored in `orin_digests.digest_status` and returned by `GET /api/orin/digest` as `digestStatus`. When summarization fails, the collector still publishes the day's items with `status: "unavailable"` rather than discarding evidence.
+
+  **Summary fallbacks.** The collector tries `model`, then each entry in `summaryFallbackModels` (default DeepSeek then Gemini), skipping models that are unavailable, over budget, or over context. Authentication and billing failures (HTTP 401/402) stop the chain immediately. The successful model is recorded on the digest.
+
+- `GET /api/orin/preflight?date=YYYY-MM-DD&days=30`: worker-only (ingestion token). Returns `{date, days, itemIds, paperIds, counts}` for items delivered in the `days`-day window before `date` (default 30, clamped to 1–90). The collector filters against this before ranking and summarizing, so already-delivered work never consumes model budget.
 
 Example ingestion payload (up to 100 items and 2 MB):
 

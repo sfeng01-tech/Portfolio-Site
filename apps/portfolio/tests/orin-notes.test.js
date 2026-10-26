@@ -7,10 +7,10 @@ import {
   validateNoteContent, validateNoteId, validateNotePatch, validateNoteTitle,
   validateReminderCreate, validateReminderDays, validateReminderPatch, validateReminderTime
 } from '../server/orin-notes.js';
+import { ownerHeaders } from './session-helper.js';
 
 const response = () => ({ headers: {}, statusCode: 200, setHeader(key, value) { this.headers[key] = value; }, status(code) { this.statusCode = code; return this; }, json(body) { this.body = body; return this; } });
 const noteId = '4f2b9a5c-0000-4000-8000-abcdefabcdef';
-const asOwner = async () => { global.fetch = async () => ({ ok: true, json: async () => ({ login: process.env.GITHUB_REPOSITORY_OWNER || 'sfeng01-tech' }) }); };
 const unsetDatabase = () => { delete process.env.ORIN_DATABASE_URL; };
 
 test('note ids are strictly version-4-shaped uuids', () => {
@@ -85,34 +85,28 @@ test('notes and reminders endpoints reject anonymous and unconfigured access', a
 });
 
 test('notes endpoints answer with the explicit database-configuration error', async () => {
-  const originalFetch = global.fetch;
   const originalUrl = process.env.ORIN_DATABASE_URL;
   delete process.env.ORIN_DATABASE_URL;
-  const headers = { host: 'portfolio.example', cookie: 'portfolio_github_token=valid' };
+  const headers = await ownerHeaders({ 'x-forwarded-proto': 'https', origin: 'https://portfolio.example' });
   try {
-    await asOwner();
     unsetDatabase();
-    const headers = { host: 'portfolio.example', cookie: 'portfolio_github_token=valid' };
     for (const [handler, method, extra] of [[notesHandler, 'GET', {}], [notesHandler, 'POST', { body: {} }], [remindersHandler, 'GET', {}]]) {
       const isWrite = method !== 'GET';
       const res = response();
-      await handler({ method, headers: isWrite ? { ...headers, origin: 'http://portfolio.example', 'content-type': 'application/json' } : headers, query: {}, ...extra }, res);
+      await handler({ method, headers: isWrite ? { ...headers, origin: 'https://portfolio.example', 'content-type': 'application/json' } : headers, query: {}, ...extra }, res);
       assert.equal(res.statusCode, 503, `${method} ${handler?.name || ''}`);
       assert.equal(res.body.error, 'ORIN database is not configured');
     }
   } finally {
-    global.fetch = originalFetch;
     if (originalUrl === undefined) delete process.env.ORIN_DATABASE_URL; else process.env.ORIN_DATABASE_URL = originalUrl;
   }
 });
 
 test('notes write methods validate immediately before any storage', async () => {
-  const originalFetch = global.fetch;
   const originalUrl = process.env.ORIN_DATABASE_URL;
   try {
-    await asOwner();
     unsetDatabase();
-    const headers = { host: 'portfolio.example', cookie: 'portfolio_github_token=valid', origin: 'http://portfolio.example', 'content-type': 'application/json' };
+    const headers = await ownerHeaders({ 'x-forwarded-proto': 'http', origin: 'http://portfolio.example' });
     for (const [handler, method, input, message] of [
       [notesHandler, 'PATCH', { id: 'bad' }, 'Invalid note id'],
       [remindersHandler, 'POST', { label: 'ok', time: '25:00' }, 'Invalid reminder time'],
@@ -125,7 +119,6 @@ test('notes write methods validate immediately before any storage', async () => 
       assert.equal(res.body.error, message);
     }
   } finally {
-    global.fetch = originalFetch;
     if (originalUrl === undefined) delete process.env.ORIN_DATABASE_URL; else process.env.ORIN_DATABASE_URL = originalUrl;
   }
 });

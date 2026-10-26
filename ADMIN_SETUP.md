@@ -37,7 +37,14 @@ cp .env.example .env.local
 # GitHub OAuth Configuration
 GITHUB_CLIENT_ID=your_client_id_here
 GITHUB_CLIENT_SECRET=your_client_secret_here
+# Encrypts the server-side session token (32+ random characters)
+AUTH_SESSION_SECRET=your_long_random_session_secret
 ```
+
+Sessions are stored in Postgres, so the admin panel also needs a database. Apply
+`apps/portfolio/server/orin-schema.sql` once, then set `ORIN_DATABASE_URL` (or a
+separate `AUTH_DATABASE_URL`). The GitHub access token is encrypted at rest and
+never sent back to the browser; only an opaque session ID cookie is.
 
 **Important**:
 - Never commit the `.env` file to Git
@@ -59,6 +66,8 @@ When deploying to production (e.g., Vercel):
    ```
    GITHUB_CLIENT_ID=your_client_id
    GITHUB_CLIENT_SECRET=your_client_secret
+   AUTH_SESSION_SECRET=your_long_random_session_secret
+   ORIN_DATABASE_URL=postgresql://USER:PASSWORD@HOST/DATABASE?sslmode=require
    ```
 
 ### Step 4: Start Development Server
@@ -138,20 +147,23 @@ All content uses the following standardized categories:
 
 - ✅ Only the repository owner can access the admin panel
 - ✅ GitHub OAuth ensures secure authentication
-- ✅ The token stays in an HttpOnly, same-site cookie that expires after 8 hours
+- ✅ The GitHub token lives in a server-side session (encrypted, 8-hour TTL) and is revoked on logout; the browser only receives an opaque HttpOnly session ID
+- ✅ Admin writes require a `repo`/`public_repo` session; ORIN-only sessions cannot reach them
 - ✅ All changes are version controlled
 - ✅ Protected routes prevent unauthorized access
 
 ### Troubleshooting
 
 **"Failed to fetch portfolio data"**
-- Verify your GitHub token is valid
-- Check that GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET are set correctly
+- Verify your GitHub session is still valid by reloading the page or signing out and back in
+- Check that GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, and AUTH_SESSION_SECRET are set correctly
+- Confirm the database is reachable and `orin-schema.sql` has been applied
 - Ensure you have write access to the repository
 
 **"Authentication Error"**
 - Make sure the OAuth callback URL matches your GitHub app settings
-- Check that `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` are available to the serverless runtime
+- Check that `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, and `AUTH_SESSION_SECRET` are available to the serverless runtime
+- If sign-in redirects back with `error=session_storage`, the database or session secret is missing
 
 **Changes not appearing**
 - Wait 2-3 minutes for deployment to complete

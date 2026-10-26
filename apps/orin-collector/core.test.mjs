@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { allowedSourceUrl, canonicalUrl, normalizeItem, selectItems, validateDigest, dailyDate, observedPopularity } from './core.mjs';
+import { allowedSourceUrl, canonicalUrl, filterDeliveredItems, normalizeItem, selectItems, validateDigest, dailyDate, observedPopularity } from './core.mjs';
 import { parseFeed } from './sources.mjs';
 
 test('source boundary rejects lookalike hosts, credentials and non-HTTPS', () => {
@@ -24,7 +24,23 @@ test('model output may only cite supplied URLs', () => {
   const items = [{ url: 'https://arxiv.org/abs/1' }];
   assert.throws(() => validateDigest({ title: 'Digest', summary: 'Summary', groups: [{ title: 'GPU', summary: 'Summary', urls: ['https://evil.test/'] }] }, items), /no valid source citations/);
   const raw = { title: 'Digest', summary: 'Summary', groups: [{ title: 'GPU', summary: 'Summary', urls: [items[0].url, 'https://evil.test/'] }] };
-  assert.deepEqual(validateDigest(raw, items), { ...raw, groups: [{ ...raw.groups[0], urls: [items[0].url] }] });
+  // Citation coverage is reported to the ingestion API so the server can tell a
+  // thin retry apart from a genuine replacement.
+  assert.deepEqual(validateDigest(raw, items), { ...raw, groups: [{ ...raw.groups[0], urls: [items[0].url] }], itemCount: 1 });
+});
+
+test('delivered items are filtered before the model is paid to rank them', () => {
+  const items = [
+    { id: 'a', url: 'https://arxiv.org/abs/1', paperId: 'arxiv:2601.00001' },
+    { id: 'b', url: 'https://arxiv.org/abs/2', paperId: 'arxiv:2601.00002' },
+    { id: 'c', url: 'https://x.com/person/status/3' }
+  ];
+  // Duplicate identity on either axis is enough to drop the item.
+  assert.deepEqual(filterDeliveredItems(items, { itemIds: ['a'], paperIds: ['arxiv:2601.00002'] }), [items[2]]);
+  assert.deepEqual(filterDeliveredItems(items, { itemIds: new Set(['c']), paperIds: new Set() }), [items[0], items[1]]);
+  // No prior delivery means nothing is dropped.
+  assert.deepEqual(filterDeliveredItems(items), items);
+  assert.deepEqual(filterDeliveredItems(items, { itemIds: [], paperIds: ['arxiv:2601.00001'] }).map(item => item.id), ['b', 'c']);
 });
 
 test('feed parsing uses HN discussion provenance and rejects XML entities', () => {

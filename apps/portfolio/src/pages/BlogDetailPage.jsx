@@ -1,16 +1,35 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Calendar, Clock, Tag, User, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, Tag } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
+import bash from 'highlight.js/lib/languages/bash';
+import css from 'highlight.js/lib/languages/css';
+import javascript from 'highlight.js/lib/languages/javascript';
+import json from 'highlight.js/lib/languages/json';
+import python from 'highlight.js/lib/languages/python';
+import sql from 'highlight.js/lib/languages/sql';
+import typescript from 'highlight.js/lib/languages/typescript';
+import xml from 'highlight.js/lib/languages/xml';
+import yaml from 'highlight.js/lib/languages/yaml';
 import { portfolioData } from '../data/portfolioData';
 import 'highlight.js/styles/atom-one-dark.css';
 
+// Only the grammars local posts actually use. The default rehype-highlight
+// bundle registers every common language, which is a large download for a
+// markdown route that almost always redirects to an external article.
+const HIGHLIGHT_LANGUAGES = { bash, css, javascript, json, python, sql, typescript, xml, yaml };
+const HIGHLIGHT_ALIASES = {
+  bash: ['sh', 'shell'],
+  javascript: ['js', 'jsx'],
+  typescript: ['ts', 'tsx'],
+  xml: ['html'],
+  yaml: ['yml']
+};
+
 const BlogDetailPage = () => {
   const { slug } = useParams();
-  const [comments, setComments] = useState([]);
-  const [newComment, setNewComment] = useState({ name: '', comment: '' });
 
   // Find the blog post by slug
   const post = portfolioData.blogPosts.find(p => p.slug === slug);
@@ -54,21 +73,6 @@ const BlogDetailPage = () => {
     const [year, month] = dateString.split('-');
     const date = new Date(year, month - 1);
     return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-  };
-
-  const handleCommentSubmit = (e) => {
-    e.preventDefault();
-    if (newComment.name && newComment.comment) {
-      setComments([
-        ...comments,
-        {
-          ...newComment,
-          date: new Date().toISOString(),
-          id: Date.now()
-        }
-      ]);
-      setNewComment({ name: '', comment: '' });
-    }
   };
 
   return (
@@ -138,7 +142,11 @@ const BlogDetailPage = () => {
           <div className="prose prose-invert prose-lg max-w-none mb-16">
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
-              rehypePlugins={[rehypeHighlight]}
+              rehypePlugins={[[rehypeHighlight, {
+                languages: HIGHLIGHT_LANGUAGES,
+                aliases: HIGHLIGHT_ALIASES,
+                detect: false
+              }]]}
               components={{
                 h1: ({ node, ...props }) => <h1 className="text-3xl font-bold text-dark-text-primary mt-8 mb-4" {...props} />,
                 h2: ({ node, ...props }) => <h2 className="text-2xl font-bold text-dark-text-primary mt-6 mb-3" {...props} />,
@@ -187,72 +195,6 @@ const BlogDetailPage = () => {
               </ol>
             </div>
           )}
-
-          {/* Comments Section */}
-          <div className="border-t border-dark-border pt-12">
-            <h3 className="text-2xl font-bold text-dark-text-primary mb-6 flex items-center">
-              <MessageCircle className="mr-3" size={24} />
-              Comments ({comments.length})
-            </h3>
-
-            {/* Comment Form */}
-            <form onSubmit={handleCommentSubmit} className="mb-8 p-6 bg-dark-surface border border-dark-border rounded-lg">
-              <div className="mb-4">
-                <label htmlFor="name" className="block text-sm font-medium text-dark-text-secondary mb-2">
-                  Name
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  value={newComment.name}
-                  onChange={(e) => setNewComment({ ...newComment, name: e.target.value })}
-                  required
-                  className="w-full bg-dark-bg border border-dark-border rounded-lg px-4 py-2 text-dark-text-primary focus:outline-none focus:border-dark-text-muted transition-colors"
-                  placeholder="Your name"
-                />
-              </div>
-              <div className="mb-4">
-                <label htmlFor="comment" className="block text-sm font-medium text-dark-text-secondary mb-2">
-                  Comment
-                </label>
-                <textarea
-                  id="comment"
-                  value={newComment.comment}
-                  onChange={(e) => setNewComment({ ...newComment, comment: e.target.value })}
-                  required
-                  rows={4}
-                  className="w-full bg-dark-bg border border-dark-border rounded-lg px-4 py-2 text-dark-text-primary focus:outline-none focus:border-dark-text-muted transition-colors resize-none"
-                  placeholder="Share your thoughts..."
-                />
-              </div>
-              <button
-                type="submit"
-                className="bg-dark-text-primary text-dark-bg font-medium py-2 px-6 rounded-lg hover:bg-white transition-colors"
-              >
-                Post Comment
-              </button>
-            </form>
-
-            {/* Comments List */}
-            <div className="space-y-4">
-              {comments.length === 0 ? (
-                <p className="text-dark-text-muted text-center py-8">No comments yet. Be the first to comment!</p>
-              ) : (
-                comments.map((comment) => (
-                  <div key={comment.id} className="p-6 bg-dark-surface border border-dark-border rounded-lg">
-                    <div className="flex items-center mb-3">
-                      <User size={16} className="text-dark-text-muted mr-2" />
-                      <span className="font-semibold text-dark-text-primary">{comment.name}</span>
-                      <span className="text-dark-text-muted text-sm ml-4">
-                        {new Date(comment.date).toLocaleDateString()}
-                      </span>
-                    </div>
-                    <p className="text-dark-text-secondary">{comment.comment}</p>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
         </div>
       </article>
     </div>

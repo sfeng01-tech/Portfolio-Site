@@ -102,6 +102,8 @@
 .orin-state { padding:70px 20px; display:flex; flex-direction:column; align-items:center; gap:15px; color:var(--muted); text-align:center; }
 .orin-state h3 { color:var(--ink); font-size:1.3125rem; font-weight:400; }
 .orin-state p { font-size:0.8125rem; }
+.orin-refreshing { padding:10px 2px; font:0.625rem monospace; letter-spacing:1.4px; text-transform:uppercase; color:var(--muted); text-align:right; }
+.orin-digest-status { margin-top:10px; padding:10px 12px; font:0.6875rem/1.6 monospace; color:var(--muted); border:1px solid var(--line); border-radius:5px; }
 .orin-source-status { padding:22px 0; font-size:0.75rem; color:var(--muted); }
 .orin-source-status p { margin-top:10px; }
 .orin-footer { display:flex; justify-content:space-between; gap:20px; padding:35px 0; margin-top:50px; border-top:1px solid var(--line); font:0.625rem monospace; color:var(--muted); }
