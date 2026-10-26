@@ -60,7 +60,7 @@ const Blog = ({ blogPosts }) => {
               <CardWrapper
                 key={index}
                 {...linkProps}
-                className="block bg-dark-bg border border-dark-border rounded-lg p-6 hover:border-dark-text-muted transition-all hover:-translate-y-1"
+                className="block bg-dark-bg border border-dark-border rounded-lg p-6 hover:border-dark-text-muted transition hover:-translate-y-1"
               >
                 {post.image && (
                   <img

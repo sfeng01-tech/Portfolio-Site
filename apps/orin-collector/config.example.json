@@ -1,6 +1,7 @@
 {
   "timezone": "America/Los_Angeles",
   "model": "z-ai/glm-5.3-flash",
+  "summaryFallbackModels": ["deepseek/deepseek-v4.1-flash-1017", "google/gemini-2.5-flash-lite"],
   "ranking": {"enabled": true, "model": "xiaomi/mimo-v2.6-flash", "maxCandidates": 120, "budgetFraction": 0.4, "discoveryFraction": 0.15, "fallbackModels": ["deepseek/deepseek-v4.1-flash-1017", "google/gemini-2.5-flash-lite"]},
   "maxItems": 60,
   "maxAgeHours": 72,

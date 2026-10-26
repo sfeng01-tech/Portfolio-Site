@@ -130,7 +130,21 @@ export function validateDigest(raw, items) {
     return urls.length ? [{ title: group.title.slice(0, 200), summary: group.summary.slice(0, 4000), urls }] : [];
   });
   if (!groups.length) throw new Error('Model digest has no valid source citations');
-  return { title: raw.title.slice(0, 200), summary: raw.summary.slice(0, 6000), groups };
+  return {
+    title: raw.title.slice(0, 200),
+    summary: raw.summary.slice(0, 6000),
+    groups,
+    itemCount: new Set(groups.flatMap(group => group.urls)).size
+  };
+}
+
+// Remove items the ingestion API already delivered on earlier days. The
+// collector does this before ranking so the model never pays for items the
+// server would suppress afterwards.
+export function filterDeliveredItems(items, { itemIds = [], paperIds = [] } = {}) {
+  const deliveredItemIds = itemIds instanceof Set ? itemIds : new Set(itemIds);
+  const deliveredPaperIds = paperIds instanceof Set ? paperIds : new Set(paperIds);
+  return items.filter(item => !deliveredItemIds.has(item.id) && !(item.paperId && deliveredPaperIds.has(item.paperId)));
 }
 
 export function dailyDate(timezone, now = new Date()) {

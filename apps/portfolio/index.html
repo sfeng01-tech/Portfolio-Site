@@ -4,15 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#f7f6f2" />
-    <script>
-      try {
-        const theme = localStorage.getItem('portfolio-theme');
-        if (theme === 'dark') {
-          document.documentElement.dataset.theme = 'dark';
-          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#1b1e19');
-        }
-      } catch {}
-    </script>
+    <script src="/theme-init.js"></script>
     <meta name="description" content="Sahil Faizal — Software Engineer building scalable AI systems for training and inference, from GPU kernels to production infrastructure." />
     <title>Sahil Faizal — Software Engineer & AI Systems</title>
   </head>

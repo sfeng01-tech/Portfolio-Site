@@ -10,17 +10,20 @@ import portfolio from '../../../api/portfolio.js';
 import digest from '../../../api/orin/digest.js';
 import items from '../../../api/orin/items.js';
 import ingest from '../../../api/orin/ingest.js';
+import preflight from '../../../api/orin/preflight.js';
 import preferences from '../../../api/orin/preferences.js';
 import contributions from '../../../api/orin/contributions.js';
 import categories from '../../../api/orin/categories.js';
 import notes from '../../../api/orin/notes.js';
 import reminders from '../../../api/orin/reminders.js';
+import { applySecurityHeaders } from './securityHeaders.js';
 
 const handlers = new Map([
   ['/api/auth/login', login], ['/api/auth/callback', callback],
   ['/api/auth/logout', logout], ['/api/auth/session', session],
   ['/api/portfolio', portfolio], ['/api/orin/digest', digest],
   ['/api/orin/preferences', preferences], ['/api/orin/items', items], ['/api/orin/ingest', ingest],
+  ['/api/orin/preflight', preflight],
   ['/api/orin/contributions', contributions], ['/api/orin/categories', categories],
   ['/api/orin/notes', notes], ['/api/orin/reminders', reminders]
 ]);
@@ -47,7 +50,7 @@ async function readBody(req, maxBytes) {
 export function createAppServer({ distDir = fileURLToPath(new URL('../dist/', import.meta.url)), maxBodyBytes = 2_000_000 } = {}) {
   const root = path.resolve(distDir);
   return http.createServer(async (req, res) => {
-    res.setHeader('X-Content-Type-Options', 'nosniff');
+    applySecurityHeaders(req, res);
     try {
       const url = new URL(req.url, 'http://localhost');
       const pathname = decodeURIComponent(url.pathname);

@@ -3,9 +3,12 @@ BEGIN;
 CREATE TABLE IF NOT EXISTS orin_digests (
   day date PRIMARY KEY,
   digest jsonb,
+  digest_status jsonb,
   source_status jsonb NOT NULL DEFAULT '[]',
   updated_at timestamptz NOT NULL DEFAULT now()
 );
+-- Existing deployments: add the run-level digest status without a table rebuild.
+ALTER TABLE orin_digests ADD COLUMN IF NOT EXISTS digest_status jsonb;
 CREATE TABLE IF NOT EXISTS orin_items (
   id text PRIMARY KEY CHECK (id ~ '^[a-f0-9]{64}$'),
   item jsonb NOT NULL,
@@ -19,6 +22,24 @@ CREATE TABLE IF NOT EXISTS orin_digest_items (
   PRIMARY KEY (day, item_id)
 );
 CREATE INDEX IF NOT EXISTS orin_saved_items ON orin_items (updated_at DESC) WHERE saved;
+-- Lookup indexes for history suppression, taxonomy counts and feedback reads.
+CREATE INDEX IF NOT EXISTS orin_digest_items_by_item ON orin_digest_items (item_id);
+CREATE INDEX IF NOT EXISTS orin_items_category ON orin_items ((item->>'category')) WHERE item ? 'category';
+CREATE INDEX IF NOT EXISTS orin_items_feedback ON orin_items ((item->>'feedback')) WHERE item ? 'feedback';
+CREATE INDEX IF NOT EXISTS orin_items_paper_id ON orin_items ((item->>'paperId')) WHERE item ? 'paperId';
+-- Server-side OAuth sessions. Only the SHA-256 hash of the browser cookie is
+-- stored; the GitHub access token is AES-256-GCM encrypted with AUTH_SESSION_SECRET.
+CREATE TABLE IF NOT EXISTS orin_auth_sessions (
+  id text PRIMARY KEY CHECK (id ~ '^[a-f0-9]{64}$'),
+  token_encrypted text NOT NULL,
+  user_login text NOT NULL,
+  user_data jsonb NOT NULL,
+  scope text NOT NULL DEFAULT '',
+  created_at timestamptz NOT NULL DEFAULT now(),
+  expires_at timestamptz NOT NULL
+);
+CREATE INDEX IF NOT EXISTS orin_auth_sessions_expiry ON orin_auth_sessions (expires_at);
+
 CREATE TABLE IF NOT EXISTS orin_categories (
   label text PRIMARY KEY CHECK (label = btrim(label) AND char_length(label) BETWEEN 1 AND 80),
   created_at timestamptz NOT NULL DEFAULT now()

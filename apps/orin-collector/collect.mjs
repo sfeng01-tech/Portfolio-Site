@@ -4,7 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { spawnSync } from 'node:child_process';
-import { allowedSourceUrl, dailyDate, selectItems } from './core.mjs';
+import { allowedSourceUrl, dailyDate, filterDeliveredItems, selectItems } from './core.mjs';
 import { collectFeed, collectSocial, createRedditApi, createThreadsApi, createXApi } from './sources.mjs';
 import { summarize } from './summarize.mjs';
 import { rankItems, freshCandidates, rankingConfig } from './ranking.mjs';
@@ -17,7 +17,8 @@ const { values } = parseArgs({ options: {
   config: { type: 'string', default: path.join(home, 'config.local.json') },
   'state-dir': { type: 'string', default: path.join(home, '.state') },
   once: { type: 'boolean' }, 'dry-run': { type: 'boolean' }, 'rss-only': { type: 'boolean' },
-  'no-model': { type: 'boolean' }, 'keychain-openrouter': { type: 'boolean' },
+  'no-model': { type: 'boolean' }, 'replace': { type: 'boolean' }, 'replace-digest': { type: 'boolean' },
+  'keychain-openrouter': { type: 'boolean' },
   login: { type: 'string' },
   'export-sessions': { type: 'boolean' },
   'sync-sessions': { type: 'boolean' },
@@ -34,6 +35,9 @@ function validateConfig(config) {
   if (!Number.isInteger(config.maxItems) || config.maxItems < 1 || config.maxItems > 100) throw new Error('maxItems must be 1–100');
   if (!(config.maxAgeHours > 0 && config.maxAgeHours <= 168) || !(config.maxRunUsd > 0 && config.maxRunUsd <= 1)) throw new Error('Invalid freshness or run budget');
   if (!Array.isArray(config.feeds) || !Array.isArray(config.social) || config.feeds.length + config.social.length > 40) throw new Error('At most 40 configured sources');
+  if (config.summaryFallbackModels !== undefined && (!Array.isArray(config.summaryFallbackModels)
+    || config.summaryFallbackModels.length > 2
+    || config.summaryFallbackModels.some(model => typeof model !== 'string' || !model.trim() || model.length > 150))) throw new Error('summaryFallbackModels must contain at most two model IDs');
   dailyDate(config.timezone);
   rankingConfig(config);
   return config;
@@ -82,6 +86,15 @@ async function main() {
       return;
     }
     const date = dailyDate(config.timezone);
+    // Validate the publish target before any network work so a configuration
+    // error fails fast. Dry-run never needs the endpoint or token.
+    const endpoint = process.env.ORIN_INGEST_URL;
+    const token = process.env.ORIN_INGEST_TOKEN;
+    const endpointUrl = endpoint ? new URL(endpoint) : null;
+    if (!values['dry-run'] && (!endpointUrl
+      || (endpointUrl.protocol !== 'https:' && !(endpointUrl.protocol === 'http:' && ['localhost', '127.0.0.1'].includes(endpointUrl.hostname)))
+      || endpointUrl.pathname !== '/api/orin/ingest' || endpointUrl.username || endpointUrl.password
+      || !token || token.length < 32)) throw new Error('Set HTTPS ORIN_INGEST_URL ending /api/orin/ingest and ORIN_INGEST_TOKEN (32+ characters)');
     let state = { seen: {}, days: {} };
     try { state = JSON.parse(await readFile(path.join(stateDir, 'state.json'), 'utf8')); }
     catch (error) { if (error.code !== 'ENOENT') throw error; }
@@ -89,7 +102,7 @@ async function main() {
     const redditApi = config.feeds.some(feed => feed.source === 'reddit') ? createRedditApi() : null;
     const xApi = config.feeds.some(feed => feed.source === 'twitter') ? createXApi() : null;
     const threadsApi = config.feeds.some(feed => feed.source === 'threads') ? createThreadsApi() : null;
-    const collected = [...(state.days?.[date] || [])], sourceStatus = [];
+    let collected = [...(state.days?.[date] || [])], sourceStatus = [];
     const status = (source, url, value, message) => sourceStatus.push({ source, url, status: value, message: message.slice(0, 500), checkedAt: new Date().toISOString() });
     for (const feed of config.feeds) {
       try {
@@ -114,6 +127,28 @@ async function main() {
         collected.push(...result.items); status(source.source, source.urls[0], result.status, result.message);
       } catch { status(source.source, source.urls?.[0] || '', 'error', 'Browser collection failed; inspect dedicated session and installed browser before next run'); }
     }
+    // Ask the server what it already delivered before paying a model to rank or
+    // summarize those items. A preflight failure is non-fatal; the ingest
+    // endpoint still suppresses duplicates afterwards.
+    let delivered = { itemIds: [], paperIds: [] };
+    if (!values['dry-run']) {
+      try {
+        const query = new URL('/api/orin/preflight', endpointUrl);
+        query.searchParams.set('date', date);
+        query.searchParams.set('days', '30');
+        const response = await fetch(query, { redirect: 'error', signal: AbortSignal.timeout(15_000), headers: { Authorization: `Bearer ${token}` } });
+        if (!response.ok) throw new Error('Preflight unavailable');
+        const payload = JSON.parse(await boundedText(response, 2_000_000));
+        if (!Array.isArray(payload.itemIds) || !Array.isArray(payload.paperIds)) throw new Error('Invalid preflight payload');
+        delivered = payload;
+        console.info(`Delivery preflight: ${payload.itemIds.length} item IDs and ${payload.paperIds.length} paper IDs from the last ${payload.days ?? 30} days.`);
+      } catch {
+        console.info('Delivery preflight unavailable this run; ranking may include previously delivered items.');
+      }
+    }
+    const beforeDeliveryFilter = collected.length;
+    collected = filterDeliveredItems(collected, delivered);
+    if (collected.length !== beforeDeliveryFilter) console.info(`Preflight removed ${beforeDeliveryFilter - collected.length} previously delivered candidates before ranking.`);
     const candidates = freshCandidates(collected, config, state.seen, date);
     let items = selectItems(candidates, config, {}, date);
     const payload = { date, items, sourceStatus };
@@ -124,10 +159,6 @@ async function main() {
       console.info(sourceStatus.map(row => `${row.source}: ${row.status} — ${row.message}`).join('\n'));
       return;
     }
-    const endpoint = process.env.ORIN_INGEST_URL;
-    const token = process.env.ORIN_INGEST_TOKEN;
-    const endpointUrl = endpoint ? new URL(endpoint) : null;
-    if (!endpointUrl || (endpointUrl.protocol !== 'https:' && !(endpointUrl.protocol === 'http:' && ['localhost', '127.0.0.1'].includes(endpointUrl.hostname))) || endpointUrl.pathname !== '/api/orin/ingest' || endpointUrl.username || endpointUrl.password || !token || token.length < 32) throw new Error('Set HTTPS ORIN_INGEST_URL ending /api/orin/ingest and ORIN_INGEST_TOKEN (32+ characters)');
     if (!values['no-model'] && candidates.length) {
       let apiKey = process.env.OPENROUTER_API_KEY;
       if (!apiKey && values['keychain-openrouter']) {
@@ -159,13 +190,47 @@ async function main() {
       payload.items = items;
       payload.rankingStatus = ranked.status;
       console.info(`${ranked.status.message}; reserved ranking budget $${ranked.reservedUsd.toFixed(4)}`);
-      if (items.length) payload.digest = await summarize(items, { ...config, maxRunUsd: config.maxRunUsd - ranked.reservedUsd }, apiKey, date);
+      if (items.length) {
+        try {
+          payload.digest = await summarize(items, { ...config, maxRunUsd: config.maxRunUsd - ranked.reservedUsd }, apiKey, date);
+          payload.digestStatus = {
+            status: 'ok',
+            message: `Digest generated with ${payload.digest.model || config.model}.`,
+            ...(payload.digest.model ? { model: payload.digest.model } : {})
+          };
+        } catch (error) {
+          // A summary outage must never discard the day's evidence. The server
+          // retains any earlier same-day digest rather than replacing it.
+          payload.digestStatus = {
+            status: 'unavailable',
+            message: `Digest unavailable; ${items.length} items were still published. ${error.message}`.slice(0, 500)
+          };
+          console.info(payload.digestStatus.message);
+        }
+      } else {
+        payload.digestStatus = { status: 'skipped', message: 'No new items were selected for a digest this run.' };
+      }
+    } else {
+      payload.digestStatus = {
+        status: 'skipped',
+        message: values['no-model']
+          ? 'Digest generation disabled by --no-model; items were ranked by keywords.'
+          : 'No new items were selected for a digest this run.'
+      };
     }
+    if (values.replace) payload.replace = true;
+    if (values['replace-digest']) payload.replaceDigest = true;
     await saveJson(path.join(stateDir, 'pending.json'), payload);
     const response = await fetch(endpoint, { method: 'POST', redirect: 'error', signal: AbortSignal.timeout(60_000), headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
     if (!response.ok) throw new Error(`Ingest HTTP ${response.status}; state not advanced, pending.json retained for diagnosis`);
     const result = await response.json();
     if (!Number.isInteger(result.count) || result.date !== date) throw new Error('Ingest acknowledgment was invalid; local state not advanced');
+    if (result.mode === 'skipped') {
+      state.lastSuccess = new Date().toISOString();
+      await saveJson(path.join(stateDir, 'state.json'), state);
+      console.info(`ORIN ${date}: publish skipped (${result.reason || 'zero items'}); the earlier digest was retained. ${sourceStatus.filter(row => ['blocked', 'error'].includes(row.status)).length} sources need attention.`);
+      return;
+    }
     state.seen ||= {}; state.days ||= {};
     for (const item of items) { state.seen[item.url] = date; state.seen[paperIdentity(item.url)] = date; }
     state.days[date] = items;
@@ -174,7 +239,7 @@ async function main() {
     state.days = Object.fromEntries(Object.entries(state.days).filter(([day]) => day >= cutoff));
     state.lastSuccess = new Date().toISOString();
     await saveJson(path.join(stateDir, 'state.json'), state);
-    console.info(`Published ORIN ${date}: ${result.count} items, ${result.added ?? result.count} new to the day (${result.members ?? result.count} members after merge, ${result.skipped || 0} previously delivered URLs skipped). ${sourceStatus.filter(row => ['blocked', 'error'].includes(row.status)).length} sources need attention.`);
+    console.info(`Published ORIN ${date}: ${result.count} items, ${result.added ?? result.count} new to the day (${result.members ?? result.count} members after merge, ${result.skipped || 0} previously delivered URLs skipped${result.digestPreserved ? ', earlier digest preserved' : ''}). ${sourceStatus.filter(row => ['blocked', 'error'].includes(row.status)).length} sources need attention.`);
   } finally { await lock.close(); await unlink(lockPath); }
 }
 

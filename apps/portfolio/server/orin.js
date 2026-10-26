@@ -92,6 +92,16 @@ export function validateIngest(body) {
       if (urls.some(url => !knownUrls.has(url))) throw fail('Group references unknown item');
       return { title: string(group.title, 200), summary: string(group.summary, 4000, true), urls };
     }) };
+    if (body.digest.model !== undefined) digest.model = string(body.digest.model, 150, true);
+    // Citation coverage is derived server-side. The collector cannot inflate it
+    // to bypass the thin-digest guard.
+    digest.itemCount = digestItemCount(digest);
+  }
+  let digestStatus;
+  if (body.digestStatus !== undefined) {
+    const value = body.digestStatus;
+    if (!value || !['ok', 'unavailable', 'preserved', 'skipped'].includes(value.status)) throw fail('Invalid digest status');
+    digestStatus = { status: value.status, message: string(value.message, 500), model: string(value.model, 150, true) };
   }
   if (body.sourceStatus !== undefined && (!Array.isArray(body.sourceStatus) || body.sourceStatus.length > 40)) throw fail('Invalid source status');
   const sourceStatus = (body.sourceStatus || []).map(status => {
@@ -105,9 +115,27 @@ export function validateIngest(body) {
     rankingStatus = { method: value.method, message: string(value.message, 500), model: string(value.model, 150, true) };
   }
   if (body.replace !== undefined && typeof body.replace !== 'boolean') throw fail('Invalid replace flag');
+  if (body.replaceDigest !== undefined && typeof body.replaceDigest !== 'boolean') throw fail('Invalid replace digest flag');
   // Keep metadata in existing JSON storage: no database migration is required.
   if (digest && rankingStatus) digest.rankingStatus = rankingStatus;
-  return { date: body.date, items: uniqueItems, digest, sourceStatus, replace: body.replace === true };
+  return { date: body.date, items: uniqueItems, digest, digestStatus, sourceStatus, replace: body.replace === true, replaceDigest: body.replaceDigest === true };
+}
+
+export function digestItemCount(digest) {
+  if (!digest || !Array.isArray(digest.groups)) return 0;
+  return new Set(digest.groups.flatMap(group => Array.isArray(group.urls) ? group.urls : [])).size;
+}
+
+// A thin same-day retry must not replace a richer digest. An explicit
+// replaceDigest flag is the only way to accept lower citation coverage, and a
+// non-null digest is never replaced with null.
+export function resolveDigestUpdate(existingDigest, incomingDigest, { replaceDigest = false } = {}) {
+  if (!existingDigest) return { digest: incomingDigest || null, preserved: false, reason: null };
+  if (!incomingDigest) return { digest: existingDigest, preserved: true, reason: 'empty-digest' };
+  if (!replaceDigest && digestItemCount(incomingDigest) < digestItemCount(existingDigest)) {
+    return { digest: existingDigest, preserved: true, reason: 'thinner-digest' };
+  }
+  return { digest: incomingDigest, preserved: false, reason: null };
 }
 
 // Pure transformation used after querying prior-day membership. Retain same-day
@@ -126,6 +154,7 @@ export function suppressPreviousItems(payload, previousIds, previousPaperIds = [
       return { ...group, urls, summary: urls.length === group.urls.length ? group.summary : '' };
     }).filter(group => group.urls.length)
   } : null;
+  if (digest) digest.itemCount = digestItemCount(digest);
   return { ...payload, items, digest, skipped: payload.items.length - items.length };
 }
 

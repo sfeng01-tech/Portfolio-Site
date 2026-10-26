@@ -30,3 +30,4 @@ dist-ssr
 
 # Private local archives; never publish to GitHub
 .local-only/
+.skills/

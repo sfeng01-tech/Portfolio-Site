@@ -1,3 +1,5 @@
+import { readSession } from './sessionStore.js';
+
 export const REPOSITORY = {
   owner: process.env.GITHUB_REPOSITORY_OWNER || 'sfeng01-tech',
   name: process.env.GITHUB_REPOSITORY_NAME || 'Portfolio-Site',
@@ -34,6 +36,7 @@ export const isPortalAllowedUser = (login) => portalAllowedUsers.has(normalizeLo
 export const isOrinAllowedUser = (login) => orinAllowedUsers.has(normalizeLogin(login));
 
 export const TOKEN_COOKIE = 'portfolio_github_token';
+export const SESSION_COOKIE = 'portfolio_session';
 export const STATE_COOKIE = 'portfolio_oauth_state';
 
 export const parseCookies = (req) => Object.fromEntries(
@@ -92,43 +95,76 @@ export const requireSameOrigin = (req) => {
 export const githubFetch = (path, token, options = {}) => fetch(
   `https://api.github.com${path}`,
   {
+    redirect: 'error',
     ...options,
     headers: {
       Accept: 'application/vnd.github+json',
       Authorization: `Bearer ${token}`,
       'X-GitHub-Api-Version': '2022-11-28',
       ...options.headers
-    }
+    },
+    signal: options.signal || AbortSignal.timeout(5_000)
   }
 );
 
+const readRequestSession = async (req) => {
+  if (localAuthBypassEnabled()) return { ...localBypassAuth(), scope: 'repo' };
+  const sessionId = parseCookies(req)[SESSION_COOKIE];
+  if (!sessionId) return null;
+  return readSession(sessionId);
+};
+
+const hasRepositoryScope = (scope) => {
+  const scopes = String(scope || '').split(/[\s,]+/).filter(Boolean);
+  return scopes.includes('repo') || scopes.includes('public_repo');
+};
+
 export const getAuthorizedUser = async (req) => {
-  if (localAuthBypassEnabled()) return localBypassAuth();
-  const token = parseCookies(req)[TOKEN_COOKIE];
-  if (!token) return null;
-
-  const response = await githubFetch('/user', token);
-  if (!response.ok) return null;
-
-  const user = await response.json();
-  if (!isPortalAllowedUser(user.login)) return null;
-
-  return { token, user };
+  const auth = await readRequestSession(req);
+  if (!auth) return null;
+  if (!isPortalAllowedUser(auth.user.login)) return null;
+  // Admin edits require repository write access. An ORIN-only identity session
+  // (read:user) must not inherit the portfolio write surface.
+  if (!hasRepositoryScope(auth.scope)) return null;
+  return { token: auth.token, user: auth.user };
 };
 
 export const getAuthorizedOrinUser = async (req) => {
-  if (localAuthBypassEnabled()) return localBypassAuth();
-  const token = parseCookies(req)[TOKEN_COOKIE];
-  if (!token) return null;
-
-  const response = await githubFetch('/user', token);
-  if (!response.ok) return null;
-
-  const user = await response.json();
-  if (!isOrinAllowedUser(user.login)) return null;
-
-  return { token, user };
+  const auth = await readRequestSession(req);
+  if (!auth) return null;
+  if (!isOrinAllowedUser(auth.user.login)) return null;
+  return { token: auth.token, user: auth.user };
 };
+
+export async function revokeGitHubToken(token) {
+  const clientId = process.env.GITHUB_CLIENT_ID;
+  const clientSecret = process.env.GITHUB_CLIENT_SECRET;
+  if (!token || !clientId || !clientSecret) return false;
+
+  try {
+    const response = await fetch(
+      `https://api.github.com/applications/${encodeURIComponent(clientId)}/token`,
+      {
+        method: 'DELETE',
+        redirect: 'error',
+        signal: AbortSignal.timeout(5_000),
+        headers: {
+          Accept: 'application/vnd.github+json',
+          Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}`,
+          'Content-Type': 'application/json',
+          'X-GitHub-Api-Version': '2022-11-28'
+        },
+        body: JSON.stringify({ access_token: token })
+      }
+    );
+    // 404 means GitHub already considers the token gone.
+    return response.ok || response.status === 404;
+  } catch {
+    // Logout must still clear the local session if GitHub is unreachable.
+    return false;
+  }
+}
+
 
 export const publicUser = (user) => ({
   login: user.login,

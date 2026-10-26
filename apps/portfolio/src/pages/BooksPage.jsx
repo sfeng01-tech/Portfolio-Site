@@ -101,7 +101,7 @@ const BooksPage = () => {
               {filteredItems && filteredItems.map((book, index) => (
                 <div
                   key={index}
-                  className="bg-dark-surface border border-dark-border rounded-lg p-6 hover:border-dark-text-muted transition-all hover:-translate-y-1"
+                  className="bg-dark-surface border border-dark-border rounded-lg p-6 hover:border-dark-text-muted transition hover:-translate-y-1"
                 >
                   {book.cover && (
                     <img

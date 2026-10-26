@@ -116,7 +116,7 @@ const DashboardPage = () => {
                   <Link
                     key={stat.name}
                     to={stat.link}
-                    className="bg-dark-surface border border-dark-border rounded-lg p-6 hover:border-dark-text-muted transition-all hover:-translate-y-1"
+                    className="bg-dark-surface border border-dark-border rounded-lg p-6 hover:border-dark-text-muted transition hover:-translate-y-1"
                   >
                     <div className="flex items-start justify-between mb-4">
                       <Icon className={`${stat.color}`} size={32} />

@@ -8,7 +8,7 @@ import OpenSourcePage from './pages/OpenSourcePage';
 import PublicationsPage from './pages/PublicationsPage';
 import TalksPage from './pages/TalksPage';
 import BlogPage from './pages/BlogPage';
-import BlogDetailPage from './pages/BlogDetailPage';
+import BlogPostPage from './pages/BlogPostPage';
 // import BooksPage from './pages/BooksPage';
 // import PhotographyPage from './pages/PhotographyPage';
 import ContactPage from './pages/ContactPage';
@@ -81,7 +81,7 @@ function App() {
             <Route path="/blog/:slug" element={
               <>
                 <Navigation />
-                <main id="main-content" tabIndex={-1}><BlogDetailPage /></main>
+                <main id="main-content" tabIndex={-1}><BlogPostPage /></main>
               </>
             } />
             {/* Reading and photography are temporarily disabled.

@@ -20,7 +20,7 @@ const Talks = ({ talks }) => {
           {talks.map((talk, index) => (
             <div
               key={index}
-              className="bg-dark-surface border border-dark-border rounded-lg p-6 hover:border-dark-text-muted transition-all hover:-translate-y-1"
+              className="bg-dark-surface border border-dark-border rounded-lg p-6 hover:border-dark-text-muted transition hover:-translate-y-1"
             >
               <div className="flex items-start justify-between mb-4">
                 <Mic className="text-dark-text-primary" size={24} />

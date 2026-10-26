@@ -21,7 +21,7 @@
   .hover\:bg-white:hover { background-color:#3f443a; }
   .hover\:text-white:hover { color:var(--accent); }
 }
-.site-header { position:fixed; inset:0 0 auto; z-index:50; background:rgb(var(--paper-rgb) / .95); border-bottom:1px solid var(--line); backdrop-filter:blur(12px); }
+.site-header { position:fixed; inset:0 0 auto; z-index:50; background:rgb(var(--paper-rgb) / .95); border-bottom:1px solid var(--line); backdrop-filter:blur(12px) saturate(1.4); }
 .nav-shell { max-width:1280px; padding:0 40px; margin:auto; height:80px; display:flex; align-items:center; gap:22px; }
 .brand { display:flex; align-items:center; gap:13px; flex-shrink:0; }
 .brand-mark { font-size:20rem; font-weight:700; letter-spacing:-3px; line-height:1; }
@@ -176,6 +176,13 @@ main .hljs { background:#292b26; color:#e5e5d9; }
   .selected-project:hover,button:active,.button-primary:active,.button-quiet:active,.nav-contact:active { transform:none; }
 }
 @media (hover:none) { main .hover\:-translate-y-1:hover { transform:none; } }
+@media (prefers-reduced-transparency:reduce) {
+  .site-header { background:var(--paper); backdrop-filter:none; }
+}
+@media (prefers-contrast:more) {
+  .site-header,.selected-project,.nav-contact,.button-primary { border-color:var(--ink); }
+  :focus-visible { outline-width:3px; }
+}
 .nav-contact { white-space:nowrap; }
 @media (max-width:360px) { .brand-name { display:none; } }
 
