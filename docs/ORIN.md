@@ -12,7 +12,7 @@ The existing GitHub OAuth app, Render environment variables, Neon schema and Act
 
 Source failures appear explicitly in the digest. Login, verification and rate-limit pages are reported rather than bypassed.
 
-Responses from the Node adapter set a Content Security Policy plus `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, `Cross-Origin-Opener-Policy`, and HSTS on HTTPS. `vercel.json` mirrors the same policy for Vercel deployments. The theme bootstrap script lives at `/theme-init.js` so `script-src 'self'` works without an inline-script exception.
+Responses from the Node adapter set a Content Security Policy plus `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, `Cross-Origin-Opener-Policy`, and HSTS on HTTPS. Vercel reads the same set from `vercel.json`. A Render static site only sends them when the service has matching dashboard header rules or is managed by the Blueprint entry in `render.yaml`. The theme bootstrap script lives at `/theme-init.js` so `script-src 'self'` works without an inline-script exception.
 
 ## Schema migrations
 
