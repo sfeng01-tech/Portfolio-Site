@@ -24,7 +24,7 @@ const formatDate = (value) => {
   return Number.isNaN(date.getTime()) ? '' : date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 };
 
-export default function OrinVideosPage() {
+export function OrinVideosShelf({ embedded = false }) {
   const { user, loading, error: authError, login } = useAuth();
   const [items, setItems] = useState([]);
   const [busy, setBusy] = useState(true);
@@ -36,11 +36,6 @@ export default function OrinVideosPage() {
   const [total, setTotal] = useState(0);
   const [revision, setRevision] = useState(0);
   const browseRef = useRef(null);
-
-  useEffect(() => {
-    document.title = 'ORIN — YouTube videos';
-    return () => { document.title = 'Sahil Faizal — Software Engineer & AI Systems'; };
-  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => { setPage(1); setQuery(search.trim()); }, 250);
@@ -85,14 +80,7 @@ export default function OrinVideosPage() {
     browseRef.current?.scrollIntoView({ block: 'start' });
   };
 
-  return (
-    <div className="orin-shell">
-      <div className="orin-topbar orin-topbar--videos">
-        <Link className="orin-icon" to="/orin" aria-label="Back to ORIN"><ArrowLeft size={17} /></Link>
-        <span className="orin-private"><Lock size={12} /> PERSONAL SPACE</span>
-      </div>
-      <main id="main-content" className="orin-main">
-        <section className="orin-videos">
+  return <section className="orin-videos">
           <div className="eyebrow"><YoutubeIcon size={15} /> YOUTUBE VIDEOS</div>
           <h2>Video shelf</h2>
           <p>Every YouTube link you save, in a tile view.</p>
@@ -101,7 +89,7 @@ export default function OrinVideosPage() {
               <div className="orin-lock"><Lock size={25} strokeWidth={1.4} /></div>
               <div className="eyebrow">JUST FOR YOU</div>
               <h2>Sign in to see your video shelf.</h2>
-              <button className="button-primary" onClick={() => login('/orin/videos')}><YoutubeIcon size={17} /> Sign in with GitHub</button>
+              <button className="button-primary" onClick={() => login(embedded ? '/orin' : '/orin/videos')}><YoutubeIcon size={17} /> Sign in with GitHub</button>
               {authError && <p role="alert" className="orin-error">{authError}</p>}
             </section>
           ) : (
@@ -137,8 +125,20 @@ export default function OrinVideosPage() {
               {!busy && !error && total > pageSize && <nav className="orin-video-pages" aria-label="Video pages"><button type="button" onClick={() => changePage(page - 1)} disabled={page <= 1}><ChevronLeft size={16} /> Previous</button><span>Page {page} of {pageCount}</span><button type="button" onClick={() => changePage(page + 1)} disabled={page >= pageCount}>Next <ChevronRight size={16} /></button></nav>}
             </>
           )}
-        </section>
-      </main>
+  </section>;
+}
+
+export default function OrinVideosPage() {
+  useEffect(() => {
+    document.title = 'ORIN — YouTube videos';
+    return () => { document.title = 'Sahil Faizal — Software Engineer & AI Systems'; };
+  }, []);
+
+  return <div className="orin-shell">
+    <div className="orin-topbar orin-topbar--videos">
+      <Link className="orin-icon" to="/orin" aria-label="Back to ORIN"><ArrowLeft size={17} /></Link>
+      <span className="orin-private"><Lock size={12} /> PERSONAL SPACE</span>
     </div>
-  );
+    <main id="main-content" className="orin-main"><OrinVideosShelf /></main>
+  </div>;
 }

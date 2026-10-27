@@ -335,9 +335,7 @@
   .orin-video-grid { grid-template-columns:1fr; }
 }
 
-.orin-video-link { display:inline-flex; align-items:center; gap:7px; font:12px monospace; letter-spacing:.5px; text-transform:uppercase; color:var(--muted); border:1px solid var(--line); border-radius:4px; min-height:44px; padding:8px 12px; }
 .orin-gate:not(.orin-gate--landing) .button-primary { font-size:15px; min-height:48px; }
-.orin-video-link:hover { color:var(--ink); background:rgb(var(--surface-rgb)); }
 .orin-topbar--videos { justify-content:space-between; }
 
 .orin-content-controls { margin-top:12px; }
