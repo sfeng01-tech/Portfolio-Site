@@ -2,6 +2,19 @@ import { repairYoutubeTitles } from '../../apps/portfolio/server/youtube.js';
 import { visibleItems, visibleDigest } from '../../apps/portfolio/server/orin-content.js';
 import { orinSql, privateResponse, requireOrinOwner, sendError, validDate, validateCategory } from '../../apps/portfolio/server/orin.js';
 
+const VIDEO_PAGE_SIZE = 24;
+export function videoListParams(query = {}) {
+  const page = query.page === undefined ? 1 : Number(query.page);
+  if (!Number.isSafeInteger(page) || page < 1 || page > 10000 || (query.page !== undefined && !/^[1-9]\d*$/.test(query.page))) {
+    throw Object.assign(new Error('Invalid video page'), { status: 400 });
+  }
+  const search = query.q === undefined ? '' : query.q;
+  if (typeof search !== 'string' || search.length > 120 || /[\u0000-\u001f]/.test(search)) {
+    throw Object.assign(new Error('Invalid video search'), { status: 400 });
+  }
+  return { page, search: search.trim(), offset: (page - 1) * VIDEO_PAGE_SIZE, pageSize: VIDEO_PAGE_SIZE };
+}
+
 export default async function handler(req, res) {
   privateResponse(res);
   if (req.method !== 'GET') { res.setHeader('Allow', 'GET'); return res.status(405).json({ error: 'Method not allowed' }); }
@@ -11,30 +24,43 @@ export default async function handler(req, res) {
     if (kind !== undefined && kind !== 'video') return res.status(400).json({ error: 'Invalid kind' });
     const category = req.query?.category ? validateCategory(req.query.category) : null;
     if (!category && req.query?.date !== undefined && !validDate(req.query.date)) return res.status(400).json({ error: 'Invalid date' });
-    const sql = await orinSql();
-    const days = await sql`SELECT day::text FROM orin_digests ORDER BY day DESC LIMIT 90`;
-    const availableDates = days.map(row => row.day);
     if (kind === 'video') {
+      const { page, search, offset, pageSize } = videoListParams(req.query);
+      const sql = await orinSql();
+      const [{ total }] = await sql`
+        SELECT COUNT(*)::integer AS total FROM orin_items
+        WHERE NOT COALESCE((item->>'deleted')::boolean, false) AND (item->>'category' = 'YouTube'
+           OR item->>'url' LIKE '%youtube.com/%'
+           OR item->>'url' LIKE '%youtu.be/%')
+          AND (${search} = '' OR STRPOS(LOWER(CONCAT_WS(' ', item->>'title', item->>'author')), LOWER(${search})) > 0)
+      `;
       const rows = await sql`
         SELECT id, item, is_read, saved
         FROM orin_items
         WHERE NOT COALESCE((item->>'deleted')::boolean, false) AND (item->>'category' = 'YouTube'
            OR item->>'url' LIKE '%youtube.com/%'
            OR item->>'url' LIKE '%youtu.be/%')
-        ORDER BY COALESCE((item->>'publishedAt')::timestamptz, updated_at) DESC
-        LIMIT 500
+          AND (${search} = '' OR STRPOS(LOWER(CONCAT_WS(' ', item->>'title', item->>'author')), LOWER(${search})) > 0)
+        ORDER BY COALESCE((item->>'publishedAt')::timestamptz, updated_at) DESC, id DESC
+        LIMIT ${pageSize} OFFSET ${offset}
       `;
       await repairYoutubeTitles(rows, sql);
       return res.status(200).json({
         date: null,
-        availableDates,
+        availableDates: [],
         digest: null,
         digestStatus: null,
         items: visibleItems(rows),
         sourceStatus: [],
-        kind
+        kind,
+        page,
+        pageSize,
+        total
       });
     }
+    const sql = await orinSql();
+    const days = await sql`SELECT day::text FROM orin_digests ORDER BY day DESC LIMIT 90`;
+    const availableDates = days.map(row => row.day);
     if (category) {
       const rows = await sql`SELECT id, item, is_read, saved FROM orin_items WHERE NOT COALESCE((item->>'deleted')::boolean, false) AND item->>'category' = ${category} ORDER BY COALESCE((item->>'publishedAt')::timestamptz, updated_at) DESC LIMIT 500`;
       return res.status(200).json({

@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Calendar, Compass, ExternalLink, Lock, Play, Youtube as YoutubeIcon } from 'lucide-react';
+import { ArrowLeft, Calendar, ChevronLeft, ChevronRight, Compass, ExternalLink, Lock, Play, Search, Youtube as YoutubeIcon } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import OrinItemControls from '../components/orin/OrinItemControls';
 import { youtubeId } from '../../server/youtube.js';
@@ -29,6 +29,13 @@ export default function OrinVideosPage() {
   const [items, setItems] = useState([]);
   const [busy, setBusy] = useState(true);
   const [error, setError] = useState('');
+  const [search, setSearch] = useState('');
+  const [query, setQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(24);
+  const [total, setTotal] = useState(0);
+  const [revision, setRevision] = useState(0);
+  const browseRef = useRef(null);
 
   useEffect(() => {
     document.title = 'ORIN — YouTube videos';
@@ -36,14 +43,27 @@ export default function OrinVideosPage() {
   }, []);
 
   useEffect(() => {
-    if (!user) { setItems([]); setBusy(false); return undefined; }
+    const timer = setTimeout(() => { setPage(1); setQuery(search.trim()); }, 250);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  useEffect(() => {
+    if (!user) { setItems([]); setTotal(0); setBusy(false); return undefined; }
     const controller = new AbortController();
     setBusy(true); setError('');
-    fetch('/api/orin/digest?kind=video', { credentials: 'same-origin', headers: { Accept: 'application/json' }, signal: controller.signal })
+    const params = new URLSearchParams({ kind: 'video', page: String(page) });
+    if (query) params.set('q', query);
+    fetch(`/api/orin/digest?${params}`, { credentials: 'same-origin', headers: { Accept: 'application/json' }, signal: controller.signal })
       .then(async response => {
         const payload = await response.json().catch(() => ({ error: 'Unable to load videos.' }));
         if (!response.ok || payload.error) throw new Error(payload.error || 'Unable to load videos.');
+        if (page > 1 && payload.total <= (page - 1) * payload.pageSize) {
+          setPage(page - 1);
+          return;
+        }
         setItems(payload.items || []);
+        setTotal(payload.total || 0);
+        setPageSize(payload.pageSize || 24);
       })
       .catch(err => {
         if (err.name === 'AbortError') return;
@@ -53,12 +73,17 @@ export default function OrinVideosPage() {
         if (!controller.signal.aborted) setBusy(false);
       });
     return () => controller.abort();
-  }, [user]);
+  }, [user, query, page, revision]);
 
   const tiles = useMemo(
     () => items.map(item => ({ ...item, videoId: youtubeId(item.url), link: safeUrl(item.url) })),
     [items]
   );
+  const pageCount = Math.max(1, Math.ceil(total / pageSize));
+  const changePage = nextPage => {
+    setPage(nextPage);
+    browseRef.current?.scrollIntoView({ block: 'start' });
+  };
 
   return (
     <div className="orin-shell">
@@ -81,6 +106,10 @@ export default function OrinVideosPage() {
             </section>
           ) : (
             <>
+              <div className="orin-video-tools" ref={browseRef}>
+                <label className="orin-video-search"><Search size={17} /><input type="search" aria-label="Search videos" placeholder="Search titles or creators…" value={search} maxLength={120} onChange={event => setSearch(event.target.value)} /></label>
+                <p role="status">{busy ? 'Searching videos…' : error ? 'Results unavailable' : total ? `Showing ${(page - 1) * pageSize + 1}–${Math.min(page * pageSize, total)} of ${total} videos` : query ? 'No matching videos' : 'No videos yet'}</p>
+              </div>
               {error && <div role="alert" className="orin-error">{error}</div>}
               {busy ? <div className="orin-state" role="status">Loading videos…</div> : error ? null : tiles.length ? (
                 <div className="orin-video-grid">
@@ -97,14 +126,15 @@ export default function OrinVideosPage() {
                           <span><Calendar size={14} />{formatDate(item.publishedAt || item.collectedAt)}</span>
                           {item.link && <a href={item.link} target="_blank" rel="noopener noreferrer">Open <ExternalLink size={14} /></a>}
                         </div>
-                        <OrinItemControls item={item} captionOnly onUpdate={updated => setItems(previous => previous.map(current => current.id === updated.id ? updated : current))} onDelete={id => setItems(previous => previous.filter(current => current.id !== id))}/>
+                        <OrinItemControls item={item} captionOnly onUpdate={updated => { setItems(previous => previous.map(current => current.id === updated.id ? updated : current)); setRevision(value => value + 1); }} onDelete={id => { setItems(previous => previous.filter(current => current.id !== id)); setRevision(value => value + 1); }}/>
                       </div>
                     </article>
                   ))}
                 </div>
               ) : (
-                <div className="orin-state"><Compass size={27} strokeWidth={1.2} /><h3>No videos yet.</h3><p>Share a YouTube link from the ORIN Share tab and it will appear here.</p></div>
+                <div className="orin-state"><Compass size={27} strokeWidth={1.2} /><h3>{query ? 'No videos match that search.' : 'No videos yet.'}</h3><p>{query ? 'Try another title or creator.' : 'Share a YouTube link from the ORIN Share tab and it will appear here.'}</p>{query && <button type="button" onClick={() => setSearch('')}>Clear search</button>}</div>
               )}
+              {!busy && !error && total > pageSize && <nav className="orin-video-pages" aria-label="Video pages"><button type="button" onClick={() => changePage(page - 1)} disabled={page <= 1}><ChevronLeft size={16} /> Previous</button><span>Page {page} of {pageCount}</span><button type="button" onClick={() => changePage(page + 1)} disabled={page >= pageCount}>Next <ChevronRight size={16} /></button></nav>}
             </>
           )}
         </section>
