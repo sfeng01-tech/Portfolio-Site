@@ -35,7 +35,7 @@ export async function repairYoutubeTitles(rows, sql, fetcher = fetch) {
   const candidates = rows.filter(({ item }) => !item.deleted && !item.titleSource && /^Shared link from (?:www\.)?(?:youtube\.com|m\.youtube\.com|music\.youtube\.com|youtu\.be)$/.test(item.title)).sort((a, b) => (a.item.titleCheckedAt || '').localeCompare(b.item.titleCheckedAt || '')).slice(0, 12);
   await Promise.all(candidates.map(async row => {
     const metadata = { ...(await youtubeMetadata(row.item.url, fetcher) || {}), titleCheckedAt: new Date().toISOString() };
-    const [updated] = await sql`UPDATE orin_items SET item = item || ${JSON.stringify(metadata)}::jsonb WHERE id = ${row.item.id} AND item->>'title' = ${row.item.title} AND NOT (item ? 'titleSource') RETURNING item`;
+    const [updated] = await sql`UPDATE orin_items SET item = item || ${JSON.stringify(metadata)}::jsonb WHERE id = ${row.id ?? row.item.id} AND item->>'title' = ${row.item.title} AND NOT (item ? 'titleSource') RETURNING item`;
     if (updated) row.item = updated.item;
   }));
   return rows;

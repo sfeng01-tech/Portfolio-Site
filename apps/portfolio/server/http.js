@@ -58,6 +58,8 @@ export function createAppServer({ distDir = fileURLToPath(new URL('../dist/', im
         res.setHeader('Cache-Control', 'private, no-store');
         if (pathname === '/api/health') {
           if (req.method !== 'GET') { res.setHeader('Allow', 'GET'); return json(res, 405, { error: 'Method not allowed' }); }
+          const commit = process.env.RENDER_GIT_COMMIT;
+          if (/^[a-f0-9]{40}$/.test(commit || '')) res.setHeader('X-Deployment-Commit', commit);
           return json(res, 200, { ok: true });
         }
         const handler = handlers.get(pathname);

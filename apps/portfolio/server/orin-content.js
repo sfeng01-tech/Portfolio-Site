@@ -13,7 +13,7 @@ export function validateContentEdit(body) {
 }
 
 export function visibleItems(rows) {
-  return rows.filter(row => !row.item.deleted).map(row => ({ ...row.item, read: row.is_read, saved: row.saved }));
+  return rows.filter(row => !row.item.deleted).map(row => ({ ...row.item, id: row.id ?? row.item.id, read: row.is_read, saved: row.saved }));
 }
 
 export function visibleDigest(digest, rows) {
@@ -39,6 +39,6 @@ export async function mutateContent(req, res, getSql) {
   const [row] = await sql`UPDATE orin_items SET item = item || ${JSON.stringify(patch)}::jsonb, updated_at = now()
     WHERE id = ${body.id} AND NOT COALESCE((item->>'deleted')::boolean, false)
       AND (item->>'source' = 'shared' OR (NOT ${manualOnly}::boolean AND (item->>'url' ~ '^https://(www[.]|m[.]|music[.])?youtube[.]com/' OR item->>'url' ~ '^https://youtu[.]be/')))
-    RETURNING item, is_read, saved`;
-  return row ? res.status(200).json({ item: { ...row.item, read: row.is_read, saved: row.saved } }) : res.status(404).json({ error: 'Editable item not found' });
+    RETURNING id, item, is_read, saved`;
+  return row ? res.status(200).json({ item: { ...row.item, id: row.id ?? body.id, read: row.is_read, saved: row.saved } }) : res.status(404).json({ error: 'Editable item not found' });
 }

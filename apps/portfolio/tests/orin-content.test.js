@@ -9,6 +9,34 @@ const id = 'a'.repeat(64);
 const url = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
 const response = () => ({ headers: {}, setHeader(key, value) { this.headers[key] = value; }, status(code) { this.statusCode = code; return this; }, json(body) { this.body = body; return this; } });
 
+test('legacy video records use the database ID for deletion even with a missing or short JSON ID', async () => {
+  const title = 'A shared video';
+  for (const legacyId of [undefined, 'dQw4w9WgXcQ', 'old-item-id']) {
+    const [video] = visibleItems([{ id, item: { id: legacyId, title, url }, is_read: false, saved: false }]);
+    assert.equal(video.id, id);
+    assert.equal(video.title, title);
+    const res = response();
+    await mutateContent({ method: 'DELETE', body: { id: video.id } }, res, async () => async (_strings, requestedId) => {
+      assert.equal(requestedId, id);
+      return [{ id }];
+    });
+    assert.equal(res.statusCode, 200);
+    assert.equal(res.body.deleted, true);
+  }
+});
+
+test('legacy video title repair targets the database ID and caption responses retain it', async () => {
+  const rows = [{ id, item: { id: 'legacy', url, title: 'Shared link from youtube.com' } }];
+  await repairYoutubeTitles(rows, async (_strings, patch, requestedId) => {
+    assert.equal(requestedId, id);
+    return [{ item: { ...rows[0].item, ...JSON.parse(patch) } }];
+  }, async () => ({ ok: true, json: async () => ({ title: 'Actual title' }) }));
+  assert.equal(visibleItems(rows)[0].id, id);
+  const res = response();
+  await mutateContent({ method: 'PATCH', body: { id, title: 'My caption' } }, res, async () => async () => [{ id, item: { id: 'legacy', title: 'My caption' }, is_read: false, saved: false }]);
+  assert.equal(res.body.item.id, id);
+});
+
 test('YouTube lookup supports shared video formats and rejects lookalike hosts', () => {
   for (const link of [url, 'https://youtu.be/dQw4w9WgXcQ?si=abc', 'https://m.youtube.com/shorts/dQw4w9WgXcQ', 'https://youtube.com/live/dQw4w9WgXcQ', 'https://music.youtube.com/watch?v=dQw4w9WgXcQ']) assert.equal(youtubeId(link), 'dQw4w9WgXcQ');
   for (const link of ['https://youtube.com.evil.test/watch?v=dQw4w9WgXcQ', 'https://evil.test/youtube.com/watch?v=dQw4w9WgXcQ', 'http://youtu.be/dQw4w9WgXcQ', 'https://user@youtube.com/watch?v=dQw4w9WgXcQ', 'https://youtube.com/watch?v=invalid']) assert.equal(youtubeId(link), null);
