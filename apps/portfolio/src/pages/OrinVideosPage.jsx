@@ -62,7 +62,7 @@ export default function OrinVideosPage() {
 
   return (
     <div className="orin-shell">
-      <div className="orin-topbar">
+      <div className="orin-topbar orin-topbar--videos">
         <Link className="orin-icon" to="/orin" aria-label="Back to ORIN"><ArrowLeft size={17} /></Link>
         <span className="orin-private"><Lock size={12} /> PERSONAL SPACE</span>
       </div>
@@ -82,7 +82,7 @@ export default function OrinVideosPage() {
           ) : (
             <>
               {error && <div role="alert" className="orin-error">{error}</div>}
-              {busy ? <div className="orin-state" role="status">Loading videos…</div> : tiles.length ? (
+              {busy ? <div className="orin-state" role="status">Loading videos…</div> : error ? null : tiles.length ? (
                 <div className="orin-video-grid">
                   {tiles.map(item => (
                     <article key={item.id} className="orin-video-tile">

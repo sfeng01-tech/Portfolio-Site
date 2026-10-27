@@ -28,13 +28,14 @@ const repositoryName = (url) => {
   }
 };
 
-export function ReferenceProjectsCollection({ items = [] }) {
+export function ReferenceProjectsCollection({ items = [], onShare }) {
   if (!items.length) {
     return (
       <section className="orin-collection">
         <div className="eyebrow">REFERENCE PROJECTS</div>
         <h2>GitHub projects you want to keep close.</h2>
         <p>Share a repository link and tag it as “Reference Projects” to build this page.</p>
+        {onShare && <button className="button-primary" type="button" onClick={onShare}>Add a project</button>}
       </section>
     );
   }
@@ -70,7 +71,7 @@ export function ReferenceProjectsCollection({ items = [] }) {
   );
 }
 
-export function BooksCollection({ items = [] }) {
+export function BooksCollection({ items = [], onShare }) {
   const [selectedId, setSelectedId] = useState(items[0]?.id || null);
   const selected = useMemo(
     () => items.find(item => item.id === selectedId) || items[0] || null,
@@ -83,6 +84,7 @@ export function BooksCollection({ items = [] }) {
         <div className="eyebrow">BOOKS</div>
         <h2>A quiet shelf for things you are reading.</h2>
         <p>Share a Google Drive link or PDF and tag it as “Books” to start the shelf.</p>
+        {onShare && <button className="button-primary" type="button" onClick={onShare}>Add a book</button>}
       </section>
     );
   }
