@@ -1,4 +1,5 @@
--- Run once in the Neon SQL editor (or psql) against ORIN_DATABASE_URL.
+-- Apply in the Neon SQL editor (or psql) against ORIN_DATABASE_URL. Every
+-- statement is additive and the file is safe to re-run after new releases.
 BEGIN;
 CREATE TABLE IF NOT EXISTS orin_digests (
   day date PRIMARY KEY,
@@ -91,5 +92,7 @@ CREATE TABLE IF NOT EXISTS orin_reminders (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 -- Existing installations keep their weekday reminders and gain optional dates.
+-- The Reminders API also repairs this one column for Render deployments that
+-- have not re-run this file, if the ORIN database role owns the table.
 ALTER TABLE orin_reminders ADD COLUMN IF NOT EXISTS due_date date;
 COMMIT;

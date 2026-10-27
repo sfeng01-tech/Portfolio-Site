@@ -16,7 +16,7 @@ Responses from the Node adapter set a Content Security Policy plus `X-Content-Ty
 
 ## Schema migrations
 
-`apps/portfolio/server/orin-schema.sql` is additive and safe to re-run. It includes the `orin_auth_sessions` table, `orin_digests.digest_status`, indexes supporting digest membership, category lookups, feedback reads, and paper-identity suppression, and the optional `orin_reminders.due_date` column. Apply it before deploying schema-dependent API changes; an unmigrated database returns explicit 5xx errors rather than serving stale behavior.
+`apps/portfolio/server/orin-schema.sql` is additive and safe to re-run. It includes the `orin_auth_sessions` table, `orin_digests.digest_status`, indexes supporting digest membership, category lookups, feedback reads, and paper-identity suppression, and the optional `orin_reminders.due_date` column. Apply it before deploying schema-dependent API changes; an unmigrated database returns explicit 5xx errors rather than serving stale behavior. The authenticated Reminders API checks this one later-added column once per server process and adds it when absent. Its `ORIN_DATABASE_URL` role must own `orin_reminders` (or inherit ownership through a role); otherwise Reminders shows a schema-update error. In that case, run `ALTER TABLE orin_reminders ADD COLUMN IF NOT EXISTS due_date date;` as the table owner. Other ORIN pages remain available.
 
 **Reminders.** The private reminders editor supports weekday repeats and one-time date reminders. Both use Pacific time and notify only while the ORIN page is open with browser notifications enabled. Existing reminders remain weekday repeats after the additive `due_date` migration.
 
