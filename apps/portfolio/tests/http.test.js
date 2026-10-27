@@ -5,6 +5,24 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { createAppServer } from '../server/http.js';
 
+test('health identifies the deployed Render commit without changing the response body', async () => {
+  const original = process.env.RENDER_GIT_COMMIT;
+  const server = createAppServer();
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  try {
+    process.env.RENDER_GIT_COMMIT = 'a'.repeat(40);
+    const health = await fetch(`http://127.0.0.1:${server.address().port}/api/health`);
+    assert.equal(health.headers.get('x-deployment-commit'), process.env.RENDER_GIT_COMMIT);
+    assert.deepEqual(await health.json(), { ok: true });
+    process.env.RENDER_GIT_COMMIT = 'invalid';
+    assert.equal((await fetch(`http://127.0.0.1:${server.address().port}/api/health`)).headers.get('x-deployment-commit'), null);
+  } finally {
+    if (original === undefined) delete process.env.RENDER_GIT_COMMIT;
+    else process.env.RENDER_GIT_COMMIT = original;
+    await new Promise(resolve => server.close(resolve));
+  }
+});
+
 test('Node adapter serves SPA, private APIs and bounded JSON without leaking files', async () => {
   const directory = await mkdtemp(path.join(tmpdir(), 'orin-http-'));
   await writeFile(path.join(directory, 'index.html'), '<!doctype html><title>ORIN test</title>');

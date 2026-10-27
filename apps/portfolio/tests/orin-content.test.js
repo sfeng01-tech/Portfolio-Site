@@ -10,7 +10,7 @@ const url = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
 const response = () => ({ headers: {}, setHeader(key, value) { this.headers[key] = value; }, status(code) { this.statusCode = code; return this; }, json(body) { this.body = body; return this; } });
 
 test('legacy video records use the database ID for deletion even with a missing or short JSON ID', async () => {
-  const title = 'Why Aleena Left Meta to Start a Kerala Chayakada in Silicon Valley. ഒരു നാടൻ ചായക്കട';
+  const title = 'A shared video';
   for (const legacyId of [undefined, 'dQw4w9WgXcQ', 'old-item-id']) {
     const [video] = visibleItems([{ id, item: { id: legacyId, title, url }, is_read: false, saved: false }]);
     assert.equal(video.id, id);
