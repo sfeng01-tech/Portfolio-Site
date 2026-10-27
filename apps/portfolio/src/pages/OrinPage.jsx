@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowUpRight, Bookmark, Check, Compass, FileText, Github, Lock, LogOut, RefreshCw, Search, Share2, ThumbsUp, ThumbsDown, Video } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { ArrowUpRight, Bookmark, Check, Compass, FileText, Github, Lock, LogOut, RefreshCw, Search, Share2, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import OrinBrain from '../components/orin/OrinBrain';
 import OrinCategoryManager from '../components/orin/OrinCategoryManager';
@@ -10,6 +9,7 @@ import OrinReminders from '../components/orin/OrinReminders';
 import { BooksCollection, ReferenceProjectsCollection } from '../components/orin/OrinCollections';
 import { displaySource } from '../components/orin/brainGraph';
 import OrinItemControls from '../components/orin/OrinItemControls';
+import { OrinVideosShelf } from './OrinVideosPage';
 import './orin.css';
 
 const MAX_PDF_BYTES = 40_000_000;
@@ -91,9 +91,8 @@ export default function OrinPage() {
   }, []);
   useEffect(() => {
     if (!user) { setData(null); lastView.current = ''; cache.current.clear(); setBusy(false); return undefined; }
-    // Notes and reminders are private panels of their own; the digest fetch is
-    // not needed while either view is open.
-    if (tab === 'notes' || tab === 'reminders') { setBusy(false); return undefined; }
+    // These private panels fetch their own content when opened.
+    if (tab === 'notes' || tab === 'reminders' || tab === 'videos') { setBusy(false); return undefined; }
     // The archive opens its own day without touching the digest tab's date,
     // so the daily digest always comes back to the latest one.
     const isCollection = tab in collectionCategories;
@@ -328,18 +327,18 @@ export default function OrinPage() {
   const renderDigestGroups = groups => groups.length > 0 && <div className="orin-groups">{groups.map((group,index)=><article key={`${group.title}-${index}`}><div className="eyebrow">THREAD {String(index+1).padStart(2,'0')}</div><h3>{group.title}</h3><p>{group.summary}</p><div>{group.urls?.map((url,i)=> safeUrl(url) && <a key={url} href={safeUrl(url)} target="_blank" rel="noopener noreferrer">Source {i+1} <ArrowUpRight size={12}/></a>)}</div></article>)}</div>;
 
   return <div className="orin-shell">
-    <div className="orin-topbar"><span className="orin-private"><Lock size={12}/> PERSONAL SPACE</span>{user && <Link className="orin-video-link" to="/orin/videos"><Video size={15}/> Videos</Link>}{user && <button onClick={logout} className="orin-icon" aria-label="Sign out"><LogOut size={17}/></button>}</div>
+    <div className="orin-topbar"><span className="orin-private"><Lock size={12}/> PERSONAL SPACE</span>{user && <button onClick={logout} className="orin-icon" aria-label="Sign out"><LogOut size={17}/></button>}</div>
     <main id="main-content" className="orin-main">
       <div className={`orin-intro ${user ? 'is-compact' : ''}`}><div className="eyebrow"><Compass size={15}/> A WORLD OF EXPLORATION & STUDY</div><h1>ORIN<span>.</span></h1><p>A quieter place to follow your curiosity.</p></div>
       {authLoading ? <div className="orin-state" role="status">Opening your space…</div> : !user ? <section className="orin-gate orin-gate--landing"><div className="orin-gate-copy"><div className="eyebrow">JUST FOR YOU</div><h2>Your daily window into what’s worth understanding.</h2><p>Research, ideas, and conversations from across AI and systems. Gathered in one private reading space.</p></div><div className="orin-gate-action"><div className="orin-lock"><Lock size={25} strokeWidth={1.4}/></div><button className="button-primary" onClick={() => login('/orin')}><Github size={17}/> Sign in with GitHub <ArrowUpRight size={16}/></button><small>Access is restricted to approved GitHub accounts.</small>{authError && <p role="alert" className="orin-error">{authError}</p>}</div></section> : <>
         <div className="orin-toolbar">
           <div className="orin-tabs" role="tablist" aria-label="Reading view">
-            {[['digest','Daily digest'],['archive','Archive'],['share','Share'],['projects','Reference Projects'],['books','Books'],['brain','Live brain'],['saved','Reading list'],['notes','Notes'],['reminders','Reminders']].map(([value,label]) =>
+            {[['digest','Daily digest'],['archive','Archive'],['share','Share'],['projects','Reference Projects'],['books','Books'],['videos','Videos'],['brain','Live brain'],['saved','Reading list'],['notes','Notes'],['reminders','Reminders']].map(([value,label]) =>
               <button key={value} role="tab" aria-selected={tab===value} onClick={() => {setTab(value);setArchiveDay(null);setSource('All');setShareMessage('');setShowAllThreads(false);setShowAllFinds(false);setFocusItem(null);setError('');}}>{label}</button>
             )}
           </div>
           {(tab === 'digest' || tab === 'brain') && <label className="orin-date"><span className="sr-only">Digest date</span><input type="date" value={date || data?.date || localDate()} max={localDate()} onChange={event => {setDate(event.target.value);setShowAllThreads(false);setShowAllFinds(false);}}/></label>}
-          {tab !== 'notes' && tab !== 'reminders' && <button className="orin-icon" disabled={busy} onClick={() => setRevision(v=>v+1)} aria-label="Refresh content"><RefreshCw size={17} className={busy ? 'animate-spin' : ''}/></button>}
+          {tab !== 'notes' && tab !== 'reminders' && tab !== 'videos' && <button className="orin-icon" disabled={busy} onClick={() => setRevision(v=>v+1)} aria-label="Refresh content"><RefreshCw size={17} className={busy ? 'animate-spin' : ''}/></button>}
         </div>
         {saveNotice && <div className="orin-save-notice" role="status">
           <span>Your source is in the {displayDay(saveNotice.date)} digest.</span>
@@ -347,7 +346,7 @@ export default function OrinPage() {
           <button type="button" onClick={() => setSaveNotice(null)} aria-label="Dismiss save confirmation">Dismiss</button>
         </div>}
         {error && <div role="alert" className="orin-error">{error}</div>}
-        {tab === 'notes' ? <OrinNotes/> : tab === 'reminders' ? <OrinReminders/> : !data && busy ? <div className="orin-state" role="status">Gathering your reading list…</div> : data && <>
+        {tab === 'notes' ? <OrinNotes/> : tab === 'reminders' ? <OrinReminders/> : tab === 'videos' ? <OrinVideosShelf embedded/> : !data && busy ? <div className="orin-state" role="status">Gathering your reading list…</div> : data && <>
           {busy && <div className="orin-refreshing" role="status">Refreshing…</div>}
           {tab==='archive' && <section className="orin-archive"><div className="eyebrow">DIGEST ARCHIVE</div>{archiveDay ? <>
             <button type="button" className="orin-archive-back" onClick={() => setArchiveDay(null)}>← Back to archive</button>

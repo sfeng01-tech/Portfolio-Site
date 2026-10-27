@@ -80,14 +80,15 @@ export default function OrinBrain({ items = [], groups = [], date = '', sourceSt
       </div>
       <p>Each source neuron fires into the topic segments it reported on, and every segment carries that signal into the action neurons it produced. Similar topics are merged into one segment, so a single idea can light up from several feeds at once.</p>
       <div className="orin-brain-stats">
-        <span><b>{model.stats.items}</b> neurons</span>
-        <span><b>{model.stats.sources}</b> sources</span>
+        <span><b>{model.stats.items}</b> of {model.stats.available} finds shown</span>
+        <span><b>{model.stats.sources}</b>{model.stats.sources < model.stats.availableSources ? ` of ${model.stats.availableSources} sources represented` : ' sources'}</span>
         <span><b>{model.stats.segments}</b> topic segments</span>
         <span><b>{model.stats.threads}</b> threads</span>
         <span><b>{model.stats.links}</b> links</span>
-        <span><b>{model.stats.unread}</b> unread</span>
-        <span><b>{model.stats.saved}</b> saved</span>
+        <span><b>{model.stats.unread}</b> unread shown</span>
+        <span><b>{model.stats.saved}</b> saved shown</span>
       </div>
+      {model.stats.truncated > 0 && <p className="orin-brain-note orin-brain-truncated">The diagram shows {model.stats.items} prioritized finds to stay readable. All {model.stats.available} finds remain in Daily digest.</p>}
     </header>
 
     {!model.items.length ? <div className="orin-state"><Compass size={27} strokeWidth={1.2}/><h3>No signal to trace yet.</h3><p>The brain lights up once a collection run publishes a digest.</p></div> : <>
@@ -135,7 +136,6 @@ export default function OrinBrain({ items = [], groups = [], date = '', sourceSt
         </div>
       </div>
       <p className="orin-brain-legend" aria-hidden="true">{model.sources.map((source) => <span key={source.id}><i style={{ background: source.color }}/>{source.label} · {source.count}</span>)}</p>
-      {model.stats.truncated > 0 && <p className="orin-brain-note orin-brain-truncated">Showing the {model.stats.items} strongest neurons; {model.stats.truncated} more item{model.stats.truncated === 1 ? '' : 's'} stay in the digest list.</p>}
     </>}
   </section>;
 }
