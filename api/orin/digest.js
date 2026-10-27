@@ -16,7 +16,7 @@ export default async function handler(req, res) {
     const availableDates = days.map(row => row.day);
     if (kind === 'video') {
       const rows = await sql`
-        SELECT item, is_read, saved
+        SELECT id, item, is_read, saved
         FROM orin_items
         WHERE NOT COALESCE((item->>'deleted')::boolean, false) AND (item->>'category' = 'YouTube'
            OR item->>'url' LIKE '%youtube.com/%'
@@ -36,7 +36,7 @@ export default async function handler(req, res) {
       });
     }
     if (category) {
-      const rows = await sql`SELECT item, is_read, saved FROM orin_items WHERE NOT COALESCE((item->>'deleted')::boolean, false) AND item->>'category' = ${category} ORDER BY COALESCE((item->>'publishedAt')::timestamptz, updated_at) DESC LIMIT 500`;
+      const rows = await sql`SELECT id, item, is_read, saved FROM orin_items WHERE NOT COALESCE((item->>'deleted')::boolean, false) AND item->>'category' = ${category} ORDER BY COALESCE((item->>'publishedAt')::timestamptz, updated_at) DESC LIMIT 500`;
       return res.status(200).json({
         date: null,
         availableDates,
@@ -51,8 +51,8 @@ export default async function handler(req, res) {
     if (!date) return res.status(200).json({ date: null, availableDates, digest: null, items: [], sourceStatus: [] });
     const [entry] = await sql`SELECT digest, digest_status, source_status FROM orin_digests WHERE day = ${date}`;
     const rows = req.query?.saved === 'true'
-      ? await sql`SELECT item, is_read, saved FROM orin_items WHERE saved = true AND NOT COALESCE((item->>'deleted')::boolean, false) ORDER BY updated_at DESC LIMIT 500`
-      : await sql`SELECT i.item, i.is_read, i.saved FROM orin_items i JOIN orin_digest_items d ON d.item_id = i.id WHERE d.day = ${date} ORDER BY COALESCE((i.item->'ranking'->>'score')::integer, -1) DESC, i.item->>'source', i.item->>'title'`;
+      ? await sql`SELECT id, item, is_read, saved FROM orin_items WHERE saved = true AND NOT COALESCE((item->>'deleted')::boolean, false) ORDER BY updated_at DESC LIMIT 500`
+      : await sql`SELECT i.id, i.item, i.is_read, i.saved FROM orin_items i JOIN orin_digest_items d ON d.item_id = i.id WHERE d.day = ${date} ORDER BY COALESCE((i.item->'ranking'->>'score')::integer, -1) DESC, i.item->>'source', i.item->>'title'`;
     await repairYoutubeTitles(rows, sql);
     return res.status(200).json({ date, availableDates, digest: visibleDigest(entry?.digest || null, rows), digestStatus: entry?.digest_status || null, items: visibleItems(rows), sourceStatus: entry?.source_status || [] });
   } catch (error) { return sendError(res, error); }
