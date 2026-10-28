@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowUpRight, Bookmark, Check, Compass, FileText, Github, Lock, LogOut, RefreshCw, Search, Share2, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import OrinBrain from '../components/orin/OrinBrain';
+import OrinDailyBrief from '../components/orin/OrinDailyBrief';
 import OrinCategoryManager from '../components/orin/OrinCategoryManager';
 import OrinCategoryPicker from '../components/orin/OrinCategoryPicker';
 import OrinNotes from '../components/orin/OrinNotes';
@@ -57,7 +58,6 @@ export default function OrinPage() {
   const [archiveJump, setArchiveJump] = useState('');
   const [source, setSource] = useState('All');
   const [tab, setTab] = useState('digest');
-  const [showAllThreads, setShowAllThreads] = useState(false);
   const [showAllFinds, setShowAllFinds] = useState(false);
   const [search, setSearch] = useState('');
   const [pending, setPending] = useState(new Set());
@@ -196,6 +196,7 @@ export default function OrinPage() {
   function openArchiveDay(day) {
     setArchiveDay(day);
     setArchiveJump(day);
+    setShowAllFinds(false);
     setSource('All');
     setSearch('');
   }
@@ -309,7 +310,7 @@ export default function OrinPage() {
       setArchiveDay(null);
       setTab('digest');
       setDate(payload.date);
-      setShowAllThreads(false);
+
       setShowAllFinds(false);
       setSaveNotice({ id: payload.id, date: payload.date });
       cache.current.clear();
@@ -322,9 +323,7 @@ export default function OrinPage() {
     }
   }
 
-  const digestGroups = data?.digest?.groups || [];
-  const featuredItems = items.slice(0, 4); // The API sorts finds by ranking score.
-  const renderDigestGroups = groups => groups.length > 0 && <div className="orin-groups">{groups.map((group,index)=><article key={`${group.title}-${index}`}><div className="eyebrow">THREAD {String(index+1).padStart(2,'0')}</div><h3>{group.title}</h3><p>{group.summary}</p><div>{group.urls?.map((url,i)=> safeUrl(url) && <a key={url} href={safeUrl(url)} target="_blank" rel="noopener noreferrer">Source {i+1} <ArrowUpRight size={12}/></a>)}</div></article>)}</div>;
+  const isDigestReading = tab === 'digest' || (tab === 'archive' && Boolean(archiveDay));
 
   return <div className="orin-shell">
     <div className="orin-topbar"><span className="orin-private"><Lock size={12}/> PERSONAL SPACE</span>{user && <button onClick={logout} className="orin-icon" aria-label="Sign out"><LogOut size={17}/></button>}</div>
@@ -334,10 +333,10 @@ export default function OrinPage() {
         <div className="orin-toolbar">
           <div className="orin-tabs" role="tablist" aria-label="Reading view">
             {[['digest','Daily digest'],['archive','Archive'],['share','Share'],['projects','Reference Projects'],['books','Books'],['videos','Videos'],['brain','Live brain'],['saved','Reading list'],['notes','Notes'],['reminders','Reminders']].map(([value,label]) =>
-              <button key={value} role="tab" aria-selected={tab===value} onClick={() => {setTab(value);setArchiveDay(null);setSource('All');setShareMessage('');setShowAllThreads(false);setShowAllFinds(false);setFocusItem(null);setError('');}}>{label}</button>
+              <button key={value} role="tab" aria-selected={tab===value} onClick={() => {setTab(value);setArchiveDay(null);setSource('All');setShareMessage('');setShowAllFinds(false);setFocusItem(null);setError('');}}>{label}</button>
             )}
           </div>
-          {(tab === 'digest' || tab === 'brain') && <label className="orin-date"><span className="sr-only">Digest date</span><input type="date" value={date || data?.date || localDate()} max={localDate()} onChange={event => {setDate(event.target.value);setShowAllThreads(false);setShowAllFinds(false);}}/></label>}
+          {(tab === 'digest' || tab === 'brain') && <label className="orin-date"><span className="sr-only">Digest date</span><input type="date" value={date || data?.date || localDate()} max={localDate()} onChange={event => {setDate(event.target.value);setShowAllFinds(false);}}/></label>}
           {tab !== 'notes' && tab !== 'reminders' && tab !== 'videos' && <button className="orin-icon" disabled={busy} onClick={() => setRevision(v=>v+1)} aria-label="Refresh content"><RefreshCw size={17} className={busy ? 'animate-spin' : ''}/></button>}
         </div>
         {saveNotice && <div className="orin-save-notice" role="status">
@@ -350,9 +349,6 @@ export default function OrinPage() {
           {busy && <div className="orin-refreshing" role="status">Refreshing…</div>}
           {tab==='archive' && <section className="orin-archive"><div className="eyebrow">DIGEST ARCHIVE</div>{archiveDay ? <>
             <button type="button" className="orin-archive-back" onClick={() => setArchiveDay(null)}>← Back to archive</button>
-            <h2>{displayDay(archiveDay)} digest</h2>
-            <p>{sources.length} source{sources.length === 1 ? '' : 's'} gathered this day.</p>
-            {renderDigestGroups(digestGroups)}
           </> : <>
             <h2>{data.date ? `${displayDay(data.date)} digest` : 'No digests yet'}</h2>
             <p>Open a day to review every source gathered that day.</p>
@@ -369,35 +365,15 @@ export default function OrinPage() {
               </details>)}</div>
             </> : <p className="orin-archive-empty">The first collector run will add dates here.</p>}
           </>}</section>}
-          {tab==='digest' && <section className="orin-brief"><div className="eyebrow">THE DAILY BRIEF · {data.date || 'NO DIGEST YET'}</div><h2>{data.digest?.title || 'A little space for discovery.'}</h2><p>{data.digest?.summary || (items.length ? `Explore ${items.length} finds from ${sources.length} sources below.` : 'Your first digest will appear here after the collector completes a run.')}</p>{data.digestStatus && data.digestStatus.status !== 'ok' && <p className="orin-digest-status" role="status">{data.digestStatus.message}</p>}<div className="orin-counts"><span>{items.length} finds</span><span>{sources.length} sources</span><span>{items.filter(item=>!item.read).length} unread</span></div></section>}
-          {tab==='digest' && featuredItems.length > 0 && <section className="orin-featured" aria-labelledby="orin-featured-heading">
-            <div className="eyebrow">START HERE</div>
-            <h3 id="orin-featured-heading">{featuredItems.length === 4 ? 'Four' : featuredItems.length} {featuredItems.length === 1 ? 'find' : 'finds'} to start with.</h3>
-            <p>Selected from this digest by relevance. Open a source, or read its full entry in ORIN.</p>
-            <div className="orin-featured-grid">{featuredItems.map(item => {
-              const preview = item.ranking?.reason || item.excerpt || '';
-              const summary = preview.length > 220 ? `${preview.slice(0, 217).trimEnd()}…` : preview;
-              return <article key={item.id} className="orin-featured-card">
-                <div className="eyebrow">{displaySource(item.source)}</div>
-                <h4>{itemLink(item) ? <a href={itemLink(item)} target="_blank" rel="noopener noreferrer">{item.title}<ArrowUpRight size={15}/></a> : item.title}</h4>
-                {summary && <p>{summary}</p>}
-                <button type="button" onClick={() => openDigestItem(item.id, data.date)}>Read in ORIN</button>
-              </article>;
-            })}</div>
-          </section>}
-          {tab==='digest' && digestGroups.length > 0 && <section className="orin-disclosure" aria-labelledby="orin-threads-heading">
-            <div><div className="eyebrow">THE THEMES</div><h3 id="orin-threads-heading">{digestGroups.length} threads connecting the finds.</h3></div>
-            <button type="button" aria-expanded={showAllThreads} onClick={() => setShowAllThreads(value => !value)}>{showAllThreads ? 'Hide threads' : `Explore all ${digestGroups.length} threads`}</button>
-            {showAllThreads && renderDigestGroups(digestGroups)}
-          </section>}
-          {tab==='digest' && <section className="orin-disclosure" aria-labelledby="orin-all-finds-heading">
+          {isDigestReading && <OrinDailyBrief key={data.date} data={data} today={localDate()} archived={tab === 'archive'} onRead={id => openDigestItem(id, data.date)}/>}
+          {isDigestReading && <section className="orin-disclosure" aria-labelledby="orin-all-finds-heading">
             <div><div className="eyebrow">FULL COLLECTION</div><h3 id="orin-all-finds-heading">All {items.length} finds.</h3></div>
             {items.length > 0 && <button type="button" aria-expanded={showAllFinds} onClick={() => setShowAllFinds(value => !value)}>{showAllFinds ? 'Hide full collection' : `Browse all ${items.length} finds`}</button>}
             {!items.length && <p>The next completed collection will fill this space.</p>}
           </section>}
           {tab==='saved' && <section className="orin-saved-intro"><div className="eyebrow">READING LIST</div><h2>{items.length} saved {items.length === 1 ? 'find' : 'finds'}</h2><p>Ideas you kept for a closer look.</p></section>}
           {tab==='projects' ? <ReferenceProjectsCollection items={items} onShare={() => { setShareCategory(collectionCategories.projects); setShareDay(localDate()); setTab('share'); }}/> : tab==='books' ? <BooksCollection items={items} onShare={() => { setShareCategory(collectionCategories.books); setShareDay(localDate()); setTab('share'); }}/> : tab==='brain' ? <OrinBrain items={items} groups={data.digest?.groups || []} date={data.date || ''} sourceStatus={data.sourceStatus || []} availableDates={data.availableDates || []}/> : tab==='share' ? <section className="orin-share"><div className="eyebrow"><Share2 size={15}/> SHARE A SOURCE</div><h2>Save a link or PDF to ORIN.</h2><form onSubmit={submitShare}><label>Source URL<input type="url" disabled={sharePdfBusy || Boolean(sharePdf)} required={!sharePdf} value={shareUrl} placeholder="https://www.youtube.com/watch?v=…" onChange={event => setShareUrl(event.target.value)}/></label><div className="orin-share-pdf"><label>Source PDF<span className="orin-share-pdf-hint">Text is extracted in your browser. Saving sends the text to your private ORIN space; the PDF file itself is not uploaded.</span><input type="file" accept="application/pdf,.pdf" disabled={sharePdfBusy} aria-label="Choose a PDF" onChange={handleSharePdf}/></label>{sharePdfBusy && <p role="status">Reading PDF…</p>}{sharePdf && <div className="orin-share-pdf-file"><FileText size={15}/><span>{sharePdf.name} · {sharePdf.text.length.toLocaleString()} characters</span><button type="button" onClick={clearSharePdf}>Remove</button></div>}</div><label>Digest date<input type="date" required value={shareDay} max={localDate()} onChange={event => setShareDay(event.target.value)}/></label><label>Category or segment<select value={shareCategory} onChange={event => setShareCategory(event.target.value)}><option value="">No category</option>{shareCategoryOptions.map(label => <option key={label} value={label}>{label}</option>)}</select></label><label>Note<textarea value={shareNote} maxLength={4000} placeholder="What is this, and why could it be useful?" onChange={event => setShareNote(event.target.value)}/></label><button className="button-primary" type="submit" disabled={shareBusy || sharePdfBusy || (!shareUrl && !sharePdf)}><Share2 size={15}/>{shareBusy ? 'Saving…' : 'Save source'}</button></form><p role="status">{shareMessage}</p></section> : <>
-        {(tab === 'saved' || (tab === 'archive' && archiveDay) || (tab === 'digest' && showAllFinds)) && <>
+        {(tab === 'saved' || (isDigestReading && showAllFinds)) && <>
         <div className="orin-filterbar"><div className="orin-source-filters">{['All',...sources].map(value=><button key={value} aria-pressed={source===value} onClick={()=>setSource(value)}>{displaySource(value)}</button>)}</div><label className="orin-search"><Search size={15}/><input placeholder="Find an idea…" aria-label="Search digest" value={search} onChange={event=>setSearch(event.target.value)}/></label><OrinCategoryManager categories={categories.filter(category => typeof category.label === 'string')} onAction={categoryAction}/></div>
           <div className="orin-items">{filtered.map(item=><article key={item.id} id={`orin-item-${item.id}`} tabIndex={-1} className={`orin-item ${item.read ? 'is-read' : ''}`}><div className="orin-item-meta"><span>{displaySource(item.source)}</span>{item.author && <span>{item.author}</span>}{item.publishedAt && <time dateTime={item.publishedAt}>{new Date(item.publishedAt).toLocaleDateString()}</time>}</div><h3>{itemLink(item) ? <a href={itemLink(item)} target="_blank" rel="noopener noreferrer">{item.title}<ArrowUpRight size={18}/></a> : item.title}</h3><OrinExcerpt text={item.excerpt} itemId={item.id} condensed={tab==="saved"}/>{item.ranking && <p className="orin-ranking"><span>{item.ranking.discovery ? 'Discovery' : 'Why this fits'}</span> {item.ranking.reason}</p>}{Object.keys(item.metrics || {}).length > 0 && <div className="orin-metrics">{Object.entries(item.metrics).map(([metric, value]) => <span key={metric}>{Number(value).toLocaleString()} {metric}</span>)}<span>observed at collection</span></div>}<div className="orin-item-bottom"><div className="orin-item-file"><OrinCategoryPicker item={item} categories={categories.map(category => category.label)} disabled={pending.has(item.id)} onSetCategory={value => { updateCategory(item, value); }} onCreateCategory={createCategory}/><div className="orin-topics">{item.topics?.map(topic=><span key={topic}>{topic}</span>)}</div></div><div className="orin-item-actions"><button disabled={pending.has(item.id)} onClick={()=>updateItem(item,'feedback',item.feedback===1 ? 0 : 1)} aria-pressed={item.feedback===1} aria-label="Recommend more like this"><ThumbsUp size={15}/>More like this</button><button disabled={pending.has(item.id)} onClick={()=>updateItem(item,'feedback',item.feedback===-1 ? 0 : -1)} aria-pressed={item.feedback===-1} aria-label="Recommend fewer like this"><ThumbsDown size={15}/>Less relevant</button><button disabled={pending.has(item.id)} onClick={()=>updateItem(item,'read')} aria-pressed={item.read} aria-label={item.read ? 'Mark unread' : 'Mark read'}><Check size={15}/>{item.read ? 'Read' : 'Mark read'}</button><button disabled={pending.has(item.id)} onClick={()=>updateItem(item,'saved')} aria-pressed={item.saved} aria-label={item.saved ? 'Remove from reading list' : 'Save to reading list'}><Bookmark size={15} fill={item.saved ? 'currentColor' : 'none'}/></button></div></div><OrinItemControls item={item} onUpdate={updated => contentChanged(updated)} onDelete={id => contentChanged(null, id)}/></article>)}</div>
           {!filtered.length && <div className="orin-state"><Compass size={27} strokeWidth={1.2}/><h3>{tab==='saved' ? 'Keep the ideas you want to return to.' : 'Nothing on the horizon just yet.'}</h3><p>{search || source!=='All' ? 'Try another search or source.' : tab==='saved' ? 'Save a find from your daily digest to add it here.' : 'The next completed collection will fill this space.'}</p></div>}
