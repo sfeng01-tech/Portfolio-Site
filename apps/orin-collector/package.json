@@ -6,7 +6,9 @@
   "scripts": {
     "test": "node --test *.test.mjs",
     "collect": "node collect.mjs",
-    "categories:backfill": "node backfill-categories.mjs"
+    "research:worker": "node research-worker.mjs",
+    "categories:backfill": "node backfill-categories.mjs",
+    "links:backfill": "node backfill-links.mjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.2.0",

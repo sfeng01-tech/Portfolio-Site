@@ -115,6 +115,56 @@ Deployment note: the `orin_categories` table must exist in Neon before the categ
 (`apps/portfolio/server/orin-schema.sql` contains the `CREATE TABLE` plus the seed insert). The collector item
 payload gained an optional `category`/`categorySource` pair, validated by `validateIngest`.
 
+## Archive repair for chat imports
+
+Days imported from a chat before the collector existed were stored as a link list: the label named the transport
+("YouTube Video", "Shared Google Link", "LinkedIn Safety Redirect Link") and the body was empty. Day digests for
+those dates therefore read "N items shared." with a single generic group. `apps/orin-collector/backfill-links.mjs`
+repairs them in three passes:
+
+1. **Read the link** (`link-meta.mjs`). Shorteners are followed by hand (every hop must stay public HTTP), the page's
+   `og:title`/`og:description`/JSON-LD byline is read, and YouTube videos are re-read from the watch page so the
+   archive keeps the full title, channel, publish date and description. Hosts that answer any anonymous client with
+   a sign-in wall (LinkedIn, X, Instagram, Threads) are never fetched; their label is derived from the URL instead
+   ("Tomiko Mceathron — LinkedIn profile", "LinkedIn job listing 3916954542"). Google's `search.app` and
+   `maps.app.goo.gl` links answer with a JavaScript app shell that no HTML parse can resolve, so `--browser-resolve`
+   opens them in the collector's headless Chromium (`browser-resolve.mjs`, three at a time) and reads the destination
+   it lands on.
+2. **Name what could not be read.** Items without a page description go to a cheap OpenRouter model
+   (`google/gemini-2.5-flash-lite` by default) in batches of 20. It receives only retrieved evidence and writes a
+   factual title plus a 1–3 sentence description; it is told to say plainly that a page could not be read instead of
+   guessing.
+3. **Rebuild the day digest.** Chat days touched by the run get a new summary and thematic groups (a strict schema,
+   and every cited URL must be one of that day's items). Collector digests are never rewritten by this pass.
+
+```
+npm run links:backfill --workspace=@portfolio/orin-collector -- --limit 400   # --dry-run previews, writes nothing
+```
+
+Useful flags: `--from`/`--to` (YYYY-MM-DD), `--hosts` (comma-separated hosts, e.g. to re-run one platform),
+`--concurrency` (link reads, default 6), `--batch` (items per model call, default 20), `--model-concurrency`
+(parallel model batches, default 4), `--digest-concurrency` (days rebuilt in parallel, default 3), `--model`,
+`--browser-resolve` (use Chromium for Google app-shell share links), `--no-llm`,
+`--no-digest`, `--refresh` (re-read items that already carry `enrichment`), `--all` (also touch items that are
+already readable), `--digests-only` (rebuild every imported chat day without touching items) and
+`--keychain-openrouter`.
+
+A long archive repair is fastest as item passes (`--no-digest`) followed by one `--digests-only` run: a chat item
+can belong to several days, so rebuilding digests on every pass repeats the same work. Runs are idempotent — items
+stamped with `enrichment` are skipped, stored titles and descriptions are only replaced when they were missing or
+placeholders, and `feedback`, `read`, `saved` and categories are never touched. The script needs
+`ORIN_DATABASE_URL`; `OPENROUTER_API_KEY` (or the Keychain entry) is only required when the model or digest pass runs.
+
+Repaired items keep their original URL for identity and digests, and gain:
+
+- `enrichment`: `{at, via, confidence, originalTitle?, note?, llm?, browserResolved?}` — `via` is `youtube`,
+  `page`, `host` (URL-derived, page requires sign-in), `attachment` or `fallback`; `confidence` is `high` when a
+  page description was read, `medium` for URL-derived labels, `low` when nothing could be read.
+- `resolvedUrl`: the destination a share link actually points to.
+- `sharedBy`: the chat provenance when the page author replaces it in `author`.
+
+New importers should call `enrichItem` from `link-meta.mjs` before publishing so this repair never has to run again.
+
 ## Live actions brain
 
 The `/orin` digest and reading-list tabs are joined by a **Live brain** tab that renders the digest as an

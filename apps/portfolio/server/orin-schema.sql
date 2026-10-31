@@ -93,3 +93,36 @@ CREATE TABLE IF NOT EXISTS orin_reminders (
 -- Existing installations keep their weekday reminders and gain optional dates.
 ALTER TABLE orin_reminders ADD COLUMN IF NOT EXISTS due_date date;
 COMMIT;
+
+-- Private research workspace. Apply before starting the research worker.
+-- The profile and options are copied into each job, so edits affect future runs.
+BEGIN;
+CREATE TABLE IF NOT EXISTS orin_research_profile (
+  id smallint PRIMARY KEY CHECK (id = 1),
+  profile jsonb NOT NULL CHECK (jsonb_typeof(profile) = 'object'),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS orin_research_jobs (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  status text NOT NULL DEFAULT 'queued' CHECK (status IN ('queued', 'running', 'completed', 'failed', 'cancelled')),
+  question text NOT NULL CHECK (char_length(question) BETWEEN 1 AND 1500),
+  prompt text NOT NULL DEFAULT '' CHECK (char_length(prompt) <= 5000),
+  sources jsonb NOT NULL DEFAULT '[]' CHECK (jsonb_typeof(sources) = 'array'),
+  profile jsonb NOT NULL CHECK (jsonb_typeof(profile) = 'object'),
+  options jsonb NOT NULL CHECK (jsonb_typeof(options) = 'object'),
+  result jsonb,
+  progress text NOT NULL DEFAULT 'Waiting for research worker',
+  error text,
+  feedback jsonb,
+  started_at timestamptz,
+  lease_token uuid,
+  lease_expires_at timestamptz,
+  attempts integer NOT NULL DEFAULT 0 CHECK (attempts >= 0),
+  spent_usd numeric(12,6) NOT NULL DEFAULT 0 CHECK (spent_usd >= 0),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS orin_research_jobs_queue ON orin_research_jobs (created_at) WHERE status = 'queued';
+CREATE INDEX IF NOT EXISTS orin_research_jobs_lease ON orin_research_jobs (lease_expires_at) WHERE status = 'running';
+CREATE INDEX IF NOT EXISTS orin_research_jobs_history ON orin_research_jobs (created_at DESC);
+COMMIT;

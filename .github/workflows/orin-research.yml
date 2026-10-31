@@ -1,0 +1,37 @@
+name: ORIN research queue
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/15 * * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: orin-research-worker
+  cancel-in-progress: false
+
+jobs:
+  research:
+    if: github.event_name == 'workflow_dispatch' || vars.ORIN_RESEARCH_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install worker dependencies
+        run: npm ci --workspace=@portfolio/orin-collector --ignore-scripts
+      - name: Process one queued research question
+        env:
+          ORIN_DATABASE_URL: ${{ secrets.ORIN_DATABASE_URL }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          ORIN_RESEARCH_MODEL: ${{ vars.ORIN_RESEARCH_MODEL }}
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
+          ORIN_RESEARCH_SEARCH_USD: ${{ vars.ORIN_RESEARCH_SEARCH_USD }}
+        run: npm run research:worker --workspace=@portfolio/orin-collector -- --once
+      # Private source text, profiles, questions and reports are not uploaded.

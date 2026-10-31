@@ -23,6 +23,8 @@ Run commands from the repository root unless a task clearly belongs to one works
 - `npm run test:orin-mcp`: run only the ORIN MCP tests.
 - `npm run collect`: run the ORIN collector.
 - `npm run mcp:orin`: start the local ORIN MCP server.
+- `npm run links:backfill --workspace=@portfolio/orin-collector`: repair archived chat-share titles and
+  descriptions and rebuild the affected day digests (needs `ORIN_DATABASE_URL`; `--dry-run` writes nothing).
 
 For a local ORIN dry run, use:
 

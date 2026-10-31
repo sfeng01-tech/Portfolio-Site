@@ -34,6 +34,11 @@ test('Node adapter serves SPA, private APIs and bounded JSON without leaking fil
     assert.match(session.headers.get('cache-control'), /no-store/);
     const digest = await fetch(`${base}/api/orin/digest`);
     assert.equal(digest.status, 401);
+    for (const method of ['GET', 'POST', 'PATCH']) {
+      const research = await fetch(`${base}/api/orin/research`, { method, ...(method === 'GET' ? {} : { headers: { 'content-type': 'application/json' }, body: '{}' }) });
+      assert.equal(research.status, 401);
+      assert.match(research.headers.get('cache-control'), /no-store/);
+    }
     const contribution = await fetch(`${base}/api/orin/contributions`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' });
     assert.equal(contribution.status, 401);
     const unknown = await fetch(`${base}/api/nonexistent`);
