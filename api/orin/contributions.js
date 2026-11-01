@@ -13,6 +13,11 @@ const MAX_PDF_TEXT = 12000;
 const MAX_PDF_NAME = 300;
 const invalidPdfText = text => text.length < MIN_PDF_TEXT || text.length > MAX_PDF_TEXT || /[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(text);
 
+// The browser extension passes the real page title; an absent, empty, or
+// whitespace-only title keeps the Share tab's hostname fallback.
+export const sharedUrlTitle = (value, hostname) =>
+  typeof value === 'string' ? value.trim().slice(0, 500) || `Shared link from ${hostname}` : `Shared link from ${hostname}`;
+
 export default async function handler(req, res) {
   privateResponse(res);
   if (req.method !== 'POST') {
@@ -26,6 +31,7 @@ export default async function handler(req, res) {
     const day = validDate(body.date) ? body.date : localDay();
     const note = typeof body.note === 'string' ? body.note.trim() : '';
     if (body.note !== undefined && body.note !== null && typeof body.note !== 'string') return res.status(400).json({ error: 'Invalid note' });
+    if (body.title !== undefined && body.title !== null && typeof body.title !== 'string') return res.status(400).json({ error: 'Invalid title' });
     if (day > localDay()) return res.status(400).json({ error: 'Digest date cannot be in the future' });
     if (note.length > 4000) return res.status(400).json({ error: 'Note is too long' });
 
@@ -35,6 +41,7 @@ export default async function handler(req, res) {
     if (hasUrl && sharedPdf) return res.status(400).json({ error: 'Share either a URL or a PDF, not both' });
 
     let id, title, excerpt, itemUrl, contribution, pdfName, pdfText;
+    let resolved = null;
     if (sharedPdf) {
       if (typeof sharedPdf !== 'object' || Array.isArray(sharedPdf)) return res.status(400).json({ error: 'Invalid PDF payload' });
       pdfName = typeof sharedPdf.name === 'string' ? sharedPdf.name.trim() : '';
@@ -52,12 +59,16 @@ export default async function handler(req, res) {
       contribution = { kind: 'pdf', sharedBy: 'you', fileName: pdfName, characters: pdfText.length, ...(note ? { note } : {}) };
     } else {
       const canonicalUrl = safeUrl(body.url);
+      // Show HN-style prefill: read what the page says about itself while the
+      // share is being saved. The owner's own title/note below always wins.
+      resolved = process.env.ORIN_SHARE_LINK_METADATA === 'off' ? null : await resolveShareLink(canonicalUrl).catch(() => null);
       const hostname = new URL(canonicalUrl).hostname.replace(/^www\./, '');
+      const ownerTitle = typeof body.title === 'string' && body.title.trim() ? body.title.trim().slice(0, 500) : '';
       id = itemId(canonicalUrl);
-      title = `Shared link from ${hostname}`;
-      excerpt = note || 'Added from the Share tab for review.';
+      title = ownerTitle || resolved?.title || `Shared link from ${hostname}`;
+      excerpt = note || resolved?.excerpt || 'Added from the Share tab for review.';
       itemUrl = canonicalUrl;
-      contribution = { kind: 'url', sharedBy: 'you', ...(note ? { note } : {}) };
+      contribution = { kind: 'url', sharedBy: 'you', ...(resolved ? { prefetchedVia: resolved.via } : {}), ...(note ? { note } : {}) };
     }
 
     const sql = await orinSql();

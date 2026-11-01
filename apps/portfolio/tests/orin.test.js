@@ -7,7 +7,7 @@ import ingestHandler from '../../../api/orin/ingest.js';
 import preflightHandler from '../../../api/orin/preflight.js';
 import preferencesHandler from '../../../api/orin/preferences.js';
 import categoriesHandler from '../../../api/orin/categories.js';
-import contributionsHandler from '../../../api/orin/contributions.js';
+import contributionsHandler, { sharedUrlTitle } from '../../../api/orin/contributions.js';
 import { ownerHeaders, sessionCookie } from './session-helper.js';
 
 const entry = { source: 'arxiv', url: 'https://arxiv.org/abs/2601.12345', title: 'A GPU paper', excerpt: 'Untrusted extracted text', author: '', topics: ['ROCm'] };
@@ -94,6 +94,35 @@ test('PDF contributions validate the extracted text before database access', asy
     assert.equal(res.statusCode, 503);
   } finally {
     if (originalUrl === undefined) delete process.env.ORIN_DATABASE_URL; else process.env.ORIN_DATABASE_URL = originalUrl;
+  }
+});
+
+test('URL shares prefer a clamped client title and keep the hostname fallback', async () => {
+  assert.equal(sharedUrlTitle('  Real page title  ', 'example.com'), 'Real page title');
+  assert.equal(sharedUrlTitle('x'.repeat(520), 'example.com'), 'x'.repeat(500));
+  for (const title of [undefined, '', '   ']) assert.equal(sharedUrlTitle(title, 'example.com'), 'Shared link from example.com');
+});
+
+test('URL contributions validate the client title before database access', async () => {
+  const originalUrl = process.env.ORIN_DATABASE_URL;
+  const originalMetadata = process.env.ORIN_SHARE_LINK_METADATA;
+  delete process.env.ORIN_DATABASE_URL;
+  process.env.ORIN_SHARE_LINK_METADATA = 'off';
+  const headers = await ownerHeaders();
+  try {
+    for (const body of [{ url: 'https://arxiv.org/abs/2601.12345', title: 42 }, { url: 'https://arxiv.org/abs/2601.12345', title: ['Real title'] }]) {
+      const res = response();
+      await contributionsHandler({ method: 'POST', headers, body }, res);
+      assert.equal(res.statusCode, 400);
+      assert.equal(res.body.error, 'Invalid title');
+    }
+    // A well-formed URL share with a title passes validation and only fails on storage.
+    const res = response();
+    await contributionsHandler({ method: 'POST', headers, body: { url: 'https://arxiv.org/abs/2601.12345', title: 'Real page title' } }, res);
+    assert.equal(res.statusCode, 503);
+  } finally {
+    if (originalUrl === undefined) delete process.env.ORIN_DATABASE_URL; else process.env.ORIN_DATABASE_URL = originalUrl;
+    if (originalMetadata === undefined) delete process.env.ORIN_SHARE_LINK_METADATA; else process.env.ORIN_SHARE_LINK_METADATA = originalMetadata;
   }
 });
 

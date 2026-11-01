@@ -1,4 +1,5 @@
 import { repairYoutubeTitles } from '../../apps/portfolio/server/youtube.js';
+import { repairLinkTitles } from '../../apps/portfolio/server/link-resolve.js';
 import { visibleItems, visibleDigest } from '../../apps/portfolio/server/orin-content.js';
 import { orinSql, privateResponse, requireOrinOwner, sendError, validDate, validateCategory } from '../../apps/portfolio/server/orin.js';
 import { loadSemanticAffinities } from '../../apps/portfolio/server/orin-semantic-affinity.js';
@@ -62,6 +63,7 @@ export default async function handler(req, res) {
         LIMIT ${pageSize} OFFSET ${offset}
       `;
       await repairYoutubeTitles(rows, sql);
+      await repairLinkTitles(rows, sql, { timeoutMs: 6000 });
       return res.status(200).json({
         date: null,
         availableDates: [],
@@ -98,6 +100,7 @@ export default async function handler(req, res) {
       ? await sql`SELECT id, item, is_read, saved FROM orin_items WHERE saved = true AND NOT COALESCE((item->>'deleted')::boolean, false) ORDER BY updated_at DESC LIMIT 500`
       : await sql`SELECT i.id, i.item, i.is_read, i.saved FROM orin_items i JOIN orin_digest_items d ON d.item_id = i.id WHERE d.day = ${date} ORDER BY COALESCE((i.item->'ranking'->>'score')::integer, -1) DESC, i.item->>'source', i.item->>'title'`;
     await repairYoutubeTitles(rows, sql);
+    await repairLinkTitles(rows, sql, { timeoutMs: 6000 });
     const affinities = await loadSemanticAffinities(sql, rows.map(row => row.id));
     for (const row of rows) if (affinities.has(row.id)) row.item = { ...row.item, semanticAffinity: affinities.get(row.id) };
     return res.status(200).json({ date, availableDates, digest: visibleDigest(entry?.digest || null, rows), digestStatus: entry?.digest_status || null, items: visibleItems(rows), sourceStatus: entry?.source_status || [] });
