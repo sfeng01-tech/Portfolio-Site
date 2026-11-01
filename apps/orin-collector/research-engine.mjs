@@ -124,18 +124,18 @@ export async function runResearch(job, {
   const prices = [maximumRate('prompt'), maximumRate('completion'), maximumRate('request')];
   if (!model || !prices.every(value => Number.isFinite(value) && value >= 0) || !Number.isFinite(model.context_length)) throw new Error('Research model pricing or context unavailable');
   const owner = { question: job.question, instructions: job.prompt, batchInstructions: job.options.batchPrompt, profile: job.profile };
-  async function ask(instruction, data, maxTokens, effort) {
+  async function ask(instruction, data, maxTokens, effort, responseFormat = { type: 'json_object' }) {
     const messages = [{ role: 'system', content: SYSTEM + '\n' + instruction }, { role: 'user', content: JSON.stringify({ owner, data }) }];
     // UTF-8 bytes conservatively bound input token counts, plus protocol overhead.
-    const inputBound = Buffer.byteLength(JSON.stringify(messages)) + 1024;
+    const inputBound = Buffer.byteLength(JSON.stringify({ messages, responseFormat })) + 1024;
     if (inputBound + maxTokens > model.context_length) throw new Error('Research evidence exceeds configured model context');
     const cost = inputBound * prices[0] + maxTokens * prices[1] + prices[2];
     await charge(cost); // Persist BEFORE request; a crash must not erase paid usage.
     const response = await fetchImpl(MODEL_ENDPOINT, { method: 'POST', redirect: 'error', signal: AbortSignal.timeout(120_000),
       headers: { Authorization: `Bearer ${env.OPENROUTER_API_KEY}`, 'Content-Type': 'application/json', 'X-Title': 'ORIN contribution research' },
-        body: JSON.stringify({ model: modelId, messages, max_tokens: maxTokens, temperature: 0.2, response_format: { type: 'json_object' },
+        body: JSON.stringify({ model: modelId, messages, max_tokens: maxTokens, temperature: 0.2, response_format: responseFormat,
         reasoning: model.reasoning?.supported_efforts?.includes(effort) ? { effort, exclude: true } : reasoningOptions(model),
-        provider: { sort: 'price', max_price: { prompt: prices[0] * 1e6, completion: prices[1] * 1e6 } } }) });
+        provider: { ...(responseFormat.type === 'json_schema' ? { require_parameters: true } : {}), sort: 'price', max_price: { prompt: prices[0] * 1e6, completion: prices[1] * 1e6 } } }) });
     if (!response.ok) throw new Error(`Research model request failed (${response.status})`);
     const body = JSON.parse(await boundedText(response, 1_000_000));
     await active();
@@ -194,8 +194,20 @@ export async function runResearch(job, {
     return value;
   };
   await progress('Planning research perspectives', state());
-  const plan = await ask(`Plan ${perspectiveCount} distinct research perspectives. Include exactly the owner-requested perspective names where supplied, then adapt remaining perspectives to the question. Cover scientific evidence, existing work and counterevidence, and practical applicability to AMD where relevant. Return JSON {"perspectives":[{"id":"P1","name":"...","question":"...","initialQuery":"..."}]}. Use P1, P2 and, if needed, P3 in order; each query under 200 characters. Questions seek evidence, never presume novelty.`, { evidence, requestedPerspectives, selectedSources: (job.sources || []).map(({ url, title }) => ({ url, title })) }, 4000, 'low');
-  if (!Array.isArray(plan.perspectives) || plan.perspectives.length !== perspectiveCount) throw new Error('Invalid research perspective plan');
+  const planSchema = { type: 'json_schema', json_schema: { name: 'research_perspectives', strict: true, schema: {
+    type: 'object', additionalProperties: false, required: ['perspectives'], properties: {
+      perspectives: { type: 'array', minItems: perspectiveCount, maxItems: perspectiveCount, items: {
+        type: 'object', additionalProperties: false, required: ['id', 'name', 'question', 'initialQuery'], properties: {
+          id: { type: 'string' }, name: { type: 'string' }, question: { type: 'string' }, initialQuery: { type: 'string' },
+        },
+      } },
+    },
+  } } };
+  const plan = await ask(`Plan ${perspectiveCount} distinct research perspectives. Include exactly the owner-requested perspective names where supplied, then adapt remaining perspectives to the question. Cover scientific evidence, existing work and counterevidence, and practical applicability to AMD where relevant. Return JSON {"perspectives":[{"id":"P1","name":"...","question":"...","initialQuery":"..."}]}. Use P1, P2 and, if needed, P3 in order; each query under 200 characters. Questions seek evidence, never presume novelty.`, { evidence, requestedPerspectives, selectedSources: (job.sources || []).map(({ url, title }) => ({ url, title })) }, 4000, 'low', planSchema);
+  if (!Array.isArray(plan.perspectives) || plan.perspectives.length !== perspectiveCount) {
+    const shape = Array.isArray(plan.perspectives) ? `array count ${plan.perspectives.length}` : 'missing or non-array';
+    throw new Error(`Invalid research perspective plan: ${shape}; expected ${perspectiveCount}`);
+  }
   perspectives = plan.perspectives.map((row, index) => {
     if (row?.id !== `P${index + 1}`) throw new Error('Invalid research perspective ID');
     return { id: row.id, name: bounded(row.name, 200, 'perspective name'), question: bounded(row.question, 1000, 'perspective question'), initialQuery: bounded(row.initialQuery, 200, 'perspective query') };

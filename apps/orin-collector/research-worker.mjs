@@ -10,6 +10,7 @@ export function researchFailureMessage(error) {
   const message = typeof error?.message === 'string' ? error.message : '';
   const status = message.match(/^Research (model|search|extract) request failed \((\d{3})\)$/);
   if (status) return `The ${status[1]} provider returned HTTP ${status[2]}. Partial evidence is retained.`;
+  if (/^Invalid research perspective plan: (array count \d+|missing or non-array); expected [23]$/.test(message)) return `${message}. Partial evidence is retained.`;
   const known = new Set([
     'Research model pricing or context unavailable', 'Unable to check research model pricing',
     'Research model reached the output token limit', 'Research model returned invalid JSON',

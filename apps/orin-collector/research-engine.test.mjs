@@ -80,6 +80,11 @@ test('deep research follows up every perspective and retains its cited discussio
   const fake = provider({ queries: ['prior work', 'counterevidence', 'AMD applicability'] });
   const result = await runResearch({ ...job(), options: { ...job().options, depth: 'deep' } }, { env, fetchImpl: fake.fetchImpl });
   assert.equal(result.perspectives.length, 3);
+  const planner = fake.calls.find(call => call.url.endsWith('/completions')).body;
+  assert.equal(planner.response_format.type, 'json_schema');
+  assert.equal(planner.response_format.json_schema.schema.properties.perspectives.minItems, 3);
+  assert.equal(planner.response_format.json_schema.schema.properties.perspectives.maxItems, 3);
+  assert.equal(planner.provider.require_parameters, true);
   assert.equal(fake.calls.filter(call => call.url.endsWith('/search')).length, 6);
   assert.ok(result.perspectives.every(p => p.status === 'grounded' && p.followUpStatus === 'grounded' && p.evidenceIds.length && p.followUpEvidenceIds.length));
   assert.ok(result.outline.every(section => section.title && Array.isArray(section.evidenceIds)));
@@ -166,6 +171,7 @@ test('a retry preserves evidence and the original extraction without paying to f
 test('diagnostic messages distinguish provider failures without revealing unsafe error content', () => {
   assert.match(researchFailureMessage(new Error('Research model request failed (429)')), /model provider returned HTTP 429/);
   assert.match(researchFailureMessage(new Error('Invalid research perspective plan')), /perspective plan/);
+  assert.match(researchFailureMessage(new Error('Invalid research perspective plan: array count 2; expected 3')), /count 2; expected 3/);
   assert.match(researchFailureMessage(new Error('Research model returned invalid JSON')), /invalid JSON/);
   assert.doesNotMatch(researchFailureMessage(new Error('credential=secret private source')), /secret|private source/);
 });
