@@ -57,9 +57,6 @@ export function createResearchRetriever(sql, { env = process.env, fetchImpl = fe
       SELECT i.id,row_number() OVER (ORDER BY e.embedding <=> ${vector}::vector,i.id) AS rank
       FROM orin_research_embeddings e JOIN orin_items i ON i.id=e.item_id
       WHERE e.embedding_model=${EMBEDDING_MODEL} AND NOT COALESCE((i.item->>'deleted')::boolean,false)
-        AND i.item->>'titleSource' IS DISTINCT FROM 'user'
-        AND ((i.item->>'source'='arxiv' AND i.item->>'url' ~ '^https://(www\\.)?arxiv\\.org/(abs|pdf)/')
-          OR (i.item->>'source'='rss' AND (i.item->>'url' LIKE 'https://rocm.docs.amd.com/%' OR i.item->>'url' LIKE 'https://rocm.blogs.amd.com/%')))
         AND e.content_hash=md5(COALESCE(i.item->>'title','') || chr(10) || COALESCE(i.item->>'excerpt',''))
         AND NOT EXISTS (SELECT 1 FROM unnest(${patterns}::text[]) p WHERE (COALESCE(i.item->>'title','') || ' ' || COALESCE(i.item->>'excerpt','')) !~* p)
       ORDER BY rank LIMIT 30

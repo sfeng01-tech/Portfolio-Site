@@ -1,7 +1,8 @@
 # ORIN hybrid search pilot
 
-This is an isolated retrieval experiment, not the search used by ORIN's UI,
-MCP server, recommender, or research worker. It compares ORIN's current
+The initial evaluation below used an isolated retrieval experiment. ORIN's
+research worker now supports hybrid search; the UI, MCP server and recommender
+do not yet use it. The pilot compared ORIN's existing
 full-text query, cosine similarity, and reciprocal rank fusion (RRF, k=60)
 on the same bounded snapshot. The expanded pilot takes up to 200 most recently updated, non-deleted arXiv
 items and up to 80 public ROCm documentation and blog pages from the official
@@ -155,7 +156,7 @@ ORIN_PILOT_HOST='<direct-pilot-branch-hostname>' node --env-file=.env.local apps
 
 This copies existing vectors only when their source titles and excerpts still
 match the pilot snapshot; it does not generate embeddings or contact a model
-provider. The 227-item development index is a bounded test fixture, not a
+provider. The original 227-item development index is a bounded test fixture, not a
 production index. To try a worker with the feature enabled, run it against a
 separate test branch and database credentials, and set
 `ORIN_RESEARCH_HYBRID_ENABLED=true` only in that worker's environment. The
@@ -164,19 +165,21 @@ false. The vector schema must be migrated before enabling hybrid retrieval.
 
 Production indexing runs through `.github/workflows/orin-research-index.yml`
 once daily at 14:37 UTC when the hybrid flag is true, and can also be manually
-dispatched. Each run processes at most 200 new or changed items, with a $0.80
+dispatched. Each run processes at most 1,000 new or changed source items, with a $0.80
 conservative per-run input-token allowance and a $1/million-token provider
-price ceiling. It indexes only arXiv entries with an arxiv.org URL and RSS
-entries from official ROCm docs/blog URLs; it excludes user-edited titles,
-private shares, notes and conversations. It removes derived vectors after soft
-deletion or when a source no longer qualifies, and reindexes changed text or
-model IDs. The indexer validates the source again when writing to guard
+price ceiling. It indexes titles and available excerpts from all ORIN item
+sources, including shared items and user-edited titles. These may be private
+and are sent through OpenRouter to the selected embedding provider; embeddings
+are retained in the ORIN database. Notes stored outside `orin_items` and full
+documents are not indexed. It removes derived vectors after soft deletion or
+when an item has no text, and reindexes changed text or model IDs. The indexer validates the source again when writing to guard
 against concurrent edits. Hard-deleted items cascade to their vectors. Search
-also excludes ineligible, deleted and stale items between indexer runs.
+also excludes deleted and stale items between indexer runs.
 
 Embedding is separately billable. Query embeddings reserve $0.01 per query from
 the research job budget; a daily indexer run has its own separate allowance,
 not charged to an individual research job. These are conservative bounds, not
-actual charges. The index is deliberately partial: material outside the
-allowlist remains keyword-searchable but has no semantic coverage. Revisit
-source permissions and perform held-out evaluation before expanding its scope.
+actual charges. Initial backfill takes multiple bounded runs; items awaiting indexing remain
+keyword-searchable. Title-only items can be retrieved, but a title alone does
+not count as research evidence. Revisit source permissions and perform a
+held-out evaluation as the library grows.

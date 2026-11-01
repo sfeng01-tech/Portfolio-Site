@@ -26,7 +26,7 @@ jobs:
           node-version: '22'
       - name: Install worker dependencies
         run: npm ci --workspace=@portfolio/orin-collector --ignore-scripts
-      - name: Index approved public research sources
+      - name: Index research sources
         env:
           ORIN_DATABASE_URL: ${{ secrets.ORIN_DATABASE_URL }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
