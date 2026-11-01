@@ -15,7 +15,6 @@ import ContactPage from './pages/ContactPage';
 
 const LoginPage = lazy(() => import('./pages/admin/LoginPage'));
 const OrinPage = lazy(() => import('./pages/OrinPage'));
-const OrinVideosPage = lazy(() => import('./pages/OrinVideosPage'));
 const DashboardPage = lazy(() => import('./pages/admin/DashboardPage'));
 const BlogAdmin = lazy(() => import('./pages/admin/BlogAdmin'));
 const BlogEditor = lazy(() => import('./pages/admin/BlogEditor'));
@@ -107,17 +106,9 @@ function App() {
             } />
 
             {/* Admin Routes */}
-            <Route path="/orin" element={
-              <>
-                <Navigation variant="orin" />
-                <OrinEntry />
-              </>
-            } />
+            <Route path="/orin" element={<OrinEntry />} />
             <Route path="/orin/videos" element={
-              <>
-                <Navigation variant="orin" />
-                <OrinEntry path="/orin/videos"><OrinVideosPage /></OrinEntry>
-              </>
+              <OrinEntry path="/orin/videos"><Navigate to="/orin?tab=videos" replace /></OrinEntry>
             } />
             <Route path="/admin/login" element={<LoginPage />} />
             <Route path="/admin" element={

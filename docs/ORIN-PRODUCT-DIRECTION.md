@@ -115,6 +115,8 @@ Keep the review's starting topics: Model Innovation; Training & Scaling; Inferen
 
 Chat with one source, a collection, a project, or your whole library. ORIN should search for the relevant passages rather than send every document to the model for every question.
 
+> **Phase 1 shipped:** Ask ORIN is library-only today. It retrieves saved passages, streams a cited answer, keeps conversations, and can save an answer as a note. The **Web** and **Both** modes below are the next phase; the API already rejects non-library modes explicitly instead of silently ignoring them.
+
 Choose where answers come from:
 
 - **My knowledge:** Use saved material and say when it does not contain enough information.

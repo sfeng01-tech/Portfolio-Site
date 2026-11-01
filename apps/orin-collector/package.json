@@ -9,6 +9,7 @@
     "research:worker": "node research-worker.mjs",
     "search:pilot": "node hybrid-pilot/pilot.mjs",
     "research:index": "node research-indexer.mjs",
+    "ask:index": "node ask-indexer.mjs",
     "categories:backfill": "node backfill-categories.mjs",
     "links:backfill": "node backfill-links.mjs"
   },

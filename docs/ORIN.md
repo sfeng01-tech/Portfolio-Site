@@ -20,6 +20,28 @@ Responses from the Node adapter set a Content Security Policy plus `X-Content-Ty
 
 **Reminders.** The private reminders editor supports weekday repeats and one-time date reminders. Both use Pacific time and notify only while the ORIN page is open with browser notifications enabled. Existing reminders remain weekday repeats after the additive `due_date` migration.
 
+## Ask ORIN (library-only)
+
+The **Ask ORIN** tab answers questions from saved items and notes only. Phase 1 does not search the web. Answers stream into the page, carry inline citation badges such as `[2]`, and list the exact passages used beneath each answer. Citations that the model invents are flagged rather than silently accepted. Answers can be copied or saved as a normal ORIN note, and recent conversations appear beside the thread.
+
+`apps/portfolio/server/orin-ask-schema.sql` is a separate, additive migration. It creates the passage index (`orin_chunks`, including a pgvector column), conversations, messages, and per-answer sources. Apply it to an isolated database branch first; creating the `vector` extension may require a role that is allowed to install extensions. The core `orin-schema.sql` is unchanged, so an unavailable pgvector extension cannot break the existing digest.
+
+Ask works without the migration: it falls back to a lexical scan of `orin_items` and `orin_notes`, and answers are not persisted. With the migration applied, build the passage index:
+
+```sh
+npm run ask:index --workspace=@portfolio/orin-collector -- --dry-run
+npm run ask:index --workspace=@portfolio/orin-collector
+```
+
+The indexer uses `ORIN_DATABASE_URL` and optionally `OPENROUTER_API_KEY` for `openai/text-embedding-3-small` vectors. Without a key it still writes passages for keyword search. On macOS, `--keychain-openrouter` reads the existing Keychain entry. Set `ORIN_ASK_MODEL` on the ORIN web service to override the default `deepseek/deepseek-v4.1-flash-1017`; `OPENROUTER_API_KEY` is required to generate answers. Provider requests contain the question, retrieved passages, and conversation history.
+
+- `GET /api/orin/ask`: `{conversations}` for the 30 most recent threads, or `?conversationId=<uuid>` for one conversation with its messages and sources. Returns `{conversations: [], migrationRequired: true}` before the migration.
+- `POST /api/orin/ask`: `{question, mode: "library", conversationId?}`. Streams server-sent events: `sources` (retrieval method, public source cards, conversation id), `delta` (answer text), `done` (cited and invalid citation numbers, model, usage, latency), and `error`. `mode` values other than `library` return 400 until web answers exist.
+- `DELETE /api/orin/ask?conversationId=<uuid>`: deletes one conversation and its messages.
+
+Retrieval uses the chunk index with reciprocal-rank fusion of keyword and embedding results when available. A partially applied migration or a failed embedding request falls back to keyword search, then to the item/note scan. Answer text is treated as untrusted; the UI renders it as text and only turns validated HTTPS source URLs into links.
+
+
 ## API contract
 
 All owner endpoints require the server-side ORIN session cookie. `POST`, `PATCH`, and `DELETE` additionally require a matching `Origin` and `Content-Type: application/json`. An expired or revoked session returns JSON 401, and the UI drops back to the sign-in gate instead of showing stale digest data.

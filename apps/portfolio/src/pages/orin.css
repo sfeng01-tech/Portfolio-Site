@@ -4,6 +4,19 @@
 .orin-topbar { display:flex; align-items:center; justify-content:flex-end; gap:14px; padding:14px 0 0; }
 .orin-private { display:flex; align-items:center; gap:7px; font:11px monospace; letter-spacing:1px; color:var(--muted); }
 .orin-main { max-width:1200px; margin:auto; }
+/* ORIN owns its chrome on /orin, so the public gate carries a compact header
+   instead of the shared fixed site header. */
+.orin-gate-shell { max-width:1360px; margin:auto; padding:0 40px; }
+.orin-gate-workspace { min-width:0; }
+.orin-public-top { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:22px 0; border-bottom:1px solid var(--line); }
+.orin-public-brand { font-size:25px; font-weight:600; letter-spacing:-1.5px; line-height:1; color:var(--ink); }
+.orin-public-brand span { color:var(--accent); }
+.orin-public-actions { display:flex; align-items:center; gap:18px; }
+.orin-public-portfolio { display:flex; align-items:center; gap:5px; font-size:13px; color:var(--muted); }
+.orin-public-portfolio span:last-child { color:var(--ink); }
+.orin-public-portfolio:hover { color:var(--accent); }
+.orin-gate-shell .orin-main { max-width:1200px; margin:auto; }
+.orin-gate-shell .orin-intro { padding-top:40px; }
 .orin-intro { padding:12px 0 26px; }
 .orin-intro h1 { font-size:80px; font-weight:500; letter-spacing:-6px; line-height:1; margin-top:20px; }
 .orin-intro h1 span { color:var(--accent); }
@@ -23,10 +36,6 @@
 .orin-gate h2 { font-size:clamp(30px,3vw,40px); line-height:1.16; letter-spacing:-1px; margin:16px 0; font-weight:400; }
 .orin-gate>p { max-width:460px; margin:0 auto 25px; font-size:16px; line-height:1.65; color:var(--muted); }
 .orin-gate small { display:block; margin-top:16px; color:var(--muted); font-size:13px; line-height:1.5; }
-.orin-toolbar { display:flex; align-items:center; gap:12px; border-block:1px solid var(--line); padding:12px 0; }
-.orin-tabs { display:flex; flex:1; min-width:0; gap:4px; overflow-x:auto; scrollbar-width:thin; white-space:nowrap; }
-.orin-tabs button { flex:none; font-size:14px; color:var(--muted); min-height:44px; padding:10px 14px; border-radius:5px; }
-.orin-tabs button[aria-selected=true] { background:rgb(var(--surface-rgb)); color:var(--ink); box-shadow:inset 0 0 0 1px var(--line); }
 .orin-date { margin-left:auto; }
 .orin-date input { background:transparent; border:1px solid var(--line); border-radius:4px; padding:9px; font:13px monospace; color:var(--ink); max-width:170px; }
 .orin-icon { width:44px; height:44px; display:grid; place-items:center; border:1px solid var(--line); border-radius:5px; flex-shrink:0; }
@@ -167,10 +176,7 @@
   .orin-gate--landing { grid-template-columns:1fr; gap:24px; }
   .orin-gate--landing .orin-gate-action { border-left:0; border-top:1px solid var(--line); padding:24px 0 0; }
   .orin-gate--landing .orin-lock { display:none; }
-  .orin-toolbar { flex-wrap:wrap; }
-  .orin-tabs { flex:1 0 100%; }
   .orin-date { margin-left:0; }
-  .orin-toolbar > .orin-icon { margin-left:auto; }
 }
 @media(max-width:600px) {
   .orin-shell { padding:72px 22px 0; }
@@ -185,7 +191,6 @@
   .orin-gate--landing { gap:16px; }
   .orin-gate--landing .orin-gate-action { padding-top:20px; }
   .orin-gate--landing .button-primary { width:100%; }
-  .orin-tabs button { padding-inline:12px; }
   .orin-item h3 { font-size:20px; }
   .orin-item-bottom { flex-wrap:wrap; }
   .orin-footer { flex-direction:column; }
@@ -393,4 +398,14 @@
   .orin-quick-read { padding:20px 16px; }
   .orin-brief-sources li { flex-direction:column; gap:2px; }
   .orin-daily-reading h2 { font-size:25px; }
+}
+
+@media(max-width:900px) {
+  .orin-gate-shell { padding-inline:24px; }
+}
+@media(max-width:600px) {
+  .orin-gate-shell { padding:0 18px; }
+  .orin-gate-shell .orin-intro { padding-top:28px; }
+  .orin-public-portfolio span:first-child { display:none; }
+  .orin-public-actions { gap:12px; }
 }

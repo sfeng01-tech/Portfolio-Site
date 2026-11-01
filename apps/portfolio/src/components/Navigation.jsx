@@ -13,7 +13,7 @@ const navLinks = [
   ['ORIN', '/orin'],
 ];
 
-export default function Navigation({ variant = 'portfolio' }) {
+export default function Navigation() {
   const [open, setOpen] = useState(false);
   const location = useLocation();
   const toggle = useRef(null);
@@ -26,18 +26,6 @@ export default function Navigation({ variant = 'portfolio' }) {
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
   }, [open]);
-  if (variant === 'orin') return (
-    <header className="site-header">
-      <a href="#main-content" className="skip-link">Skip to content</a>
-      <nav className="nav-shell orin-site-nav" aria-label="ORIN navigation">
-        <Link to="/orin" className="orin-nav-brand" aria-label="ORIN home">ORIN<span>.</span></Link>
-        <div className="orin-nav-actions">
-          <Link to="/" className="orin-nav-portfolio"><span>Sahil Faizal</span><span>Portfolio</span></Link>
-          <ThemeToggle />
-        </div>
-      </nav>
-    </header>
-  );
   return (
     <header className="site-header">
       <a href="#main-content" className="skip-link">Skip to content</a>
