@@ -389,3 +389,12 @@
   .orin-ask-composer-foot > div { margin-left:auto; }
 }
 @media(prefers-reduced-motion:reduce) { .orin-ask * { animation:none !important; transition:none !important; scroll-behavior:auto !important; } }
+
+.orin-ask-search-mode { display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin:14px 0; color:var(--muted); font-size:12px; }
+.orin-ask-search-mode select,.orin-ask-result-filters select,.orin-ask-result-filters input { min-width:0; max-width:100%; min-height:40px; padding:8px; color:var(--ink); background:rgb(var(--surface-rgb)); border:1px solid var(--line); border-radius:6px; font:inherit; color-scheme:normal; }
+.orin-ask-result-filters { display:flex; flex-wrap:wrap; align-items:end; gap:12px; margin:16px 0; }
+.orin-ask-result-filters label { display:flex; flex:1 1 140px; min-width:0; flex-direction:column; gap:6px; font-size:12px; color:var(--muted); }
+.orin-ask-result-filters button { margin:0; }
+.orin-ask-search-status { display:flex; align-items:center; flex-wrap:wrap; gap:12px; }
+.orin-ask-search-results .orin-ask-limited { color:var(--accent); }
+@media(max-width:620px) { .orin-ask-result-filters input,.orin-ask-result-filters select,.orin-ask-search-mode select { min-height:44px; } }

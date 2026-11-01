@@ -1,0 +1,11 @@
+.orin-brief-navigation { margin: 1.25rem 0 2rem; }
+.orin-brief-navigation > button,
+.orin-brief-navigation > a { display: inline-block; margin: .25rem 0 .75rem; min-height: 44px; padding: .65rem .85rem; border: 1px solid var(--line); border-radius: 5px; color: var(--ink); font-size: .875rem; }
+.orin-brief-navigation nav { border-block: 1px solid var(--line); padding: .85rem 0; }
+.orin-brief-navigation ol { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; list-style: none; padding: 0; margin: 0; }
+.orin-brief-navigation li { max-width: 100%; }
+.orin-brief-navigation nav a { font-size: .875rem; overflow-wrap: anywhere; }
+.orin-brief-navigation nav span { opacity: .7; }
+.orin-topic-brief { scroll-margin-top: 1.5rem; }
+
+.orin-brief .orin-counts { flex-wrap: wrap; gap: .5rem 1.25rem; }

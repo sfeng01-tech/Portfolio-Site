@@ -72,3 +72,15 @@ test('library search renders an explicit submit and provider disclosure', async(
     assert.match(html,/Search your whole library/);assert.match(html,/embedding provider/);assert.match(html,/type="submit"/);
   } finally {await vite.close();}
 });
+
+test('keyword-only search bypasses embeddings even when the index and provider are available', async () => {
+  assert.equal(validateViewSearch({query:'GPU',searchMode:'keyword'}).searchMode,'keyword');
+  assert.throws(() => validateViewSearch({query:'GPU',searchMode:'other'}), /mode/);
+  const {sql,calls}=fakeSql();
+  let embedded=false;
+  const result=await searchView(sql,{query:'GPU',ids:null,searchMode:'keyword'},{env:{OPENROUTER_API_KEY:'key'},fetchImpl:async()=>{embedded=true;throw Error('must not embed');}});
+  assert.equal(result.method,'keyword');
+  assert.equal(embedded,false);
+  assert.equal(calls.length,1);
+  assert.match(calls[0].q,/to_tsvector/);
+});

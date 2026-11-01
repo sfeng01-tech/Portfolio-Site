@@ -82,5 +82,12 @@ export function buildDailyBrief({ digest, items = [], sourceStatus = [] } = {}) 
   for (const item of ranked) add(item);
   const stamps = [...items.map(item => item.collectedAt), ...sourceStatus.map(source => source.checkedAt)]
     .map(value => Date.parse(value)).filter(Number.isFinite);
-  return { topics, takeaways: topics.filter(topic => topic.takeaway).slice(0, 5), recommended, collectedAt: stamps.length ? Math.max(...stamps) : null };
+  // Estimate the brief itself, including expanded editorial context, rather than
+  // implying that linked papers or articles can be read in this time.
+  const readingText = [clean(digest?.summary), ...topics.map(topic => [
+    topic.title, topic.summary, topic.reason,
+    ...(!topic.editorial ? topic.sources.slice(0, 2).map(source => clean(source.item?.excerpt)) : []),
+  ].join(' '))].join(' ');
+  const readingMinutes = Math.max(1, Math.ceil((readingText.match(/\S+/g)?.length || 0) / 200));
+  return { readingMinutes, topics, takeaways: topics.filter(topic => topic.takeaway).slice(0, 5), recommended, collectedAt: stamps.length ? Math.max(...stamps) : null };
 }

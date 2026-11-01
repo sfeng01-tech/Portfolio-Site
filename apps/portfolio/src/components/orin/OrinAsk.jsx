@@ -6,6 +6,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import './OrinAsk.css';
 import { researchHandoff } from './exploration';
+import { filterSearchResults, publicationDay, searchPreview } from './searchResults';
 
 const MAX_QUESTION = 2000;
 const TIER_ORDER = ['custom', 'value', 'balanced', 'fast', 'premium'];
@@ -142,11 +143,32 @@ export default function OrinAsk({ workspace, onWorkspaceChange, onResearch }) {
   const [thread, setThread] = useState([]);
   const { question, mode, sources: selectedSources } = workspace;
   const setQuestion = value => onWorkspaceChange(current => ({ ...current, question: value }));
-  const setMode = value => { setError(''); onWorkspaceChange(current => ({ ...current, mode: value })); };
+  const setMode = value => { cancelSearch(); setError(''); onWorkspaceChange(current => ({ ...current, mode: value })); };
   const [searchResult, setSearchResult] = useState(null);
   const [searchBusy, setSearchBusy] = useState(false);
   const [searchedQuery, setSearchedQuery] = useState('');
   const searchAbort = useRef(null);
+  const [searchMode, setSearchMode] = useState('hybrid');
+  const [searchDelayed, setSearchDelayed] = useState(false);
+  const [searchStatus, setSearchStatus] = useState('');
+  const [resultFilters, setResultFilters] = useState({ source: '', after: '', before: '', sort: 'relevance' });
+  const [visibleResults, setVisibleResults] = useState(20);
+  const resultItems = searchResult?.items || [];
+  const matchingResults = useMemo(() => filterSearchResults(resultItems, resultFilters), [resultItems, resultFilters]);
+  const resultSources = [...new Set(resultItems.map(item => item.source).filter(Boolean))].sort();
+  function changeResultFilter(key, value) {
+    setResultFilters(current => ({ ...current, [key]: value })); setVisibleResults(20);
+  }
+  function cancelSearch() {
+    if (!searchAbort.current) return;
+    searchAbort.current?.abort(); searchAbort.current = null;
+    setSearchBusy(false); setSearchDelayed(false); setSearchStatus('Search canceled.');
+  }
+  useEffect(() => {
+    if (!searchBusy) return undefined;
+    const timer = setTimeout(() => setSearchDelayed(true), 5000);
+    return () => clearTimeout(timer);
+  }, [searchBusy]);
   const isSearching = mode === 'search';
   const isResearching = mode === 'research';
   function toggleSource(item) {
@@ -164,13 +186,14 @@ export default function OrinAsk({ workspace, onWorkspaceChange, onResearch }) {
     if (query.length < 2 || query.length > 200) { setError('Search must be 2–200 characters.'); return; }
     searchAbort.current?.abort();
     const controller = new AbortController(); searchAbort.current = controller;
-    setSearchBusy(true); setError(''); setSearchResult(null); setSearchedQuery(query);
+    setSearchBusy(true); setSearchDelayed(false); setSearchStatus(''); setError(''); setSearchResult(null); setSearchedQuery(query);
+    setVisibleResults(20); setResultFilters({ source: '', after: '', before: '', sort: 'relevance' });
     try {
       const result = await json('/api/orin/search', { method: 'POST', signal: controller.signal,
-        headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query }) });
-      if (!controller.signal.aborted) setSearchResult(result);
-    } catch (err) { if (err.name !== 'AbortError') report(err); }
-    finally { if (!controller.signal.aborted) setSearchBusy(false); }
+        headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query, searchMode }) });
+      if (searchAbort.current === controller && !controller.signal.aborted) setSearchResult(result);
+    } catch (err) { if (searchAbort.current === controller && !controller.signal.aborted && err.name !== 'AbortError') report(err); }
+    finally { if (searchAbort.current === controller) { searchAbort.current = null; setSearchBusy(false); setSearchDelayed(false); } }
   }
   const [conversationId, setConversationId] = useState(null);
   const [conversations, setConversations] = useState([]);
@@ -627,6 +650,7 @@ export default function OrinAsk({ workspace, onWorkspaceChange, onResearch }) {
           </div>}
         </div>}
         {selectedSources.length > 0 && mode !== 'search' && <div className="orin-ask-selected" aria-label="Selected sources">{selectedSources.map(source => <button type="button" key={source.id} disabled={busy} onClick={() => toggleSource(source)} aria-label={`Remove ${source.title}`}><span>{source.title}</span><X size={13}/></button>)}</div>}
+        {isSearching && <label className="orin-ask-search-mode">Match type <select value={searchMode} disabled={searchBusy} onChange={event => setSearchMode(event.target.value)}><option value="hybrid">Semantic + keyword</option><option value="keyword">Keywords only</option></select></label>}
         <label htmlFor="orin-ask-input" className="sr-only">{isSearching ? 'Search saved sources' : isResearching ? 'Investigation question' : 'Ask your library'}</label>
         <textarea id="orin-ask-input" ref={composer} rows={2} maxLength={isSearching ? 200 : isResearching ? 1500 : MAX_QUESTION} value={question}
           placeholder={isSearching ? 'Search a topic, title, model or GPU…' : isResearching ? 'What would you like to investigate?' : 'Ask about anything you have saved…'}
@@ -656,14 +680,39 @@ export default function OrinAsk({ workspace, onWorkspaceChange, onResearch }) {
           </div>
         </div>}
       {isSearching && <div className="orin-ask-search-results" aria-live="polite">
-        <p className="orin-ask-search-disclosure">Search covers saved source items. Your query may be sent to the embedding provider. Keyword search is used when semantic search is unavailable.</p>
-        {searchBusy && <p role="status">Searching your library…</p>}
+        <p className="orin-ask-search-disclosure">{searchMode === 'keyword' ? 'Keywords only searches saved source text without sending your query to an embedding provider.' : 'Search covers saved source items. Your query may be sent to the embedding provider. Keyword search is used when semantic search is unavailable.'}</p>
+        {searchBusy && <div className="orin-ask-search-status"><p role="status">{searchDelayed ? 'Still searching. You can cancel and try keywords only for a faster search.' : 'Searching your library…'}</p><button type="button" onClick={cancelSearch}>Cancel search</button></div>}
+        {!searchBusy && searchStatus && <p role="status">{searchStatus}</p>}
         {selectedSources.length > 0 && <div className="orin-ask-selection-bar"><span>{selectedSources.length}/10 sources selected</span><button type="button" onClick={() => { setMode('ask'); setQuestion(selectedSources.length === 1 ? 'Explain the key ideas and limitations in the selected source.' : 'Compare the selected sources. Where do they agree and disagree?'); }}>Ask about selected</button><button type="button" onClick={() => { setMode('research'); setQuestion('What unresolved question is worth investigating across these sources?'); }}>Research selected</button><button type="button" onClick={() => onWorkspaceChange(current => ({ ...current, sources: [] }))}>Clear</button></div>}
-        {searchResult && <><h3>{searchResult.items.length} results for “{searchedQuery}”</h3><p>{searchResult.method === 'hybrid' ? 'Semantic + keyword matches' : 'Keyword matches'}</p><ul>{searchResult.items.map(item => {
-          const selected = selectedSources.some(source => source.id === item.id);
-          const link = safeUrl(item.resolvedUrl) || safeUrl(item.url);
-          return <li key={item.id}><small>{item.source || 'Saved source'}</small><h4>{link ? <a href={link} target="_blank" rel="noopener noreferrer">{item.title}<ArrowUpRight size={14}/></a> : item.title}</h4><p>{(item.excerpt || '').slice(0,320)}</p><button type="button" aria-pressed={selected} disabled={!selected && selectedSources.length >= 10} onClick={() => toggleSource(item)}>{selected ? 'Selected' : 'Select source'}</button></li>;
-        })}</ul>{!searchResult.items.length && <p>No matching sources. Try a broader topic or a different title.</p>}</>}
+        {searchResult && <>
+          <h3>{searchResult.items.length >= 100 ? 'Top 100 matches' : `${searchResult.items.length} matches`} for “{searchedQuery}”</h3>
+          <p>{searchResult.method === 'hybrid' ? 'Semantic + keyword matches' : 'Keyword matches'}</p>
+          <div className="orin-ask-result-filters" aria-label="Filter returned matches">
+            <label>Source<select value={resultFilters.source} onChange={event => changeResultFilter('source', event.target.value)}><option value="">All sources</option>{resultSources.map(source => <option key={source} value={source}>{source}</option>)}</select></label>
+            <label>Published from<input type="date" value={resultFilters.after} max={resultFilters.before || undefined} onChange={event => changeResultFilter('after', event.target.value)}/></label>
+            <label>Published through<input type="date" value={resultFilters.before} min={resultFilters.after || undefined} onChange={event => changeResultFilter('before', event.target.value)}/></label>
+            <label>Sort<select value={resultFilters.sort} onChange={event => changeResultFilter('sort', event.target.value)}><option value="relevance">Relevance</option><option value="newest">Newest published</option><option value="oldest">Oldest published</option></select></label>
+            <button type="button" onClick={() => { setResultFilters({ source: '', after: '', before: '', sort: 'relevance' }); setVisibleResults(20); }}>Reset filters</button>
+          </div>
+          <p>Filters and sorting apply to these returned matches. Date filters exclude sources without a publication date.</p>
+          {resultFilters.after && resultFilters.before && resultFilters.after > resultFilters.before && <p role="status">Choose an end date on or after the start date.</p>}
+          <p role="status">Showing {Math.min(visibleResults, matchingResults.length)} of {matchingResults.length} matching sources.</p>
+          <ul>{matchingResults.slice(0, visibleResults).map(item => {
+            const selected = selectedSources.some(source => source.id === item.id);
+            const link = safeUrl(item.resolvedUrl) || safeUrl(item.url);
+            const day = publicationDay(item);
+            const preview = searchPreview(item);
+            return <li key={item.id}>
+              <small>{[item.source || 'Saved source', item.author, link ? new URL(link).hostname.replace(/^www\./, '') : null].filter(Boolean).join(' · ')}{day && <> · <time dateTime={item.publishedAt}>{day}</time></>}</small>
+              <h4>{link ? <a href={link} target="_blank" rel="noopener noreferrer">{item.title || 'Untitled source'}<ArrowUpRight size={14}/></a> : item.title || 'Untitled source'}</h4>
+              {preview.excerpt && <p>{preview.excerpt}</p>}
+              {preview.limited && <p className="orin-ask-limited">Limited archived content · open the original for details.</p>}
+              <button type="button" aria-pressed={selected} aria-label={`${selected ? 'Deselect' : 'Select'} ${item.title || 'untitled source'}`} disabled={!selected && selectedSources.length >= 10} onClick={() => toggleSource(item)}>{selected ? 'Selected' : 'Select source'}</button>
+            </li>;
+          })}</ul>
+          {matchingResults.length > visibleResults && <button type="button" onClick={() => setVisibleResults(count => count + 20)}>Show 20 more</button>}
+          {!matchingResults.length && <p>{searchResult.items.length ? 'No sources match these filters. Reset filters or run a narrower search.' : 'No matching sources. Try a broader topic or a different title.'}</p>}
+        </>}
       </div>}
       {mode === 'ask' && <p className="orin-ask-footnote">Answers can be wrong. Follow the citations before relying on a claim.</p>}
       {notice && <p className="orin-ask-notice" role="status"><Check size={13}/> {notice}</p>}

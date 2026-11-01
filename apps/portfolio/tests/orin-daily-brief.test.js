@@ -75,6 +75,12 @@ test('the same reading component renders today, past dates, summary outages and 
     assert.match(today, /Today in 60 seconds/);
     assert.match(today, /Topic briefs/);
     assert.match(today, /Worth your time/);
+    assert.match(today, /aria-label="Digest topics"/);
+    assert.match(today, /Browse all 4 finds/);
+    assert.match(today, /3 source platforms/);
+    assert.match(today, /About 1 min to read the brief/);
+    const fourSources = render({ data: { ...data, digest: { groups: [{ title: 'All', urls: items.map(item => item.url) }] } } });
+    assert.match(fourSources, /Show 1 more source<\/summary>/);
     assert.match(today, /href="https:\/\/arxiv.org\/abs\/2608.08097"/);
     assert.match(today, /OasisKV paper/);
     assert.match(today, /Independent validation is still needed/);
@@ -106,4 +112,12 @@ test('worth-reading order uses a bounded explicit-feedback affinity while retain
   assert.equal(brief.recommended[0].title,'High score');
   assert.equal(brief.recommended[1].title,'Related');
   assert.match(brief.recommended[1].reason,/marked useful/);
+});
+
+
+test('reading estimate grows with editorial length and covers fallback excerpts', () => {
+  const text = Array.from({ length: 410 }, () => 'word').join(' ');
+  assert.equal(buildDailyBrief({ digest: { groups: [{ title: 'Long read', summary: text }] } }).readingMinutes, 3);
+  assert.equal(buildDailyBrief({ items: [{ ...items[0], excerpt: text }] }).readingMinutes, 3);
+  assert.equal(buildDailyBrief().readingMinutes, 1);
 });

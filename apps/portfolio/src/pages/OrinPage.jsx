@@ -16,6 +16,7 @@ import OrinAsk from '../components/orin/OrinAsk';
 import { BooksCollection, ReferenceProjectsCollection } from '../components/orin/OrinCollections';
 import { displaySource } from '../components/orin/brainGraph';
 import OrinItemControls from '../components/orin/OrinItemControls';
+import { readOrinView, orinViewUrl, validCaptureUrl } from '../components/orin/viewState';
 import { OrinVideosShelf } from './OrinVideosPage';
 import './orin.css';
 
@@ -59,14 +60,12 @@ export default function OrinPage() {
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
-  const [date, setDate] = useState('');
-  const [archiveDay, setArchiveDay] = useState(null);
+  const [initialView] = useState(() => readOrinView(window.location.search, ORIN_TABS));
+  const [date, setDate] = useState(initialView.date);
+  const [archiveDay, setArchiveDay] = useState(initialView.archiveDay);
   const [archiveJump, setArchiveJump] = useState('');
   const [source, setSource] = useState('All');
-  const [tab, setTab] = useState(() => {
-    const requested = new URLSearchParams(window.location.search).get('tab');
-    return ORIN_TABS.some(entry => entry.value === requested) ? requested : 'digest';
-  });
+  const [tab, setTab] = useState(initialView.tab);
   const [researchSeeds, setResearchSeeds] = useState([]);
   const [askWorkspace, setAskWorkspace] = useState({ question: '', mode: 'ask', sources: [] });
   const [researchDraft, setResearchDraft] = useState(null);
@@ -103,14 +102,33 @@ export default function OrinPage() {
     document.title = 'ORIN — A world of exploration & study';
     return () => { document.title = 'Sahil Faizal — Software Engineer & AI Systems'; };
   }, []);
-  // Keep the active section in the URL so refresh, shared links, and the
-  // legacy /orin/videos route land on the same place.
+  // Store the selected day as well as the section, and make browser history
+  // restore the same view rather than silently returning to the archive index.
+  const viewHistoryReady = useRef(false);
   useEffect(() => {
-    const url = new URL(window.location.href);
-    if (tab === 'digest') url.searchParams.delete('tab');
-    else url.searchParams.set('tab', tab);
-    window.history.replaceState({}, '', url);
-  }, [tab]);
+    const url = orinViewUrl(window.location.href, { tab, date, archiveDay });
+    if (url.href !== window.location.href) {
+      const method = viewHistoryReady.current ? 'pushState' : 'replaceState';
+      window.history[method](window.history.state, '', url);
+    }
+    viewHistoryReady.current = true;
+  }, [tab, date, archiveDay]);
+  useEffect(() => {
+    const restoreView = () => {
+      const view = readOrinView(window.location.search, ORIN_TABS);
+      setTab(view.tab);
+      setDate(view.date);
+      setArchiveDay(view.archiveDay);
+      setArchiveJump(view.archiveDay || '');
+      setShowAllFinds(false);
+      setSource('All');
+      setSearch('');
+      setFocusItem(null);
+      setError('');
+    };
+    window.addEventListener('popstate', restoreView);
+    return () => window.removeEventListener('popstate', restoreView);
+  }, []);
   useEffect(() => {
     if (!user) { setAskWorkspace({ question: '', mode: 'ask', sources: [] }); setResearchDraft(null); setResearchSeeds([]); setData(null); lastView.current = ''; cache.current.clear(); setBusy(false); return undefined; }
     // These private panels fetch their own content when opened.
@@ -334,7 +352,7 @@ export default function OrinPage() {
     event.preventDefault();
     if (shareBusy || sharePdfBusy) return;
     if (!shareUrl && !sharePdf) { setShareMessage('Add a link or a PDF to share.'); return; }
-    if (!sharePdf && !safeUrl(shareUrl)) { setShareMessage('Use a valid HTTPS source URL.'); return; }
+    if (!sharePdf && !validCaptureUrl(shareUrl.trim())) { setShareMessage('Use a public HTTPS URL without a username, password, or custom port.'); return; }
     setShareBusy(true);
     setShareMessage('');
     try {
@@ -347,7 +365,7 @@ export default function OrinPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(sharePdf
           ? { pdf: sharePdf, note: shareNote, category: category || null, date: shareDay }
-          : { url: shareUrl, note: shareNote, category: category || null, date: shareDay })
+          : { url: shareUrl.trim(), note: shareNote, category: category || null, date: shareDay })
       });
       setShareUrl('');
       setSharePdf(null);
@@ -369,6 +387,17 @@ export default function OrinPage() {
     }
   }
 
+  const shareUrlInvalid = !sharePdf && Boolean(shareUrl.trim()) && !validCaptureUrl(shareUrl.trim());
+
+  function browseAllFinds() {
+    setShowAllFinds(true);
+    requestAnimationFrame(() => {
+      const heading = document.getElementById('orin-all-finds-heading');
+      heading?.scrollIntoView({ block: 'start' });
+      heading?.focus({ preventScroll: true });
+    });
+  }
+
   const isDigestReading = tab === 'digest' || (tab === 'archive' && Boolean(archiveDay));
 
   const activeTab = ORIN_TABS.find(entry => entry.value === tab) || ORIN_TABS[0];
@@ -385,7 +414,7 @@ export default function OrinPage() {
           <h1>{activeTab.label}{tab === 'research' && researchSeeds.length > 0 && <span className="orin-context-count">{researchSeeds.length}</span>}</h1>
         </div>
         <div className="orin-context-actions">
-          {showDate && <label className="orin-date"><span className="sr-only">Digest date</span><input type="date" value={date || data?.date || localDate()} max={localDate()} onChange={event => {setDate(event.target.value);setShowAllFinds(false);}}/></label>}
+          {showDate && <label className="orin-date"><span className="sr-only">Digest date</span><input type="date" value={(tab === 'archive' ? archiveDay : date) || data?.date || localDate()} max={localDate()} onChange={event => { if (tab === 'archive') openArchiveDay(event.target.value); else { setDate(event.target.value); setShowAllFinds(false); } }}/></label>}
           {showRefresh && <button className="orin-icon" disabled={busy} onClick={() => setRevision(v=>v+1)} aria-label="Refresh content"><RefreshCw size={17} className={busy ? 'animate-spin' : ''}/></button>}
           <ThemeToggle/>
         </div>
@@ -427,14 +456,14 @@ export default function OrinPage() {
               </details>)}</div>
             </> : <p className="orin-archive-empty">The first collector run will add dates here.</p>}
           </>}</section>}
-          {isDigestReading && <OrinDailyBrief key={data.date} data={data} today={localDate()} archived={tab === 'archive'} onRead={id => openDigestItem(id, data.date)}/>}
+          {isDigestReading && <OrinDailyBrief key={data.date} data={data} today={localDate()} archived={tab === 'archive'} onRead={id => openDigestItem(id, data.date)} onBrowseAll={browseAllFinds}/>}
           {isDigestReading && <section className="orin-disclosure" aria-labelledby="orin-all-finds-heading">
-            <div><div className="eyebrow">FULL COLLECTION</div><h3 id="orin-all-finds-heading">All {items.length} finds.</h3></div>
+            <div><div className="eyebrow">FULL COLLECTION</div><h3 id="orin-all-finds-heading" tabIndex={-1}>All {items.length} finds.</h3></div>
             {items.length > 0 && <button type="button" aria-expanded={showAllFinds} onClick={() => setShowAllFinds(value => !value)}>{showAllFinds ? 'Hide full collection' : `Browse all ${items.length} finds`}</button>}
             {!items.length && <p>The next completed collection will fill this space.</p>}
           </section>}
           {tab==='saved' && <section className="orin-saved-intro"><div className="eyebrow">READING LIST</div><h2>{items.length} saved {items.length === 1 ? 'find' : 'finds'}</h2><p>Ideas you kept for a closer look.</p></section>}
-          {tab==='projects' ? <ReferenceProjectsCollection items={items} onShare={() => { setShareCategory(collectionCategories.projects); setShareDay(localDate()); setTab('share'); }}/> : tab==='books' ? <BooksCollection items={items} onShare={() => { setShareCategory(collectionCategories.books); setShareDay(localDate()); setTab('share'); }}/> : tab==='brain' ? <OrinBrain items={items} groups={data.digest?.groups || []} date={data.date || ''} sourceStatus={data.sourceStatus || []} availableDates={data.availableDates || []}/> : tab==='share' ? <section className="orin-share"><div className="eyebrow"><Share2 size={15}/> SHARE A SOURCE</div><h2>Save a link or PDF to ORIN.</h2><form onSubmit={submitShare}><label>Source URL<input type="url" disabled={sharePdfBusy || Boolean(sharePdf)} required={!sharePdf} value={shareUrl} placeholder="https://www.youtube.com/watch?v=…" onChange={event => setShareUrl(event.target.value)}/></label><div className="orin-share-pdf"><label>Source PDF<span className="orin-share-pdf-hint">Text is extracted in your browser. Saving sends the text to your private ORIN space; the PDF file itself is not uploaded.</span><input type="file" accept="application/pdf,.pdf" disabled={sharePdfBusy} aria-label="Choose a PDF" onChange={handleSharePdf}/></label>{sharePdfBusy && <p role="status">Reading PDF…</p>}{sharePdf && <div className="orin-share-pdf-file"><FileText size={15}/><span>{sharePdf.name} · {sharePdf.text.length.toLocaleString()} characters</span><button type="button" onClick={clearSharePdf}>Remove</button></div>}</div><label>Digest date<input type="date" required value={shareDay} max={localDate()} onChange={event => setShareDay(event.target.value)}/></label><label>Category or segment<select value={shareCategory} onChange={event => setShareCategory(event.target.value)}><option value="">No category</option>{shareCategoryOptions.map(label => <option key={label} value={label}>{label}</option>)}</select></label><label>Note<textarea value={shareNote} maxLength={4000} placeholder="What is this, and why could it be useful?" onChange={event => setShareNote(event.target.value)}/></label><button className="button-primary" type="submit" disabled={shareBusy || sharePdfBusy || (!shareUrl && !sharePdf)}><Share2 size={15}/>{shareBusy ? 'Saving…' : 'Save source'}</button></form><p role="status">{shareMessage}</p></section> : <>
+          {tab==='projects' ? <ReferenceProjectsCollection items={items} onShare={() => { setShareCategory(collectionCategories.projects); setShareDay(localDate()); setTab('share'); }}/> : tab==='books' ? <BooksCollection items={items} onShare={() => { setShareCategory(collectionCategories.books); setShareDay(localDate()); setTab('share'); }}/> : tab==='brain' ? <OrinBrain items={items} groups={data.digest?.groups || []} date={data.date || ''} sourceStatus={data.sourceStatus || []} availableDates={data.availableDates || []}/> : tab==='share' ? <section className="orin-share"><div className="eyebrow"><Share2 size={15}/> SHARE A SOURCE</div><h2>Save a link or PDF to ORIN.</h2><form onSubmit={submitShare}><label>Source URL<input type="url" disabled={sharePdfBusy || Boolean(sharePdf)} required={!sharePdf} aria-invalid={shareUrlInvalid || undefined} aria-describedby={shareUrlInvalid ? "orin-share-url-error" : undefined} value={shareUrl} placeholder="https://www.youtube.com/watch?v=…" onChange={event => setShareUrl(event.target.value)}/></label>{shareUrlInvalid && <p id="orin-share-url-error" role="status">Use a public HTTPS URL without a username, password, or custom port.</p>}<div className="orin-share-pdf"><label>Source PDF<span className="orin-share-pdf-hint">Text is extracted in your browser. Saving sends the text to your private ORIN space; the PDF file itself is not uploaded.</span><input type="file" accept="application/pdf,.pdf" disabled={sharePdfBusy} aria-label="Choose a PDF" onChange={handleSharePdf}/></label>{sharePdfBusy && <p role="status">Reading PDF…</p>}{sharePdf && <div className="orin-share-pdf-file"><FileText size={15}/><span>{sharePdf.name} · {sharePdf.text.length.toLocaleString()} characters</span><button type="button" onClick={clearSharePdf}>Remove</button></div>}</div><label>Digest date<input type="date" required value={shareDay} max={localDate()} onChange={event => setShareDay(event.target.value)}/></label><label>Category or segment<select value={shareCategory} onChange={event => setShareCategory(event.target.value)}><option value="">No category</option>{shareCategoryOptions.map(label => <option key={label} value={label}>{label}</option>)}</select></label><label>Note<textarea value={shareNote} maxLength={4000} placeholder="What is this, and why could it be useful?" onChange={event => setShareNote(event.target.value)}/></label><button className="button-primary" type="submit" disabled={shareBusy || sharePdfBusy || (!sharePdf && !validCaptureUrl(shareUrl.trim()))}><Share2 size={15}/>{shareBusy ? 'Saving…' : 'Save source'}</button></form><p role="status">{shareMessage}</p></section> : <>
         {(tab === 'saved' || (isDigestReading && showAllFinds)) && <>
         <div className="orin-filterbar"><div className="orin-source-filters">{['All',...sources].map(value=><button key={value} aria-pressed={source===value} onClick={()=>setSource(value)}>{displaySource(value)}</button>)}</div><label className="orin-search"><Search size={15}/><input placeholder="Find an idea…" aria-label="Search digest" value={search} maxLength={200} onChange={event=>{setSearch(event.target.value);setRelatedSearch(null);}}/></label><button type="button" disabled={relatedBusy || search.trim().length<2} onClick={findRelated}>{relatedBusy?'Finding…':'Find related'}</button>{relatedSearch?.query===search.trim() && relatedSearch.tab===tab && relatedSearch.date===data?.date && <small role="status">{relatedSearch.method==='hybrid'?'Related and keyword matches':'Keyword matches'}</small>}<OrinCategoryManager categories={categories.filter(category => typeof category.label === 'string')} onAction={categoryAction}/></div>
           {search.trim().length>=2 && <small>Find related may send your query to the embedding provider.</small>}

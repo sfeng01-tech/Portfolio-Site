@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import { buildDailyBrief } from './dailyBrief';
+import './OrinDailyBrief.css';
 
 function SourceLinks({ sources }) {
   return <ul className="orin-brief-sources">{sources.map(source => <li key={source.url}>
@@ -9,9 +10,10 @@ function SourceLinks({ sources }) {
   </li>)}</ul>;
 }
 
-export default function OrinDailyBrief({ data, today, archived = false, onRead }) {
+export default function OrinDailyBrief({ data, today, archived = false, onRead, onBrowseAll }) {
   const items = data.items || [];
-  const { topics, takeaways, recommended, collectedAt } = buildDailyBrief(data);
+  const platformCount = new Set(items.map(item => item.source).filter(Boolean)).size;
+  const { topics, takeaways, recommended, collectedAt, readingMinutes } = buildDailyBrief(data);
   const day = data.date ? new Date(`${data.date}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : null;
   const label = archived || (data.date && data.date < (data.availableDates?.[0] || data.date)) ? 'ARCHIVE' : data.date === today ? 'TODAY' : 'LATEST AVAILABLE';
   return <div className="orin-daily-reading">
@@ -19,7 +21,14 @@ export default function OrinDailyBrief({ data, today, archived = false, onRead }
       <div className="eyebrow">{label} · {day || 'NO DIGEST YET'}</div>
       <h2 id="daily-brief-title">{data.digest?.title || (items.length ? 'Your collected reading.' : 'A little space for discovery.')}</h2>
       {collectedAt && <p className="orin-brief-freshness">Collected <time dateTime={new Date(collectedAt).toISOString()}>{new Date(collectedAt).toLocaleString('en-US', { timeZone: 'America/Los_Angeles', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' })}</time></p>}
-      <div className="orin-counts"><span>{items.length} finds</span><span>{new Set(items.map(item => item.source)).size} sources</span><span>{items.filter(item => !item.read).length} unread</span></div>
+      <div className="orin-counts"><span>{items.length} {items.length === 1 ? 'find' : 'finds'}</span><span>{platformCount} source {platformCount === 1 ? 'platform' : 'platforms'}</span><span>{items.filter(item => !item.read).length} unread</span></div>
+      {(topics.length > 0 || items.length > 0) && <div className="orin-brief-navigation">
+        <p className="orin-brief-note">About {readingMinutes} min to read the brief · original articles take longer.</p>
+        {items.length > 0 && (onBrowseAll
+          ? <button type="button" onClick={onBrowseAll}>Browse all {items.length} {items.length === 1 ? 'find' : 'finds'} ↓</button>
+          : <a href="#orin-all-finds-heading">Browse all {items.length} {items.length === 1 ? 'find' : 'finds'} ↓</a>)}
+        {topics.length > 1 && <nav aria-label="Digest topics"><ol>{topics.map(topic => <li key={topic.id}><a href={`#${topic.id}`}>{topic.title} <span>({topic.sources.length})</span></a></li>)}</ol></nav>}
+      </div>}
       {data.digestStatus && data.digestStatus.status !== 'ok' && <p className="orin-digest-status" role="status">{data.digestStatus.message}</p>}
       {!items.length && !topics.length && <p>Your digest will appear here after the collector completes a run.</p>}
       {takeaways.length > 0 && <section className="orin-quick-read" aria-labelledby="quick-read-title">
@@ -46,7 +55,7 @@ export default function OrinDailyBrief({ data, today, archived = false, onRead }
         {topic.rest && <details className="orin-topic-details"><summary>Go deeper · full topic summary</summary><p>{topic.rest}</p></details>}
         {!topic.editorial && topic.sources.slice(0, 2).map(source => source.item?.excerpt && <p className="orin-topic-lead" key={source.url}><strong>{source.title}: </strong>{source.item.excerpt}</p>)}
         {topic.sources.length > 0 && <div className="orin-topic-originals"><h4>Original sources</h4><SourceLinks sources={topic.sources.slice(0, 3)}/>
-          {topic.sources.length > 3 && <details><summary>Show {topic.sources.length - 3} more sources</summary><SourceLinks sources={topic.sources.slice(3)}/></details>}
+          {topic.sources.length > 3 && <details><summary>Show {topic.sources.length - 3} more {topic.sources.length === 4 ? 'source' : 'sources'}</summary><SourceLinks sources={topic.sources.slice(3)}/></details>}
         </div>}
       </article>)}
     </section>}
