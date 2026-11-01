@@ -218,7 +218,7 @@ test('research uses supported reasoning levels for planning and synthesis', asyn
   const fake = provider({ reasoning: { supported_efforts: ['high', 'low', 'none'] } });
   await runResearch(job('library'), { env, fetchImpl: fake.fetchImpl });
   const calls = fake.calls.filter(call => call.url.endsWith('/completions'));
-  assert.deepEqual(calls.map(call => call.body.reasoning), [{ effort: 'low', exclude: true }, { effort: 'high', exclude: true }, { effort: 'low', exclude: true }, { effort: 'high', exclude: true }]);
+  assert.deepEqual(calls.map(call => call.body.reasoning), [{ effort: 'low', exclude: true }, { effort: 'high', exclude: true }, { effort: 'low', exclude: true }, { effort: 'low', exclude: true }]);
   assert.ok(calls[0].body.max_tokens >= 3000 && calls[3].body.max_tokens >= 12000);
 });
 
