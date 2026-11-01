@@ -83,6 +83,8 @@ export default async function handler(req, res) {
     const availableDates = days.map(row => row.day);
     if (category) {
       const rows = await sql`SELECT id, item, is_read, saved FROM orin_items WHERE NOT COALESCE((item->>'deleted')::boolean, false) AND item->>'category' = ${category} ORDER BY COALESCE((item->>'publishedAt')::timestamptz, updated_at) DESC LIMIT 500`;
+      await repairYoutubeTitles(rows, sql);
+      await repairLinkTitles(rows, sql, { timeoutMs: 6000 });
       return res.status(200).json({
         date: null,
         availableDates,
