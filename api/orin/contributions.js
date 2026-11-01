@@ -1,4 +1,5 @@
 import { youtubeMetadata } from '../../apps/portfolio/server/youtube.js';
+import { resolveShareLink } from '../../apps/portfolio/server/link-resolve.js';
 import { orinSql, privateResponse, requireOrinOwner, safeUrl, sendError, validDate, validateCategory, itemId } from '../../apps/portfolio/server/orin.js';
 
 const localDay = () => new Intl.DateTimeFormat('en-CA', {

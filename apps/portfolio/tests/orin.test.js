@@ -126,6 +126,30 @@ test('URL contributions validate the client title before database access', async
   }
 });
 
+test('URL shares resolve link metadata on the default path before touching storage', async () => {
+  // Regression: the metadata branch once called resolveShareLink without an
+  // import. The ReferenceError was swallowed by sendError and surfaced as the
+  // generic "ORIN storage is unavailable" 503, which made a code bug look like
+  // a database outage. With metadata enabled (the production default) a
+  // well-formed share must reach orinSql() and report the missing database
+  // configuration instead.
+  const originalUrl = process.env.ORIN_DATABASE_URL;
+  const originalMetadata = process.env.ORIN_SHARE_LINK_METADATA;
+  delete process.env.ORIN_DATABASE_URL;
+  delete process.env.ORIN_SHARE_LINK_METADATA;
+  const headers = await ownerHeaders();
+  try {
+    // x.com is a walled host, so resolution returns without any network call.
+    const res = response();
+    await contributionsHandler({ method: 'POST', headers, body: { url: 'https://x.com/person/status/1', title: 'A post' } }, res);
+    assert.equal(res.statusCode, 503);
+    assert.equal(res.body.error, 'ORIN database is not configured');
+  } finally {
+    if (originalUrl === undefined) delete process.env.ORIN_DATABASE_URL; else process.env.ORIN_DATABASE_URL = originalUrl;
+    if (originalMetadata === undefined) delete process.env.ORIN_SHARE_LINK_METADATA; else process.env.ORIN_SHARE_LINK_METADATA = originalMetadata;
+  }
+});
+
 test('session identity must be an allowed ORIN user', async () => {
   const res = response();
   await digestHandler({ method: 'GET', query: {}, headers: { cookie: await sessionCookie({ login: 'someone-else' }) } }, res);

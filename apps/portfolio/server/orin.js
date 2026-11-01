@@ -184,6 +184,10 @@ export async function orinSql() {
   return neon(process.env.ORIN_DATABASE_URL);
 }
 export function sendError(res, error) {
+  // Unexpected failures (bugs, provider errors) are hidden from the client, so
+  // log them server-side under a label that cannot be mistaken for the generic
+  // message. Without this, a code bug reads as a storage outage.
+  if (!error?.status) console.error('[orin] Unhandled error:', error?.name, error?.message);
   // Database/provider diagnostics can contain connection details; never expose them.
   return res.status(error.status || 503).json({ error: error.status ? error.message : 'ORIN storage is unavailable. Check database setup.' });
 }
