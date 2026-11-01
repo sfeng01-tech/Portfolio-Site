@@ -41,6 +41,16 @@ export function validateResearchBatch(body) {
   if (!plain(body) || Buffer.byteLength(JSON.stringify(body)) > 300000 || !Array.isArray(body.jobs) || body.jobs.length < 1 || body.jobs.length > MAX_RESEARCH_JOBS) throw fail('Submit between 1 and 10 research questions (maximum 300 KB)');
   if (!['library', 'web'].includes(body.scope)) throw fail('Invalid research scope');
   if (!Number.isFinite(body.maxUsd) || body.maxUsd < 0.1 || body.maxUsd > 25) throw fail('Batch spending limit must be between $0.10 and $25');
+  const depth = body.depth ?? 'standard';
+  if (!['standard', 'deep'].includes(depth)) throw fail('Invalid research depth');
+  if (body.perspectives !== undefined && (!Array.isArray(body.perspectives) || body.perspectives.length > 3)) throw fail('Invalid research perspectives: choose at most 3');
+  const seenPerspectives = new Set();
+  const perspectives = (body.perspectives || []).map(value => text(value, 200, 'research perspective')).filter(value => {
+    const key = value.toLocaleLowerCase('en-US');
+    if (seenPerspectives.has(key)) return false;
+    seenPerspectives.add(key);
+    return true;
+  });
   const jobs = body.jobs.map(job => {
     if (!plain(job)) throw fail('Invalid research question');
     const sources = job.sources ?? [];
@@ -61,7 +71,8 @@ export function validateResearchBatch(body) {
       ...(job.suggestionId !== undefined ? { suggestionId: text(job.suggestionId, 160, 'suggestion id') } : {})
     };
   });
-  return { jobs, scope: body.scope, batchPrompt: text(body.batchPrompt, 5000, 'batch instructions', true), maxUsd: body.maxUsd };
+  return { jobs, scope: body.scope, depth, perspectives, batchPrompt: text(body.batchPrompt, 5000, 'batch instructions', true), maxUsd: body.maxUsd,
+    ...(body.requestId === undefined ? {} : { requestId: validateResearchId(body.requestId) }) };
 }
 
 export function validateResearchPatch(body) {

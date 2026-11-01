@@ -49,6 +49,11 @@
 .orin-research-result-list { margin:8px 0; padding-left:20px; list-style:disc; }
 .orin-research-result-list > li { padding:5px 0; }
 .orin-research-text { white-space:pre-wrap; }
+.orin-research-brief { display:grid; gap:16px; padding:10px 0; }
+.orin-research-brief h5 { font-size:12px; font-weight:600; margin-bottom:5px; }
+.orin-research-brief .orin-research-status { justify-self:start; }
+.orin-research-brief details { border-top:1px solid var(--line); }
+.orin-research-claims { display:grid; gap:10px; padding-left:20px; list-style:disc; font-size:13px; line-height:1.7; }
 .orin-research-dimensions { display:grid; gap:12px; padding:10px 0; }
 .orin-research-dimensions dd { font-size:12px; }
 .orin-research-feedback { margin-top:20px; padding-top:18px; border-top:1px solid var(--line); }

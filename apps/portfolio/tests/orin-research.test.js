@@ -36,9 +36,12 @@ test('research defaults cover systems, agents, reinforcement learning, harnesses
 
 test('batch validation bounds cost and size while allowing question-only and multi-source research', () => {
   assert.equal(validateResearchBatch(batch()).jobs.length, 1);
+  assert.equal(validateResearchBatch(batch()).depth, 'standard');
+  assert.deepEqual(validateResearchBatch(batch({ depth: 'deep', perspectives: [' AMD impact ', 'amd impact', 'Safety'] })).perspectives, ['AMD impact', 'Safety']);
   assert.deepEqual(validateResearchBatch(batch({ jobs: [{ question: 'What is missing?' }] })).jobs[0].sources, []);
   for (const broken of [
     batch({ maxUsd: 0 }), batch({ maxUsd: 26 }), batch({ maxUsd: '1' }), batch({ scope: 'private-web' }),
+    batch({ depth: 'unlimited' }), batch({ perspectives: 'safety' }), batch({ perspectives: [''] }), batch({ perspectives: Array(4).fill('too many') }), batch({ perspectives: ['x'.repeat(201)] }),
     batch({ jobs: [] }), batch({ jobs: Array(11).fill({ question: 'Q' }) }), batch({ jobs: [{ question: ' ' }] }),
     batch({ jobs: [{ question: 'Q', prompt: 'x'.repeat(5001) }] }), batch({ jobs: [{ question: 'Q', sources: [{ url: 'http://example.org' }] }] }),
     batch({ jobs: [{ question: 'Q', sources: [{ url: 'https://127.0.0.1' }] }] }),
@@ -88,9 +91,9 @@ test('anonymous access and cross-origin mutations are denied before storage', as
 
 test('submission is atomic, snapshots the profile, and splits a total batch allowance', async () => {
   const profile = { ...DEFAULT_RESEARCH_PROFILE, hardware: 'One AMD GPU' };
-  const { api, calls } = fixture([[{ profile }], values => JSON.parse(values[0]).map(job => ({ ...job, status: 'queued', spent_usd: 0 }))]);
+  const { api, calls } = fixture([[{ profile }], values => JSON.parse(values[2]).map(job => ({ ...job, status: 'queued', spent_usd: 0 }))]);
   const res = response();
-  await api({ method: 'POST', body: batch({ jobs: [{ question: 'Q1' }, { question: 'Q2' }, { question: 'Q3' }] }) }, res);
+  await api({ method: 'POST', body: batch({ depth: 'deep', perspectives: ['AMD impact', 'Safety'], jobs: [{ question: 'Q1' }, { question: 'Q2' }, { question: 'Q3' }] }) }, res);
   assert.equal(res.statusCode, 201);
   assert.equal(calls.length, 2);
   assert.match(calls[1].query, /jsonb_to_recordset/);
@@ -100,6 +103,26 @@ test('submission is atomic, snapshots the profile, and splits a total batch allo
   assert.ok(res.body.jobs.reduce((sum, job) => sum + job.options.maxUsd, 0) <= 1);
   assert.equal(new Set(res.body.jobs.map(job => job.options.batchId)).size, 1);
   assert.equal(res.body.jobs[0].options.batchPrompt, 'Check counterevidence');
+  assert.equal(res.body.jobs[0].options.depth, 'deep');
+  assert.deepEqual(res.body.jobs[0].options.perspectives, ['AMD impact', 'Safety']);
+});
+
+test('a retried batch reuses jobs while a mismatched request id is rejected', async () => {
+  let calls;
+  const payload = batch({ requestId: id });
+  const setup = fixture([[], [], () => [{ fingerprint: calls[1].values[1] }], [{ id, status: 'queued' }]]);
+  calls = setup.calls;
+  const replay = response();
+  await setup.api({ method: 'POST', body: payload }, replay);
+  assert.equal(replay.statusCode, 200);
+  assert.equal(replay.body.batchId, id);
+  assert.equal(replay.body.replayed, true);
+  assert.equal(replay.body.jobs.length, 1);
+  const conflict = fixture([[], [], [{ fingerprint: 'different' }]]);
+  const denied = response();
+  await conflict.api({ method: 'POST', body: payload }, denied);
+  assert.equal(denied.statusCode, 409);
+  assert.throws(() => validateResearchBatch(batch({ requestId: 'bad' })), /Invalid/);
 });
 
 test('unconfigured provider rejects submission without touching storage', async () => {

@@ -102,6 +102,13 @@ CREATE TABLE IF NOT EXISTS orin_research_profile (
   profile jsonb NOT NULL CHECK (jsonb_typeof(profile) = 'object'),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
+-- A request ID lets an interrupted client safely retry one batch without
+-- creating another set of billable jobs. The digest never contains credentials.
+CREATE TABLE IF NOT EXISTS orin_research_batches (
+  id uuid PRIMARY KEY,
+  fingerprint text NOT NULL CHECK (fingerprint ~ '^[a-f0-9]{64}$'),
+  created_at timestamptz NOT NULL DEFAULT now()
+);
 CREATE TABLE IF NOT EXISTS orin_research_jobs (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   status text NOT NULL DEFAULT 'queued' CHECK (status IN ('queued', 'running', 'completed', 'failed', 'cancelled')),
@@ -125,4 +132,5 @@ CREATE TABLE IF NOT EXISTS orin_research_jobs (
 CREATE INDEX IF NOT EXISTS orin_research_jobs_queue ON orin_research_jobs (created_at) WHERE status = 'queued';
 CREATE INDEX IF NOT EXISTS orin_research_jobs_lease ON orin_research_jobs (lease_expires_at) WHERE status = 'running';
 CREATE INDEX IF NOT EXISTS orin_research_jobs_history ON orin_research_jobs (created_at DESC);
+CREATE INDEX IF NOT EXISTS orin_research_jobs_batch ON orin_research_jobs ((options->>'batchId'));
 COMMIT;
