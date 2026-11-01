@@ -11,7 +11,8 @@
     "research:index": "node research-indexer.mjs",
     "ask:index": "node ask-indexer.mjs",
     "categories:backfill": "node backfill-categories.mjs",
-    "links:backfill": "node backfill-links.mjs"
+    "links:backfill": "node backfill-links.mjs",
+    "sources:delete": "node delete-source.mjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.2.0",

@@ -2,8 +2,24 @@ import { repairYoutubeTitles } from '../../apps/portfolio/server/youtube.js';
 import { visibleItems, visibleDigest } from '../../apps/portfolio/server/orin-content.js';
 import { orinSql, privateResponse, requireOrinOwner, sendError, validDate, validateCategory } from '../../apps/portfolio/server/orin.js';
 import { loadSemanticAffinities } from '../../apps/portfolio/server/orin-semantic-affinity.js';
+import { purgeDeletedItems } from '../../apps/portfolio/server/orin-source-repo.js';
 
 const VIDEO_PAGE_SIZE = 24;
+// Soft-deleted items are only kept for 30 days; a hard purge then removes them
+// together with their derived embeddings and ask chunks. Any owner visit to
+// ORIN triggers this, so a daily dashboard visit satisfies the retention
+// policy without a new scheduler. The throttle keeps the check at most once an
+// hour per server instance and the guard survives serverless reuse.
+let lastPurge = 0;
+export async function purgeIfDue(sql, retentionDays = 30) {
+  if (Date.now() - lastPurge < 60 * 60 * 1000) return { items: 0 };
+  try {
+    return await purgeDeletedItems(sql, retentionDays);
+  } catch {
+    // Retention cleanup must never fail the digest view; the next visit retries.
+    return { items: 0 };
+  } finally { lastPurge = Date.now(); }
+}
 export function videoListParams(query = {}) {
   const page = query.page === undefined ? 1 : Number(query.page);
   if (!Number.isSafeInteger(page) || page < 1 || page > 10000 || (query.page !== undefined && !/^[1-9]\d*$/.test(query.page))) {
@@ -60,6 +76,7 @@ export default async function handler(req, res) {
       });
     }
     const sql = await orinSql();
+    await purgeIfDue(sql);
     const days = await sql`SELECT day::text FROM orin_digests ORDER BY day DESC LIMIT 90`;
     const availableDates = days.map(row => row.day);
     if (category) {
