@@ -1,0 +1,494 @@
+{
+  "corpus": 227,
+  "cases": 20,
+  "metrics": {
+    "keyword": {
+      "queries": 20,
+      "hitAt5": 0.95,
+      "recallAt5": 0.8333333333333333,
+      "mrrAt5": 0.7933333333333333,
+      "negativeResultsAt5": 1,
+      "unjudgedResultsAt5": 71
+    },
+    "semantic": {
+      "queries": 20,
+      "hitAt5": 0.95,
+      "recallAt5": 0.8416666666666668,
+      "mrrAt5": 0.8099999999999999,
+      "negativeResultsAt5": 1,
+      "unjudgedResultsAt5": 69
+    },
+    "hybrid": {
+      "queries": 20,
+      "hitAt5": 1,
+      "recallAt5": 0.875,
+      "mrrAt5": 0.8791666666666668,
+      "negativeResultsAt5": 1,
+      "unjudgedResultsAt5": 68
+    },
+    "semanticWeighted": {
+      "queries": 20,
+      "hitAt5": 1,
+      "recallAt5": 0.8333333333333333,
+      "mrrAt5": 0.8791666666666668,
+      "negativeResultsAt5": 0,
+      "unjudgedResultsAt5": 71
+    }
+  },
+  "tracks": {
+    "amd_version": {
+      "keyword": {
+        "queries": 3,
+        "hitAt5": 1,
+        "recallAt5": 1,
+        "mrrAt5": 1,
+        "negativeResultsAt5": 1,
+        "unjudgedResultsAt5": 11
+      },
+      "semantic": {
+        "queries": 3,
+        "hitAt5": 1,
+        "recallAt5": 1,
+        "mrrAt5": 1,
+        "negativeResultsAt5": 1,
+        "unjudgedResultsAt5": 11
+      },
+      "hybrid": {
+        "queries": 3,
+        "hitAt5": 1,
+        "recallAt5": 1,
+        "mrrAt5": 1,
+        "negativeResultsAt5": 1,
+        "unjudgedResultsAt5": 11
+      },
+      "semanticWeighted": {
+        "queries": 3,
+        "hitAt5": 1,
+        "recallAt5": 1,
+        "mrrAt5": 1,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 12
+      }
+    },
+    "amd_inference": {
+      "keyword": {
+        "queries": 2,
+        "hitAt5": 0.5,
+        "recallAt5": 0.5,
+        "mrrAt5": 0.5,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 8
+      },
+      "semantic": {
+        "queries": 2,
+        "hitAt5": 1,
+        "recallAt5": 0.8333333333333333,
+        "mrrAt5": 1,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 6
+      },
+      "hybrid": {
+        "queries": 2,
+        "hitAt5": 1,
+        "recallAt5": 0.6666666666666666,
+        "mrrAt5": 1,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 7
+      },
+      "semanticWeighted": {
+        "queries": 2,
+        "hitAt5": 1,
+        "recallAt5": 0.6666666666666666,
+        "mrrAt5": 1,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 7
+      }
+    },
+    "amd_training": {
+      "keyword": {
+        "queries": 1,
+        "hitAt5": 1,
+        "recallAt5": 0.5,
+        "mrrAt5": 0.5,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 4
+      },
+      "semantic": {
+        "queries": 1,
+        "hitAt5": 1,
+        "recallAt5": 0.5,
+        "mrrAt5": 1,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 4
+      },
+      "hybrid": {
+        "queries": 1,
+        "hitAt5": 1,
+        "recallAt5": 0.5,
+        "mrrAt5": 1,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 4
+      },
+      "semanticWeighted": {
+        "queries": 1,
+        "hitAt5": 1,
+        "recallAt5": 0.5,
+        "mrrAt5": 1,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 4
+      }
+    },
+    "amd_gpu": {
+      "keyword": {
+        "queries": 2,
+        "hitAt5": 1,
+        "recallAt5": 0.6666666666666666,
+        "mrrAt5": 0.35,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 8
+      },
+      "semantic": {
+        "queries": 2,
+        "hitAt5": 1,
+        "recallAt5": 1,
+        "mrrAt5": 1,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 6
+      },
+      "hybrid": {
+        "queries": 2,
+        "hitAt5": 1,
+        "recallAt5": 1,
+        "mrrAt5": 1,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 6
+      },
+      "semanticWeighted": {
+        "queries": 2,
+        "hitAt5": 1,
+        "recallAt5": 0.8333333333333333,
+        "mrrAt5": 1,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 7
+      }
+    },
+    "amd_infra": {
+      "keyword": {
+        "queries": 1,
+        "hitAt5": 1,
+        "recallAt5": 1,
+        "mrrAt5": 1,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 3
+      },
+      "semantic": {
+        "queries": 1,
+        "hitAt5": 1,
+        "recallAt5": 1,
+        "mrrAt5": 1,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 3
+      },
+      "hybrid": {
+        "queries": 1,
+        "hitAt5": 1,
+        "recallAt5": 1,
+        "mrrAt5": 1,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 3
+      },
+      "semanticWeighted": {
+        "queries": 1,
+        "hitAt5": 1,
+        "recallAt5": 1,
+        "mrrAt5": 1,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 3
+      }
+    },
+    "agents": {
+      "keyword": {
+        "queries": 1,
+        "hitAt5": 1,
+        "recallAt5": 0.3333333333333333,
+        "mrrAt5": 0.3333333333333333,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 4
+      },
+      "semantic": {
+        "queries": 1,
+        "hitAt5": 1,
+        "recallAt5": 0.6666666666666666,
+        "mrrAt5": 0.3333333333333333,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 3
+      },
+      "hybrid": {
+        "queries": 1,
+        "hitAt5": 1,
+        "recallAt5": 0.6666666666666666,
+        "mrrAt5": 0.3333333333333333,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 3
+      },
+      "semanticWeighted": {
+        "queries": 1,
+        "hitAt5": 1,
+        "recallAt5": 0.6666666666666666,
+        "mrrAt5": 0.5,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 3
+      }
+    },
+    "harness": {
+      "keyword": {
+        "queries": 2,
+        "hitAt5": 1,
+        "recallAt5": 1,
+        "mrrAt5": 1,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 6
+      },
+      "semantic": {
+        "queries": 2,
+        "hitAt5": 0.5,
+        "recallAt5": 0.5,
+        "mrrAt5": 0.5,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 8
+      },
+      "hybrid": {
+        "queries": 2,
+        "hitAt5": 1,
+        "recallAt5": 0.75,
+        "mrrAt5": 0.75,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 7
+      },
+      "semanticWeighted": {
+        "queries": 2,
+        "hitAt5": 1,
+        "recallAt5": 0.75,
+        "mrrAt5": 0.6666666666666666,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 7
+      }
+    },
+    "safety": {
+      "keyword": {
+        "queries": 2,
+        "hitAt5": 1,
+        "recallAt5": 1,
+        "mrrAt5": 1,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 7
+      },
+      "semantic": {
+        "queries": 2,
+        "hitAt5": 1,
+        "recallAt5": 1,
+        "mrrAt5": 0.6666666666666666,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 7
+      },
+      "hybrid": {
+        "queries": 2,
+        "hitAt5": 1,
+        "recallAt5": 1,
+        "mrrAt5": 1,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 7
+      },
+      "semanticWeighted": {
+        "queries": 2,
+        "hitAt5": 1,
+        "recallAt5": 1,
+        "mrrAt5": 1,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 7
+      }
+    },
+    "quantization": {
+      "keyword": {
+        "queries": 1,
+        "hitAt5": 1,
+        "recallAt5": 1,
+        "mrrAt5": 1,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 3
+      },
+      "semantic": {
+        "queries": 1,
+        "hitAt5": 1,
+        "recallAt5": 1,
+        "mrrAt5": 1,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 3
+      },
+      "hybrid": {
+        "queries": 1,
+        "hitAt5": 1,
+        "recallAt5": 1,
+        "mrrAt5": 1,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 3
+      },
+      "semanticWeighted": {
+        "queries": 1,
+        "hitAt5": 1,
+        "recallAt5": 1,
+        "mrrAt5": 1,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 3
+      }
+    },
+    "inference": {
+      "keyword": {
+        "queries": 2,
+        "hitAt5": 1,
+        "recallAt5": 1,
+        "mrrAt5": 1,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 6
+      },
+      "semantic": {
+        "queries": 2,
+        "hitAt5": 1,
+        "recallAt5": 0.75,
+        "mrrAt5": 1,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 7
+      },
+      "hybrid": {
+        "queries": 2,
+        "hitAt5": 1,
+        "recallAt5": 1,
+        "mrrAt5": 1,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 6
+      },
+      "semanticWeighted": {
+        "queries": 2,
+        "hitAt5": 1,
+        "recallAt5": 0.75,
+        "mrrAt5": 1,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 7
+      }
+    },
+    "training": {
+      "keyword": {
+        "queries": 1,
+        "hitAt5": 1,
+        "recallAt5": 0.5,
+        "mrrAt5": 1,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 4
+      },
+      "semantic": {
+        "queries": 1,
+        "hitAt5": 1,
+        "recallAt5": 0.5,
+        "mrrAt5": 0.3333333333333333,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 4
+      },
+      "hybrid": {
+        "queries": 1,
+        "hitAt5": 1,
+        "recallAt5": 0.5,
+        "mrrAt5": 0.5,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 4
+      },
+      "semanticWeighted": {
+        "queries": 1,
+        "hitAt5": 1,
+        "recallAt5": 0.5,
+        "mrrAt5": 0.5,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 4
+      }
+    },
+    "infra": {
+      "keyword": {
+        "queries": 1,
+        "hitAt5": 1,
+        "recallAt5": 1,
+        "mrrAt5": 1,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 3
+      },
+      "semantic": {
+        "queries": 1,
+        "hitAt5": 1,
+        "recallAt5": 1,
+        "mrrAt5": 1,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 3
+      },
+      "hybrid": {
+        "queries": 1,
+        "hitAt5": 1,
+        "recallAt5": 1,
+        "mrrAt5": 1,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 3
+      },
+      "semanticWeighted": {
+        "queries": 1,
+        "hitAt5": 1,
+        "recallAt5": 1,
+        "mrrAt5": 1,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 3
+      }
+    },
+    "rl": {
+      "keyword": {
+        "queries": 1,
+        "hitAt5": 1,
+        "recallAt5": 1,
+        "mrrAt5": 0.3333333333333333,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 4
+      },
+      "semantic": {
+        "queries": 1,
+        "hitAt5": 1,
+        "recallAt5": 1,
+        "mrrAt5": 0.2,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 4
+      },
+      "hybrid": {
+        "queries": 1,
+        "hitAt5": 1,
+        "recallAt5": 1,
+        "mrrAt5": 0.25,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 4
+      },
+      "semanticWeighted": {
+        "queries": 1,
+        "hitAt5": 1,
+        "recallAt5": 1,
+        "mrrAt5": 0.25,
+        "negativeResultsAt5": 0,
+        "unjudgedResultsAt5": 4
+      }
+    }
+  },
+  "timingsMs": {
+    "embeddingMedian": 411.9390410000001,
+    "embeddingP95": 634.0379160000011,
+    "databaseMedian": 85.24225000000024,
+    "databaseP95": 248.83179100000052
+  },
+  "queryEmbeddingUsage": {
+    "promptTokens": 193,
+    "tokenReports": 20,
+    "reportedCostUsd": 0.00000386,
+    "costReports": 20
+  }
+}

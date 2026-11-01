@@ -1,0 +1,227 @@
+[
+  {
+    "track": "amd_version",
+    "query": "ROCm 7.10 preview documentation",
+    "relevant": [
+      "7c3eabdbb69c"
+    ],
+    "negative": [
+      "3bbe6bcea2ea",
+      "3ea7bc5baf9d"
+    ]
+  },
+  {
+    "track": "amd_version",
+    "query": "AMD MI325X vLLM v0.14.1 inference benchmarks",
+    "relevant": [
+      "306810cf0c0a"
+    ],
+    "negative": [
+      "68b871ef4685",
+      "f647cc601272"
+    ]
+  },
+  {
+    "track": "amd_version",
+    "query": "MI450 Gluon attention decode kernel",
+    "relevant": [
+      "1bcc696b0aa8"
+    ],
+    "negative": [
+      "45b1b034a5d7",
+      "115750132d70"
+    ]
+  },
+  {
+    "track": "amd_inference",
+    "query": "AMD prefill decode disaggregation for scalable inference",
+    "relevant": [
+      "c14ddd981aca",
+      "f7b798d9f360"
+    ],
+    "negative": [
+      "6fefbe7b1745",
+      "3bbe6bcea2ea"
+    ]
+  },
+  {
+    "track": "amd_inference",
+    "query": "running language model serving on AMD Instinct",
+    "relevant": [
+      "09b15b290c51",
+      "f647cc601272",
+      "306810cf0c0a"
+    ],
+    "negative": [
+      "6fefbe7b1745"
+    ]
+  },
+  {
+    "track": "amd_training",
+    "query": "how to improve mixture of experts training on AMD accelerators",
+    "relevant": [
+      "6fefbe7b1745",
+      "905f9f057334"
+    ],
+    "negative": [
+      "68b871ef4685",
+      "7c3eabdbb69c"
+    ]
+  },
+  {
+    "track": "amd_gpu",
+    "query": "AI agents generating optimized GPU kernels across accelerators",
+    "relevant": [
+      "ac87a8b41316",
+      "a355c57e73c9",
+      "58c83bcac1dc"
+    ],
+    "negative": [
+      "3bbe6bcea2ea"
+    ]
+  },
+  {
+    "track": "amd_gpu",
+    "query": "GPU programming low precision matrix acceleration on CDNA",
+    "relevant": [
+      "115750132d70"
+    ],
+    "negative": [
+      "7c3eabdbb69c",
+      "3bbe6bcea2ea"
+    ]
+  },
+  {
+    "track": "amd_infra",
+    "query": "AMD distributed inference cache storage and orchestration",
+    "relevant": [
+      "21387af37d4b",
+      "0d5ff9faaee6"
+    ],
+    "negative": [
+      "3bbe6bcea2ea",
+      "6fefbe7b1745"
+    ]
+  },
+  {
+    "track": "agents",
+    "query": "multi agent approaches to automatic GPU kernel optimization",
+    "relevant": [
+      "58c83bcac1dc",
+      "a355c57e73c9",
+      "ac87a8b41316"
+    ],
+    "negative": [
+      "7c3eabdbb69c"
+    ]
+  },
+  {
+    "track": "harness",
+    "query": "evaluating AI coding agents on infrastructure and measuring agent tool context failure",
+    "relevant": [
+      "ef598a94a452",
+      "3b96d13f420b"
+    ],
+    "negative": [
+      "3bbe6bcea2ea"
+    ]
+  },
+  {
+    "track": "harness",
+    "query": "runtime verification and regression gates for LLM agent workflows",
+    "relevant": [
+      "01b217e42f5b",
+      "d8e4a199a9f1"
+    ],
+    "negative": [
+      "7c3eabdbb69c"
+    ]
+  },
+  {
+    "track": "safety",
+    "query": "AI agent instructions bypass human approval and security supervision",
+    "relevant": [
+      "3b342265ec5e",
+      "d8e4a199a9f1"
+    ],
+    "negative": [
+      "3bbe6bcea2ea"
+    ]
+  },
+  {
+    "track": "safety",
+    "query": "safety safeguards for streaming language model outputs",
+    "relevant": [
+      "b122ee2a8d45"
+    ],
+    "negative": [
+      "3b342265ec5e",
+      "7c3eabdbb69c"
+    ]
+  },
+  {
+    "track": "quantization",
+    "query": "post training quantization low bit language model compression",
+    "relevant": [
+      "202468ac6b2a",
+      "027c5bc38fca"
+    ],
+    "negative": [
+      "89afdd6bfd5d"
+    ]
+  },
+  {
+    "track": "inference",
+    "query": "lossless compression and GPU attention for the KV cache",
+    "relevant": [
+      "51821b421295",
+      "1bbee645176f"
+    ],
+    "negative": [
+      "2e338f4975c6"
+    ]
+  },
+  {
+    "track": "inference",
+    "query": "CPU and GPU performance bottlenecks for serving LLMs",
+    "relevant": [
+      "d5c1a21f8094",
+      "385eb6e99b78"
+    ],
+    "negative": [
+      "2e338f4975c6"
+    ]
+  },
+  {
+    "track": "training",
+    "query": "training mixture of experts models under limited memory",
+    "relevant": [
+      "2e338f4975c6",
+      "6fefbe7b1745"
+    ],
+    "negative": [
+      "306810cf0c0a"
+    ]
+  },
+  {
+    "track": "infra",
+    "query": "diagnosing failures and resource utilization in GPU clusters",
+    "relevant": [
+      "271693d2e8ce",
+      "4b87f2ecf88f"
+    ],
+    "negative": [
+      "7c3eabdbb69c"
+    ]
+  },
+  {
+    "track": "rl",
+    "query": "reinforcement learning to coordinate teams of language model agents",
+    "relevant": [
+      "e0f3ebb3e178"
+    ],
+    "negative": [
+      "7c3eabdbb69c"
+    ]
+  }
+]

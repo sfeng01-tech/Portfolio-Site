@@ -7,6 +7,8 @@
     "test": "node --test *.test.mjs",
     "collect": "node collect.mjs",
     "research:worker": "node research-worker.mjs",
+    "search:pilot": "node hybrid-pilot/pilot.mjs",
+    "research:index": "node research-indexer.mjs",
     "categories:backfill": "node backfill-categories.mjs",
     "links:backfill": "node backfill-links.mjs"
   },

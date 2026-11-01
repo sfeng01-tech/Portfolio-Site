@@ -223,8 +223,11 @@ export async function runResearch(job, {
   queries = perspectives.map(row => row.initialQuery);
   await progress('Researching initial perspectives', state());
   async function investigate(query, perspectiveId, phase) {
-    evidence = collectEvidence(await searchLibrary(query), evidence);
-    searchLog.push({ query, perspectiveId, phase, source: 'library', searchedAt: new Date().toISOString() });
+    const library = await searchLibrary(query, { reserve: charge });
+    evidence = collectEvidence(Array.isArray(library) ? library : library.items, evidence);
+    searchLog.push({ query, perspectiveId, phase, source: 'library',
+      ...(!Array.isArray(library) ? { method: library.method, ...(library.reason ? { fallbackReason: library.reason } : {}), constraints: library.constraints } : {}),
+      searchedAt: new Date().toISOString() });
     await progress('Checking library sources', state());
     if (scope === 'web') {
       await charge(webAllowance);

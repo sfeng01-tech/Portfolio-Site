@@ -1,0 +1,10 @@
+[
+  {"query":"detecting failures in distributed GPU workload logs", "relevantPrefixes":["271693d2e8ce"]},
+  {"query":"autonomous GPU kernel optimization using multiple AI agents", "relevantPrefixes":["a355c57e73c9"]},
+  {"query":"memory bandwidth optimization for mixture of experts language model serving", "relevantPrefixes":["385eb6e99b78"]},
+  {"query":"compressing language model attention cache for devices", "relevantPrefixes":["1bbee645176f"]},
+  {"query":"agent safety human approval instructions embedded in skills", "relevantPrefixes":["3b342265ec5e"]},
+  {"query":"testing computer use agents in changing environments", "relevantPrefixes":["80d161c95bfe"]},
+  {"query":"how information gets lost in long running LLM agent context management", "relevantPrefixes":["3b96d13f420b"]},
+  {"query":"profiling GPU clusters to find underused computing resources", "relevantPrefixes":["4b87f2ecf88f"]}
+]

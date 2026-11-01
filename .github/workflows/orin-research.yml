@@ -33,5 +33,6 @@ jobs:
           ORIN_RESEARCH_MODEL: ${{ vars.ORIN_RESEARCH_MODEL }}
           TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
           ORIN_RESEARCH_SEARCH_USD: ${{ vars.ORIN_RESEARCH_SEARCH_USD }}
+          ORIN_RESEARCH_HYBRID_ENABLED: ${{ vars.ORIN_RESEARCH_HYBRID_ENABLED }}
         run: npm run research:worker --workspace=@portfolio/orin-collector -- --once
       # Private source text, profiles, questions and reports are not uploaded.

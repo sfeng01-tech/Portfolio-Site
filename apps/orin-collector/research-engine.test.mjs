@@ -252,3 +252,16 @@ test('store claims atomically, bounds recovery, and guards cost and completion b
   await store.reserve(current, .02); assert.match(queries[2].text, /spent_usd \+ \? <=/); assert.match(queries[2].text, /lease_token =/);
   await store.finish(current, {}); assert.match(queries[3].text, /status = 'running'/); assert.match(queries[3].text, /lease_expires_at > now/);
 });
+
+test('research preserves retrieval mode and explicit constraints in the library search log', async () => {
+  const fake = provider();
+  const result = await runResearch(job('library'), { env, fetchImpl: fake.fetchImpl,
+    searchLibrary: async (_query, context) => {
+      assert.equal(typeof context.reserve, 'function');
+      return { items: [], method: 'keyword', reason: 'semantic_unavailable', constraints: ['rocm 7.10-preview'] };
+    } });
+  const entry = result.searchLog.find(row => row.source === 'library');
+  assert.equal(entry.method, 'keyword');
+  assert.equal(entry.fallbackReason, 'semantic_unavailable');
+  assert.deepEqual(entry.constraints, ['rocm 7.10-preview']);
+});

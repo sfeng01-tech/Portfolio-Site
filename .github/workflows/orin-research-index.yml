@@ -1,0 +1,33 @@
+name: ORIN research embeddings
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '37 14 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: orin-research-embeddings
+  cancel-in-progress: false
+
+jobs:
+  index:
+    if: github.event_name == 'workflow_dispatch' || vars.ORIN_RESEARCH_HYBRID_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install worker dependencies
+        run: npm ci --workspace=@portfolio/orin-collector --ignore-scripts
+      - name: Index approved public research sources
+        env:
+          ORIN_DATABASE_URL: ${{ secrets.ORIN_DATABASE_URL }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: npm run research:index --workspace=@portfolio/orin-collector
