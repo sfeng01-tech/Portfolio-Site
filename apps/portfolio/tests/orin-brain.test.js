@@ -43,7 +43,7 @@ test('clusterTopics groups similar topics and labels each segment by volume', ()
 
 test('buildBrainModel turns a digest into sources, topic segments and action neurons', () => {
   const model = buildBrainModel({ items: digestItems, groups: [{ title: 'Kernel work', summary: '', urls: ['https://example.test/a', 'https://example.test/b'] }] });
-  assert.deepEqual(model.stats, { items: 5, available: 5, sources: 4, segments: 3, threads: 1, links: 9, unread: 4, saved: 1, truncated: 0 });
+  assert.deepEqual(model.stats, { items: 5, available: 5, sources: 4, availableSources: 4, segments: 3, threads: 1, links: 9, unread: 4, saved: 1, truncated: 0 });
   assert.deepEqual(model.sources.map((source) => source.source), ['arxiv', 'hackernews', 'reddit', 'twitter']);
   assert.equal(model.sources[0].label, 'arXiv');
   assert.equal(model.sources[0].caption, 'arXiv');
@@ -63,6 +63,8 @@ test('buildBrainModel caps neurons, keeps the strongest and reports the remainde
   const model = buildBrainModel({ items: digestItems, maxItems: 3 });
   assert.equal(model.stats.items, 3);
   assert.equal(model.stats.available, 5);
+  assert.equal(model.stats.sources, 3);
+  assert.equal(model.stats.availableSources, 4);
   assert.equal(model.stats.truncated, 2);
   // Saved first, then highest fit score.
   assert.deepEqual(model.items.map((node) => node.id), [id('a'), id('b'), id('c')]);

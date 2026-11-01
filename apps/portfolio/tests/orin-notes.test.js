@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import notesHandler from '../../../api/orin/notes.js';
 import remindersHandler from '../../../api/orin/reminders.js';
+import { createReminderSchemaEnsurer } from '../server/orin-reminder-schema.js';
 import {
   NOTE_EXCERPT_LENGTH, noteExcerpt, noteWordCount,
   validateNoteContent, validateNoteId, validateNotePatch, validateNoteTitle,
@@ -74,6 +75,43 @@ test('reminder patches accept label, time, days, enabled, and fired stamps', () 
   for (const broken of [null, {}, { id: 'bad' }, { id: noteId }, { id: noteId, label: 'x'.repeat(201) }, { id: noteId, time: '07:60' }, { id: noteId, firedAt: 'not-a-time' }]) {
     assert.throws(() => validateReminderPatch(broken), /Invalid|empty/);
   }
+});
+
+test('reminder schema repair is bounded and safe under concurrent requests', async () => {
+  const ensure = createReminderSchemaEnsurer();
+  const statements = [];
+  const sql = async parts => {
+    const statement = parts.join('?');
+    statements.push(statement);
+    return statement.includes('SELECT EXISTS') ? [{ hasDueDate: false }] : [];
+  };
+  await Promise.all(Array.from({ length: 8 }, () => ensure(sql)));
+  await ensure(sql);
+  assert.equal(statements.filter(statement => statement.includes('SELECT EXISTS')).length, 1);
+  assert.equal(statements.filter(statement => statement.includes('ALTER TABLE')).length, 1);
+  assert.match(statements.find(statement => statement.includes('ALTER TABLE')), /ADD COLUMN IF NOT EXISTS due_date date/);
+});
+
+test('reminder schema repair skips an existing column and retries after a permission failure', async () => {
+  const alreadyMigrated = createReminderSchemaEnsurer();
+  const healthyStatements = [];
+  await alreadyMigrated(async parts => {
+    healthyStatements.push(parts.join('?'));
+    return [{ hasDueDate: true }];
+  });
+  assert.equal(healthyStatements.length, 1);
+
+  const ensure = createReminderSchemaEnsurer();
+  let alterations = 0;
+  const sql = async parts => {
+    if (parts.join('?').includes('SELECT EXISTS')) return [{ hasDueDate: false }];
+    alterations += 1;
+    if (alterations === 1) throw Object.assign(new Error('denied'), { code: '42501' });
+    return [];
+  };
+  await assert.rejects(ensure(sql), error => error.status === 503 && /schema update/.test(error.message));
+  await ensure(sql);
+  assert.equal(alterations, 2);
 });
 
 test('notes and reminders endpoints reject anonymous and unconfigured access', async () => {

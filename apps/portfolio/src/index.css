@@ -23,6 +23,13 @@
 }
 .site-header { position:fixed; inset:0 0 auto; z-index:50; background:rgb(var(--paper-rgb) / .95); border-bottom:1px solid var(--line); backdrop-filter:blur(12px) saturate(1.4); }
 .nav-shell { max-width:1280px; padding:0 40px; margin:auto; height:80px; display:flex; align-items:center; gap:22px; }
+.orin-site-nav { max-width:1360px; justify-content:space-between; }
+.orin-nav-brand { font-size:25px; font-weight:600; letter-spacing:-1.5px; line-height:1; }
+.orin-nav-brand span { color:var(--accent); }
+.orin-nav-actions { display:flex; align-items:center; gap:20px; }
+.orin-nav-portfolio { display:flex; align-items:center; gap:5px; font-size:13px; color:var(--muted); }
+.orin-nav-portfolio span:last-child { color:var(--ink); }
+.orin-nav-portfolio:hover { color:var(--accent); }
 .brand { display:flex; align-items:center; gap:13px; flex-shrink:0; }
 .brand-mark { font-size:32px; font-weight:700; letter-spacing:-3px; line-height:1; }
 .brand-mark span { color:var(--accent); }
@@ -139,6 +146,8 @@ main .hljs { background:#292b26; color:#e5e5d9; }
 }
 @media (max-width:600px) {
   .nav-shell { padding-inline:20px; height:72px; gap:14px; }
+  .orin-nav-actions { gap:12px; }
+  .orin-nav-portfolio span:first-child { display:none; }
   .mobile-links { top:72px; }
   .brand-name { display:block; }
   .home-layout { padding-inline:24px; }

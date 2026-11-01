@@ -9,7 +9,7 @@ function SourceLinks({ sources }) {
   </li>)}</ul>;
 }
 
-export default function OrinDailyBrief({ data, today, archived = false }) {
+export default function OrinDailyBrief({ data, today, archived = false, onRead }) {
   const items = data.items || [];
   const { topics, takeaways, recommended, collectedAt } = buildDailyBrief(data);
   const day = data.date ? new Date(`${data.date}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : null;
@@ -57,6 +57,7 @@ export default function OrinDailyBrief({ data, today, archived = false }) {
       <div>{recommended.map(source => <article key={source.url}><span className="eyebrow">{source.publisher}</span>
         <h3><a href={source.url} target="_blank" rel="noopener noreferrer">{source.title}<ArrowUpRight size={15}/></a></h3>
         {source.reason && <p>{source.reason}</p>}
+        {onRead && source.item?.id && <button type="button" onClick={() => onRead(source.item.id)}>Read in ORIN</button>}
       </article>)}</div>
     </section>}
   </div>;

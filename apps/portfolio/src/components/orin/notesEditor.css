@@ -107,7 +107,7 @@
   border-radius: 4px;
   box-shadow: 0 1px 2px rgb(0 0 0 / .08), 0 8px 26px rgb(0 0 0 / .12);
   padding: 72px 90px;
-  font-size: 14.5px; line-height: 1.75; outline: none;
+  font-size: 16px; line-height: 1.7; outline: none;
 }
 .orin-docs-page:empty::before { content: 'Start writing…'; color: var(--muted); font-style: italic; }
 .orin-docs-page h1 { font-size: 26px; line-height: 1.25; letter-spacing: -0.02em; margin: 0.6em 0 0.35em; font-weight: 600; }

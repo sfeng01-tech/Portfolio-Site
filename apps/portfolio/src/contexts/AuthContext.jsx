@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 const AuthContext = createContext();
+const isOrinPath = (path) => path === '/orin' || path?.startsWith('/orin/');
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -10,7 +11,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const restoreSession = async () => {
       try {
-        const sessionUrl = window.location.pathname === '/orin'
+        const sessionUrl = isOrinPath(window.location.pathname)
           ? '/api/auth/session?destination=%2Forin'
           : '/api/auth/session';
         const response = await fetch(sessionUrl, {
@@ -42,7 +43,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = useCallback((returnTo) => {
     setError(null);
-    window.location.assign(returnTo === '/orin' ? '/api/auth/login?returnTo=%2Forin' : '/api/auth/login');
+    window.location.assign(isOrinPath(returnTo) ? '/api/auth/login?returnTo=%2Forin' : '/api/auth/login');
   }, []);
 
   const logout = useCallback(async () => {

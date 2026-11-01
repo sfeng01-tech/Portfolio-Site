@@ -1,5 +1,12 @@
 import { orinSql, privateResponse, requireOrinOwner, sendError } from '../../apps/portfolio/server/orin.js';
 import { validateNoteId, validateReminderCreate, validateReminderPatch } from '../../apps/portfolio/server/orin-notes.js';
+import { ensureReminderSchema } from '../../apps/portfolio/server/orin-reminder-schema.js';
+
+async function reminderSql() {
+  const sql = await orinSql();
+  await ensureReminderSchema(sql);
+  return sql;
+}
 
 // Daily reminders for the ORIN owner. The browser schedules the notifications;
 // this table is the durable source of truth, so reloads and other devices stay
@@ -16,13 +23,13 @@ export default async function handler(req, res) {
     // Column lists repeat intentionally: tagged templates bind interpolated
     // strings as parameters, so SQL fragments stay written out inline.
     if (req.method === 'GET') {
-      const sql = await orinSql();
+      const sql = await reminderSql();
       const rows = await sql`SELECT id, label, to_char(time_of_day, 'HH24:MI') AS time, days, due_date::text AS "dueDate", enabled, last_fired_at AS "lastFiredAt", created_at AS "createdAt" FROM orin_reminders ORDER BY enabled DESC, due_date NULLS LAST, time_of_day, created_at`;
       return res.status(200).json({ reminders: rows });
     }
     if (req.method === 'POST') {
       const create = validateReminderCreate(req.body || {});
-      const sql = await orinSql();
+      const sql = await reminderSql();
       const [reminder] = await sql`
         INSERT INTO orin_reminders (label, time_of_day, days, due_date, enabled)
         VALUES (${create.label}, ${create.time}::time, ${JSON.stringify(create.days)}::jsonb, ${create.dueDate}::date, ${create.enabled})
@@ -37,7 +44,7 @@ export default async function handler(req, res) {
       return res.status(200).json({ deleted: removed.id });
     }
     const patch = validateReminderPatch(req.body || {});
-    const sql = await orinSql();
+    const sql = await reminderSql();
     const [reminder] = await sql`
       UPDATE orin_reminders SET
         label = COALESCE(${patch.label ?? null}, label),

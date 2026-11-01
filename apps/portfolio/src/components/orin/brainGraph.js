@@ -271,6 +271,7 @@ export function buildBrainModel({ items = [], groups = [], maxItems = 40, cluste
       items: nodes.length,
       available: usable.length,
       sources: sources.length,
+      availableSources: new Set(usable.map((item) => item.source)).size,
       segments: topics.length,
       threads: threads.filter((thread) => thread.itemIds.length).length,
       links: edges.length,

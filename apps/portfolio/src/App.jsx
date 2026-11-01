@@ -109,13 +109,13 @@ function App() {
             {/* Admin Routes */}
             <Route path="/orin" element={
               <>
-                <Navigation />
+                <Navigation variant="orin" />
                 <OrinEntry />
               </>
             } />
             <Route path="/orin/videos" element={
               <>
-                <Navigation />
+                <Navigation variant="orin" />
                 <OrinEntry path="/orin/videos"><OrinVideosPage /></OrinEntry>
               </>
             } />

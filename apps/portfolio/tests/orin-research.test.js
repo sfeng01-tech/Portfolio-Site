@@ -57,6 +57,9 @@ test('capabilities never contain provider secrets and distinguish library from w
   assert.equal(researchCapabilities(env).web, true);
   assert.ok(!JSON.stringify(researchCapabilities(env)).includes('private-model-key'));
   assert.equal(researchCapabilities(env).workerRequired, true);
+  assert.equal(researchCapabilities({ ORIN_RESEARCH_WORKER_ENABLED: 'true' }).library, true);
+  assert.equal(researchCapabilities({ ORIN_RESEARCH_WORKER_ENABLED: 'false' }).library, false);
+  assert.equal(researchCapabilities({ ORIN_RESEARCH_WORKER_ENABLED: 'true', ORIN_RESEARCH_WEB_ENABLED: 'true' }).web, true);
   assert.equal(DEFAULT_RESEARCH_MODEL, 'deepseek/deepseek-v4.1-flash-1017');
   assert.equal(researchCapabilities({ OPENROUTER_API_KEY: 'key' }).model, DEFAULT_RESEARCH_MODEL);
   assert.equal(researchCapabilities({ ...env, ORIN_RESEARCH_MODEL: ' custom/model ' }).model, 'custom/model');

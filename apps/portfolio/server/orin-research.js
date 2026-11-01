@@ -84,12 +84,14 @@ export function validateResearchPatch(body) {
 }
 
 export function researchCapabilities(env = process.env) {
-  const library = Boolean(env.OPENROUTER_API_KEY?.trim());
+  // A separately configured worker may hold provider keys without exposing
+  // them to the web process. Operators explicitly enable only verified modes.
+  const library = Boolean(env.OPENROUTER_API_KEY?.trim()) || env.ORIN_RESEARCH_WORKER_ENABLED === 'true';
   const model = env.ORIN_RESEARCH_MODEL?.trim() || DEFAULT_RESEARCH_MODEL;
-  const web = library && Boolean(env.TAVILY_API_KEY?.trim());
+  const web = library && (Boolean(env.TAVILY_API_KEY?.trim()) || env.ORIN_RESEARCH_WEB_ENABLED === 'true');
   return {
     library, web, model: library ? model : null, workerRequired: true,
-    message: !library ? 'Research needs OPENROUTER_API_KEY and a separately running research worker.'
+    message: !library ? 'Research needs a configured model provider and a separately running research worker.'
       : !web ? 'Library research is configured. Web research additionally needs TAVILY_API_KEY. A separate research worker must be running.'
         : 'Research providers are configured. A separate research worker must be running to process queued jobs.'
   };

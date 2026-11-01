@@ -1,10 +1,14 @@
+import { mutateContent } from '../../apps/portfolio/server/orin-content.js';
 import { orinSql, privateResponse, requireOrinOwner, sendError, validateCategory } from '../../apps/portfolio/server/orin.js';
 
 export default async function handler(req, res) {
   privateResponse(res);
-  if (req.method !== 'PATCH') { res.setHeader('Allow', 'PATCH'); return res.status(405).json({ error: 'Method not allowed' }); }
+  if (!['PATCH', 'DELETE'].includes(req.method)) { res.setHeader('Allow', 'PATCH, DELETE'); return res.status(405).json({ error: 'Method not allowed' }); }
   try {
     await requireOrinOwner(req, true);
+    if (req.method === 'DELETE' || ['title', 'excerpt', 'url'].some(key => req.body?.[key] !== undefined)) {
+      return await mutateContent(req, res, orinSql);
+    }
     const { id, read, saved, feedback, category } = req.body || {};
     let parsedCategory;
     if (category !== undefined && category !== null) parsedCategory = validateCategory(category);

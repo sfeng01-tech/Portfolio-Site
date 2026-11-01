@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { digestItemCount, requireIngestToken, requireOrinOwner, resolveDigestUpdate, safeUrl, suppressPreviousItems, validDate, validateCategory, validateIngest } from '../server/orin.js';
-import digestHandler from '../../../api/orin/digest.js';
+import digestHandler, { videoListParams } from '../../../api/orin/digest.js';
 import itemsHandler from '../../../api/orin/items.js';
 import ingestHandler from '../../../api/orin/ingest.js';
 import preflightHandler from '../../../api/orin/preflight.js';
@@ -45,6 +45,23 @@ test('read and write endpoints reject anonymous requests before querying private
     await handler({ method, headers: {}, query: {} }, res);
     assert.equal(res.statusCode, 401);
     assert.equal(res.headers['Cache-Control'], 'private, no-store');
+  }
+});
+
+test('video browsing accepts bounded literal search and pages', async () => {
+  assert.deepEqual(videoListParams({}), { page: 1, search: '', offset: 0, pageSize: 24 });
+  assert.deepEqual(videoListParams({ page: '3', q: '  GPU kernels  ' }), { page: 3, search: 'GPU kernels', offset: 48, pageSize: 24 });
+  for (const page of ['0', '-1', '1.5', 'abc', '10001', ['1', '2']]) {
+    assert.throws(() => videoListParams({ page }), /Invalid video page/);
+  }
+  for (const q of ['x'.repeat(121), 'line\nbreak', ['GPU']]) {
+    assert.throws(() => videoListParams({ q }), /Invalid video search/);
+  }
+  const headers = { cookie: await sessionCookie() };
+  for (const query of [{ kind: 'video', page: '0' }, { kind: 'video', q: 'x'.repeat(121) }]) {
+    const res = response();
+    await digestHandler({ method: 'GET', query, headers }, res);
+    assert.equal(res.statusCode, 400);
   }
 });
 
