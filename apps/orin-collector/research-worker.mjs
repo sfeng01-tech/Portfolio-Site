@@ -2,6 +2,28 @@ import { randomUUID } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 import { runResearch, ResearchCancelled, ResearchBudgetExceeded } from './research-engine.mjs';
 
+// Only fixed messages and HTTP status codes are persisted; provider bodies,
+// request text, URLs and credentials must never leak to the owner or logs.
+export function researchFailureMessage(error) {
+  if (error instanceof ResearchBudgetExceeded) return 'Budget reached before completion. Partial evidence is retained.';
+  if (error?.name === 'TimeoutError' || error?.name === 'AbortError') return 'A research provider timed out. Partial evidence is retained.';
+  const message = typeof error?.message === 'string' ? error.message : '';
+  const status = message.match(/^Research (model|search|extract) request failed \((\d{3})\)$/);
+  if (status) return `The ${status[1]} provider returned HTTP ${status[2]}. Partial evidence is retained.`;
+  const known = new Set([
+    'Research model pricing or context unavailable', 'Unable to check research model pricing',
+    'Research model reached the output token limit', 'Research model returned invalid JSON',
+    'Invalid research perspective plan', 'Invalid research perspective ID',
+    'Research plan omitted or duplicated a requested perspective',
+    'Research evidence exceeds configured model context', 'Research model is not configured',
+    'Web research search provider is not configured', 'Invalid research budget', 'Invalid search request allowance'
+  ]);
+  if (known.has(message)) return `${message}. Partial evidence is retained.`;
+  if (/^(Invalid|Unsupported) (research |first-pass |follow-up |perspective |outline |evidence |research brief )/.test(message)
+      && /^[A-Za-z -]{1,100}$/.test(message)) return `Research output could not be validated: ${message}. Partial evidence is retained.`;
+  return 'Research could not complete. Check worker configuration/provider availability and review retained evidence.';
+}
+
 export function createResearchStore(sql) {
   async function claim() {
     // Jobs interrupted twice become terminal rather than looping indefinitely.
@@ -45,8 +67,7 @@ export function createResearchStore(sql) {
     return Boolean(row);
   }
   async function fail(job, error) {
-    const message = error instanceof ResearchBudgetExceeded ? 'Budget reached before completion. Partial evidence is retained.'
-      : 'Research could not complete. Check worker configuration/provider availability and review retained evidence.';
+    const message = researchFailureMessage(error);
     await sql`UPDATE orin_research_jobs SET status = 'failed', error = ${message}, progress = 'Investigation stopped',
       lease_token = NULL, lease_expires_at = NULL, updated_at = now()
       WHERE id = ${job.id}::uuid AND status = 'running' AND lease_token = ${job.lease_token}::uuid AND lease_expires_at > now()`;

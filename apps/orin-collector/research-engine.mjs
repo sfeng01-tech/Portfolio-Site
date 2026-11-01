@@ -101,8 +101,11 @@ export async function runResearch(job, {
     reservedUsd += rounded;
   };
   const progress = async (message, partial) => { await active(); await checkpoint(message, partial); };
-  let evidence = collectEvidence(job.sources);
-  const searchLog = [];
+  // Reclaimed or explicitly retried jobs retain exact passages and the paid
+  // extraction checkpoint. Their existing reservation remains in spent_usd.
+  const prior = job.result && typeof job.result === 'object' ? job.result : {};
+  let evidence = collectEvidence(job.sources, Array.isArray(prior.evidence) ? prior.evidence : []);
+  const searchLog = Array.isArray(prior.searchLog) ? [...prior.searchLog] : [];
   await progress('Planning the investigation', { evidence, searchLog });
   const selectedLibrarySources = await loadSources(job.sources || []);
   evidence = collectEvidence(selectedLibrarySources, evidence);
@@ -143,7 +146,8 @@ export async function runResearch(job, {
   if (scope === 'web' && (!Number.isFinite(webAllowance) || webAllowance < 0.01 || webAllowance > 1)) throw new Error('Invalid search request allowance');
   const selectedUrls = [...new Set((job.sources || []).map(source => publicHttps(source.url)).filter(Boolean))].slice(0, 20);
   const selectedIdentities = new Set([...selectedUrls, ...selectedLibrarySources.map(source => publicHttps(source.url)).filter(Boolean)]);
-  if (scope === 'web' && selectedUrls.length) {
+  const priorExtraction = searchLog.some(row => row?.source === 'selected sources');
+  if (scope === 'web' && selectedUrls.length && !priorExtraction) {
     await progress('Reading selected sources', { evidence, searchLog });
     // One basic extraction credit covers at most five URLs. Reserve for every
     // attempted batch before submitting, even if some URLs cannot be read.

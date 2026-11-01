@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { collectEvidence, publicHttps, validateBrief, runResearch, ResearchBudgetExceeded, ResearchCancelled, DEFAULT_RESEARCH_MODEL } from './research-engine.mjs';
-import { createResearchStore, processNextResearch } from './research-worker.mjs';
+import { createResearchStore, processNextResearch, researchFailureMessage } from './research-worker.mjs';
 
 const evidence = collectEvidence([{ url: 'https://example.org/paper', title: 'Paper', excerpt: 'Benchmark limited to a specific GPU.', provenance: 'web' }]);
 const brief = () => ({ outcome: 'candidate', title: 'Test portability', summary: 'A candidate worth investigating.', opportunity: 'Evaluate the reported limitation.', amdBenefit: 'Potential portability evidence.', existingWork: 'The cited paper provides a baseline.', counterevidence: 'No tests have been run.', limitations: ['Excerpt only.'], nextQuestions: ['Which hardware?'], claims: [{ statement: 'The paper reports a limited benchmark.', evidenceIds: ['E1', 'E2'], kind: 'source_claim' }], experiment: { action: 'Reproduce baseline', baseline: 'Published recipe', metrics: 'Latency and correctness', requirements: 'Target GPU', stopCondition: 'Already covered by existing results' } });
@@ -150,6 +150,24 @@ test('selected manual links are extracted before planning, while library data re
   assert.ok(fake.calls.findIndex(call => call.url.endsWith('/extract')) < fake.calls.findIndex(call => call.url.endsWith('/completions')));
   const upgraded = collectEvidence([{ url: current.sources[0].url, excerpt: 'from library', provenance: 'library' }], collectEvidence([{ ...current.sources[0], excerpt: 'unverified' }]));
   assert.equal(upgraded[0].provenance, 'provided'); assert.equal(upgraded[1].provenance, 'library'); assert.equal(upgraded[1].id, 'E2');
+});
+
+test('a retry preserves evidence and the original extraction without paying to fetch it again', async () => {
+  const fake = provider();
+  const priorEvidence = collectEvidence([{ url: 'https://example.org/paper', title: 'Paper', excerpt: 'Previously extracted text.', provenance: 'web', coverage: 'page_text' }]);
+  const current = { ...job(), spent_usd: 0.032778, result: { evidence: priorEvidence, searchLog: [{ source: 'selected sources', requested: 1, readable: 1 }] } };
+  const result = await runResearch(current, { env, fetchImpl: fake.fetchImpl });
+  assert.equal(fake.calls.some(call => call.url.endsWith('/extract')), false);
+  assert.equal(result.evidence[0].excerpt, 'Previously extracted text.');
+  assert.ok(result.reservedUsd > current.spent_usd);
+  assert.equal(result.searchLog.filter(row => row.source === 'selected sources').length, 1);
+});
+
+test('diagnostic messages distinguish provider failures without revealing unsafe error content', () => {
+  assert.match(researchFailureMessage(new Error('Research model request failed (429)')), /model provider returned HTTP 429/);
+  assert.match(researchFailureMessage(new Error('Invalid research perspective plan')), /perspective plan/);
+  assert.match(researchFailureMessage(new Error('Research model returned invalid JSON')), /invalid JSON/);
+  assert.doesNotMatch(researchFailureMessage(new Error('credential=secret private source')), /secret|private source/);
 });
 
 test('failed persisted reservation prevents a paid provider call', async () => {
