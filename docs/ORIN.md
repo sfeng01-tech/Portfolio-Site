@@ -35,6 +35,8 @@ npm run ask:index --workspace=@portfolio/orin-collector
 
 The indexer uses `ORIN_DATABASE_URL` and optionally `OPENROUTER_API_KEY` for `openai/text-embedding-3-small` vectors. Without a key it still writes passages for keyword search. On macOS, `--keychain-openrouter` reads the existing Keychain entry. Set `ORIN_ASK_MODEL` on the ORIN web service to override the default `deepseek/deepseek-v4.1-flash-1017`; `OPENROUTER_API_KEY` is required to generate answers. Provider requests contain the question, retrieved passages, and conversation history.
 
+GitHub Actions refreshes the Ask index every six hours at minute 37 UTC using `.github/workflows/orin-ask-index.yml`. The workflow can also be run manually and requires the `ORIN_ASK_DATABASE_URL` and `OPENROUTER_API_KEY` repository secrets; it fails if either is missing. It indexes up to the 2,000 most recently updated items and 500 notes. Each run has a conservative $0.80 embedding allowance; if it reaches that limit, subsequent runs continue with passages still needing work. Scheduled runs may be delayed by GitHub Actions.
+
 - `GET /api/orin/ask`: `{conversations}` for the 30 most recent threads, or `?conversationId=<uuid>` for one conversation with its messages and sources. Returns `{conversations: [], migrationRequired: true}` before the migration.
 - `POST /api/orin/ask`: `{question, mode: "library", conversationId?}`. Streams server-sent events: `sources` (retrieval method, public source cards, conversation id), `delta` (answer text), `done` (cited and invalid citation numbers, model, usage, latency), and `error`. `mode` values other than `library` return 400 until web answers exist.
 - `DELETE /api/orin/ask?conversationId=<uuid>`: deletes one conversation and its messages.

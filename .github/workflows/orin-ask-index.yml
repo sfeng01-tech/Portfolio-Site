@@ -1,0 +1,38 @@
+name: ORIN Ask passage index
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '37 */6 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: orin-ask-passage-index
+  cancel-in-progress: false
+
+jobs:
+  index:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install indexer dependencies
+        run: npm ci --workspace=@portfolio/orin-collector --ignore-scripts
+      - name: Refresh Ask passages and embeddings
+        env:
+          ORIN_DATABASE_URL: ${{ secrets.ORIN_ASK_DATABASE_URL }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        shell: bash
+        run: |
+          if [[ -z "$ORIN_DATABASE_URL" || -z "$OPENROUTER_API_KEY" ]]; then
+            echo 'ORIN Ask indexing requires ORIN_ASK_DATABASE_URL and OPENROUTER_API_KEY repository secrets.' >&2
+            exit 1
+          fi
+          npm run ask:index --workspace=@portfolio/orin-collector
