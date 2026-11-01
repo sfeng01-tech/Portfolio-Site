@@ -9,7 +9,8 @@
   "workspaces": [
     "apps/portfolio",
     "apps/orin-collector",
-    "apps/orin-mcp"
+    "apps/orin-mcp",
+    "apps/orin-extension"
   ],
   "scripts": {
     "dev": "npm run dev --workspace=@portfolio/site",

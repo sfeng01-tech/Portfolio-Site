@@ -8,6 +8,9 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+
+# Safari extension wrapper (generated per machine by safari-web-extension-converter)
+/safari/
 dist
 dist-ssr
 .vite/

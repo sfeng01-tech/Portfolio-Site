@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Save to ORIN</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header>
+    <h1>Save to ORIN</h1>
+    <span id="target-origin"></span>
+  </header>
+
+  <main>
+    <label for="url">URL</label>
+    <input id="url" type="url" readonly>
+    <p id="internal-warning" hidden>This page can't be saved</p>
+
+    <label for="title">Title</label>
+    <input id="title" type="text" maxlength="300">
+
+    <label for="note">Note</label>
+    <textarea id="note" rows="2" placeholder="Add a note (optional)"></textarea>
+
+    <label for="category">Category</label>
+    <select id="category" hidden>
+      <option value="">No category</option>
+    </select>
+    <input id="category-text" type="text" hidden>
+    <p id="category-hint" class="hint" hidden>Categories unavailable</p>
+
+    <button id="save" type="button" class="primary">Save to ORIN</button>
+    <p id="status" role="status"></p>
+  </main>
+
+  <footer>
+    <button id="open-orin" type="button">Open ORIN</button>
+    <button id="login" type="button" hidden>Log in</button>
+  </footer>
+
+  <script src="popup.js"></script>
+</body>
+</html>
