@@ -250,7 +250,14 @@ export function createLibrarySearch(sql, { env = process.env, fetchImpl = fetch 
         ORDER BY array_position(${sourceIds}::text[], i.id) LIMIT ${limit}`;
       if (rows.length !== sourceIds.length) throw fail('Some selected sources are no longer available. Remove them and try again.', 409);
       if (rows.some(row => !row.text?.trim())) throw fail('A selected source has no saved text. Remove it or save its content before asking.', 409);
-      return { sources: rows, method: 'selected' };
+      const textBudget = Math.floor(MAX_CONTEXT_CHARS / sourceIds.length) - 650;
+      return {
+        sources: rows.map(row => ({
+          ...row, title: row.title.slice(0, 500), origin: row.origin?.slice(0, 100),
+          text: row.text.slice(0, Math.min(2400, textBudget))
+        })),
+        method: 'selected'
+      };
     }
     const terms = searchTerms(query);
     if (!terms) return { sources: [], method: 'empty', reason: 'empty_query' };

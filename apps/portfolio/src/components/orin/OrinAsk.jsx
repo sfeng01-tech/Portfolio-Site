@@ -1,10 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowUpRight, BookmarkPlus, Check, Copy, CornerDownLeft, MessageSquarePlus,
-  Search, Sparkles, Trash2, AlertTriangle, History
+  Search, Sparkles, Trash2, AlertTriangle, History, FlaskConical, Paperclip, X, ChevronDown
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import './OrinAsk.css';
+import { researchHandoff } from './exploration';
 
 const MAX_QUESTION = 2000;
 const TIER_ORDER = ['custom', 'value', 'balanced', 'fast', 'premium'];
@@ -52,6 +53,7 @@ const relative = iso => {
   return days < 7 ? `${days}d ago` : new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 };
 const methodLabel = method => ({
+  selected: 'Selected sources',
   hybrid: 'Semantic + keyword search',
   lexical: 'Keyword search',
   fallback: 'Library scan',
@@ -134,16 +136,48 @@ function SourceCards({ message, onCite }) {
   </ol>;
 }
 
-export default function OrinAsk() {
+export default function OrinAsk({ workspace, onWorkspaceChange, onResearch }) {
   const { expireSession } = useAuth();
   const [historyOpen, setHistoryOpen] = useState(false);
   const [thread, setThread] = useState([]);
-  const [question, setQuestion] = useState('');
+  const { question, mode, sources: selectedSources } = workspace;
+  const setQuestion = value => onWorkspaceChange(current => ({ ...current, question: value }));
+  const setMode = value => { setError(''); onWorkspaceChange(current => ({ ...current, mode: value })); };
+  const [searchResult, setSearchResult] = useState(null);
+  const [searchBusy, setSearchBusy] = useState(false);
+  const [searchedQuery, setSearchedQuery] = useState('');
+  const searchAbort = useRef(null);
+  const isSearching = mode === 'search';
+  const isResearching = mode === 'research';
+  function toggleSource(item) {
+    onWorkspaceChange(current => ({ ...current, sources: current.sources.some(source => source.id === item.id)
+      ? current.sources.filter(source => source.id !== item.id)
+      : current.sources.length < 10 ? [...current.sources, item] : current.sources }));
+  }
+  function researchFrom(message) {
+    const index = thread.findIndex(entry => entry.key === message.key);
+    const prompt = [...thread.slice(0, index)].reverse().find(entry => entry.role === 'user')?.content || question;
+    onResearch(researchHandoff(prompt, message.sources || []));
+  }
+  async function searchLibrary() {
+    const query = question.trim();
+    if (query.length < 2 || query.length > 200) { setError('Search must be 2–200 characters.'); return; }
+    searchAbort.current?.abort();
+    const controller = new AbortController(); searchAbort.current = controller;
+    setSearchBusy(true); setError(''); setSearchResult(null); setSearchedQuery(query);
+    try {
+      const result = await json('/api/orin/search', { method: 'POST', signal: controller.signal,
+        headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query }) });
+      if (!controller.signal.aborted) setSearchResult(result);
+    } catch (err) { if (err.name !== 'AbortError') report(err); }
+    finally { if (!controller.signal.aborted) setSearchBusy(false); }
+  }
   const [conversationId, setConversationId] = useState(null);
   const [conversations, setConversations] = useState([]);
   const [capabilities, setCapabilities] = useState(null);
   const [model, setModel] = useState('');
   const [effort, setEffort] = useState('auto');
+  const [modelOpen, setModelOpen] = useState(false);
   const [migrationRequired, setMigrationRequired] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -154,6 +188,9 @@ export default function OrinAsk() {
   const abort = useRef(null);
   const threadEnd = useRef(null);
   const composer = useRef(null);
+  const modelBar = useRef(null);
+  const modelTrigger = useRef(null);
+  const modelPopover = useRef(null);
 
   const report = useCallback(err => {
     if (err?.status === 401) { expireSession(); return; }
@@ -173,7 +210,7 @@ export default function OrinAsk() {
   }, [report]);
 
   useEffect(() => { loadConversations(); }, [loadConversations]);
-  useEffect(() => () => abort.current?.abort(), []);
+  useEffect(() => () => { abort.current?.abort(); searchAbort.current?.abort(); }, []);
 
   // Restore the last model/effort choice, but only after the server tells us
   // which models this deployment allows.
@@ -202,6 +239,34 @@ export default function OrinAsk() {
     try { localStorage.setItem('orin-ask-effort', effort); } catch { /* Non-fatal. */ }
   }, [effort]);
 
+  // The model menu is a non-modal popover: outside click closes it, Escape
+  // returns focus to the trigger, and the selected option receives focus.
+  useEffect(() => {
+    if (!modelOpen) return undefined;
+    const onPointerDown = event => {
+      if (!modelBar.current?.contains(event.target)) setModelOpen(false);
+    };
+    const onKeyDown = event => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setModelOpen(false);
+        modelTrigger.current?.focus();
+      }
+    };
+    document.addEventListener('pointerdown', onPointerDown);
+    document.addEventListener('keydown', onKeyDown);
+    const frame = requestAnimationFrame(() => {
+      const active = modelPopover.current?.querySelector('.orin-ask-model-option.is-active');
+      const first = modelPopover.current?.querySelector('button');
+      (active || first)?.focus();
+    });
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown);
+      document.removeEventListener('keydown', onKeyDown);
+      cancelAnimationFrame(frame);
+    };
+  }, [modelOpen]);
+
   const selectedModel = useMemo(
     () => capabilities?.models?.find(entry => entry.id === model) || capabilities?.models?.[0] || null,
     [capabilities, model]
@@ -212,18 +277,21 @@ export default function OrinAsk() {
   const effortChoices = selectedModel?.efforts || [];
   const modelName = useCallback(id => capabilities?.models?.find(entry => entry.id === id)?.label || id, [capabilities]);
   const effortName = value => EFFORT_LABELS[value] || value;
-  const priceLabel = selectedModel && Number.isFinite(selectedModel.promptPerM)
-    ? `${formatPrice(selectedModel.promptPerM)} in / ${formatPrice(selectedModel.completionPerM)} out per 1M tokens`
+  const effectiveEffort = effort === 'auto' ? selectedModel?.defaultEffort : effort;
+  const compactPriceLabel = selectedModel && Number.isFinite(selectedModel.promptPerM)
+    ? `${formatPrice(selectedModel.promptPerM)} / ${formatPrice(selectedModel.completionPerM)} per 1M`
     : null;
   const contextLabel = formatContext(selectedModel?.context);
-  const modelSummary = selectedModel
-    ? [selectedModel.note, priceLabel, contextLabel ? `${contextLabel} context` : null].filter(Boolean).join(' · ')
-    : '';
 
   function chooseModel(id) {
     setModel(id);
     const next = capabilities?.models?.find(entry => entry.id === id);
     if (effort !== 'auto' && !next?.efforts?.includes(effort)) setEffort('auto');
+  }
+
+  function closeModelMenu() {
+    setModelOpen(false);
+    modelTrigger.current?.focus();
   }
 
   const updateAssistant = useCallback((key, patch) => {
@@ -238,6 +306,8 @@ export default function OrinAsk() {
     setError('');
     setNotice('');
     setBusy(false);
+    setModelOpen(false);
+    onWorkspaceChange(current => ({ ...current, question: '', sources: [] }));
     composer.current?.focus();
   }
 
@@ -262,6 +332,7 @@ export default function OrinAsk() {
           done: true
         });
       }
+      onWorkspaceChange(current => ({ ...current, mode: 'ask', sources: [], question: '' }));
       setHistoryOpen(false);
       setThread(messages);
       setConversationId(payload.conversation?.id || id);
@@ -289,6 +360,13 @@ export default function OrinAsk() {
 
   async function send(event, preset) {
     event?.preventDefault();
+    setModelOpen(false);
+    if (isSearching) { if (!searchBusy) await searchLibrary(); return; }
+    if (isResearching) {
+      if (question.trim().length > 1500) { setError('Research questions are limited to 1500 characters. Shorten the question before continuing.'); return; }
+      if (question.trim()) onResearch(researchHandoff(question.trim(), selectedSources));
+      return;
+    }
     const prompt = (preset ?? question).trim();
     if (!prompt || busy) return;
     if (prompt.length > MAX_QUESTION) { setError(`Questions are limited to ${MAX_QUESTION} characters.`); return; }
@@ -320,6 +398,7 @@ export default function OrinAsk() {
           question: prompt,
           mode: 'library',
           conversationId,
+          ...(selectedSources.length ? { sourceIds: selectedSources.map(source => source.id) } : {}),
           model: selectedModel?.id || undefined,
           effort
         })
@@ -436,27 +515,21 @@ export default function OrinAsk() {
   const lastAssistant = [...thread].reverse().find(message => message.role === 'assistant');
   const isEmpty = thread.length === 0;
 
-  return <section className={`orin-ask ${isEmpty ? 'is-empty' : 'has-thread'} ${historyOpen ? 'has-history' : ''}`} aria-labelledby="orin-ask-heading">
+  return <section className={`orin-ask ${isEmpty || mode !== 'ask' ? 'is-empty' : 'has-thread'} ${historyOpen ? 'has-history' : ''}`} aria-labelledby="orin-ask-heading">
     <div className="orin-ask-main">
       <header className={`orin-ask-intro ${isEmpty ? '' : 'is-compact'}`}>
         <div className="eyebrow"><Sparkles size={14}/> ASK YOUR LIBRARY</div>
-        <h2 id="orin-ask-heading" className={isEmpty ? '' : 'sr-only'}>What would you like to explore?</h2>
-        {isEmpty && <p>Explore your library with answers you can trace back to the source.</p>}
-        <button type="button" className="orin-ask-history-toggle" aria-expanded={historyOpen} aria-controls="orin-ask-history" onClick={() => setHistoryOpen(value => !value)}><History size={15}/> History{conversations.length > 0 ? ` · ${conversations.length}` : ''}</button>
+        <h2 id="orin-ask-heading" className={isEmpty || mode !== 'ask' ? '' : 'sr-only'}>What would you like to explore?</h2>
+        {(isEmpty || mode !== 'ask') && <p>{isSearching ? 'Find saved sources, then choose what to explore.' : isResearching ? 'Start with a question. Review the plan before research begins.' : 'Explore your library with answers you can trace back to the source.'}</p>}
+        <button type="button" className="orin-ask-history-toggle" aria-expanded={historyOpen} aria-controls="orin-ask-history" onClick={() => { setHistoryOpen(value => !value); if (!historyOpen && window.matchMedia('(max-width:1040px)').matches) requestAnimationFrame(() => document.getElementById('orin-ask-history')?.scrollIntoView({ block: 'start', behavior: 'smooth' })); }}><History size={15}/> History{conversations.length > 0 ? ` · ${conversations.length}` : ''}</button>
       </header>
 
       {migrationRequired && <p className="orin-ask-hint" role="status">Conversation history needs the ask migration. Answers still work and are not saved.</p>}
       {capabilities && !capabilities.library && <p className="orin-ask-hint" role="status">{capabilities.message}</p>}
       {error && <div className="orin-error" role="alert">{error}</div>}
 
-      <div className="orin-ask-thread" role="log" aria-live="polite" aria-relevant="additions text">
-        {isEmpty ? <div className="orin-ask-empty">
-          <div className="orin-ask-prompts">
-            {SUGGESTIONS.map(prompt => <button key={prompt} type="button" onClick={() => { setQuestion(prompt); composer.current?.focus(); }}>
-              <span>{prompt}</span><CornerDownLeft size={14}/>
-            </button>)}
-          </div>
-        </div> : thread.map(message => message.role === 'user'
+      <div className="orin-ask-thread" hidden={mode !== 'ask'} role="log" aria-live="polite" aria-relevant="additions text">
+        {thread.map(message => message.role === 'user'
           ? <article key={message.key} className="orin-ask-turn orin-ask-turn--user">
             <span className="orin-ask-role">You</span>
             <p>{message.content}</p>
@@ -481,6 +554,7 @@ export default function OrinAsk() {
                 <SourceCards message={message} onCite={ref => highlight(message, ref)}/>
                 {message.done && message.content && <div className="orin-ask-actions">
                   <button type="button" onClick={() => copy(message)}>{copiedKey === message.key ? <Check size={14}/> : <Copy size={14}/>} {copiedKey === message.key ? 'Copied' : 'Copy'}</button>
+                  <button type="button" onClick={() => researchFrom(message)}><FlaskConical size={14}/> Research this further</button>
                   <button type="button" disabled={savingKey === message.key} onClick={() => saveAsNote(message)}>
                     {savingKey === message.key ? <span className="orin-ask-spinner" aria-hidden="true"/> : <BookmarkPlus size={14}/>} Save as note
                   </button>
@@ -490,59 +564,114 @@ export default function OrinAsk() {
         <div ref={threadEnd}/>
       </div>
 
-      <form className="orin-ask-composer" onSubmit={event => send(event)}>
-        <details className="orin-ask-settings"><summary>{selectedModel?.label || 'Answer settings'} · {effortName(effort)}</summary><div className="orin-ask-controls">
-          <label className="orin-ask-control">
-            <span>Model</span>
-            <select value={model} onChange={event => chooseModel(event.target.value)}
-              disabled={busy || !modelsByTier.length} aria-label="Answer model" aria-describedby="orin-ask-model-note">
+      <form className={`orin-ask-composer ${modelOpen ? 'has-model-open' : ''}`} onSubmit={event => send(event)}>
+        <div className="orin-ask-modes" role="group" aria-label="Explore mode">{[['ask', 'Ask', Sparkles], ['search', 'Search', Search], ['research', 'Research', FlaskConical]].map(([value, label, Icon]) => <button key={value} type="button" aria-pressed={mode === value} disabled={busy} onClick={() => setMode(value)}><Icon size={14}/>{label}</button>)}</div>
+        {mode === 'ask' && <div className="orin-ask-modelbar" ref={modelBar}>
+          <button type="button" className="orin-ask-model-trigger" ref={modelTrigger}
+            aria-haspopup="dialog" aria-expanded={modelOpen} disabled={busy}
+            aria-label={`Answer model: ${selectedModel?.label || 'choose'}${effectiveEffort ? `, ${effortName(effectiveEffort)} reasoning` : ''}`}
+            onClick={() => setModelOpen(open => !open)}>
+            <Sparkles size={14}/>
+            <span>{selectedModel?.label || 'Choose model'}</span>
+            {effectiveEffort && <span className="orin-ask-model-effort"
+              title={effort === 'auto' ? `Auto (default: ${effortName(effectiveEffort)})` : `${effortName(effectiveEffort)} reasoning`}>
+              {effortName(effectiveEffort)}
+            </span>}
+            <ChevronDown size={14} className={modelOpen ? 'is-open' : ''}/>
+          </button>
+          {compactPriceLabel && <span className="orin-ask-model-caption">{compactPriceLabel}</span>}
+          {modelOpen && <div className={`orin-ask-model-popover ${isEmpty ? 'is-down' : 'is-up'}`} ref={modelPopover}
+            role="dialog" aria-label="Model and reasoning settings">
+            <header className="orin-ask-model-popover-head">
+              <span className="eyebrow">MODEL</span>
+              <button type="button" className="orin-ask-model-close" onClick={closeModelMenu} aria-label="Close model settings"><X size={15}/></button>
+            </header>
+            <div className="orin-ask-model-list">
               {modelsByTier.length
-                ? modelsByTier.map(group => <optgroup key={group.tier} label={group.label}>
-                  {group.models.map(entry => <option key={entry.id} value={entry.id}>{entry.label}</option>)}
-                </optgroup>)
-                : <option value="">Loading models…</option>}
-            </select>
-          </label>
-          <label className="orin-ask-control">
-            <span>Reasoning</span>
-            <select value={effort} onChange={event => setEffort(event.target.value)}
-              disabled={busy || !effortChoices.length} aria-label="Reasoning effort" aria-describedby="orin-ask-model-note">
-              <option value="auto">{effortChoices.length
-                ? `Auto${selectedModel?.defaultEffort ? ` · ${effortName(selectedModel.defaultEffort)}` : ''}`
-                : 'Fixed'}</option>
-              {effortChoices.map(value => <option key={value} value={value}>{effortName(value)}</option>)}
-            </select>
-          </label>
-          <span className="orin-ask-model-note" id="orin-ask-model-note">{modelSummary}</span>
-        </div>
-        </details>
-        <label htmlFor="orin-ask-input" className="sr-only">Ask your library</label>
-        <textarea id="orin-ask-input" ref={composer} rows={2} maxLength={MAX_QUESTION} value={question}
-          placeholder="Ask about anything you have saved…"
+                ? modelsByTier.map(group => <section key={group.tier} className="orin-ask-model-group">
+                  <span className="orin-ask-model-group-label">{group.label}</span>
+                  {group.models.map(entry => {
+                    const active = entry.id === selectedModel?.id;
+                    return <button key={entry.id} type="button"
+                      className={`orin-ask-model-option ${active ? 'is-active' : ''}`}
+                      aria-pressed={active} onClick={() => chooseModel(entry.id)}>
+                      <span className="orin-ask-model-option-copy">
+                        <strong>{entry.label}</strong>
+                        <small>{entry.provider}{entry.note ? ` · ${entry.note}` : ''}</small>
+                      </span>
+                      <span className="orin-ask-model-option-price"
+                        title={entry.promptPerM != null ? `Input ${formatPrice(entry.promptPerM)} / output ${formatPrice(entry.completionPerM)} per 1M tokens` : 'Pricing unavailable'}>
+                        {entry.promptPerM != null ? `${formatPrice(entry.promptPerM)} / ${formatPrice(entry.completionPerM)}` : '—'}
+                      </span>
+                      {active && <Check size={15} className="orin-ask-model-check"/>}
+                    </button>;
+                  })}
+                </section>)
+                : <p className="orin-ask-model-loading">Loading models…</p>}
+            </div>
+            <div className="orin-ask-reasoning">
+              <span className="orin-ask-model-group-label">Reasoning effort</span>
+              {effortChoices.length
+                ? <div className="orin-ask-effort-options" role="group" aria-label="Reasoning effort">
+                  <button type="button" aria-pressed={effort === 'auto'} onClick={() => setEffort('auto')}
+                    title={selectedModel?.defaultEffort ? `Model default: ${effortName(selectedModel.defaultEffort)}` : 'Model default'}>Auto</button>
+                  {effortChoices.map(value => <button key={value} type="button" aria-pressed={effort === value}
+                    onClick={() => setEffort(value)}>{effortName(value)}</button>)}
+                </div>
+                : <p className="orin-ask-model-fixed">This model does not expose reasoning effort.</p>}
+            </div>
+            <footer className="orin-ask-model-popover-foot">
+              <span>{contextLabel ? `${contextLabel} context · ` : ''}USD per 1M tokens</span>
+              <button type="button" onClick={closeModelMenu}>Done</button>
+            </footer>
+          </div>}
+        </div>}
+        {selectedSources.length > 0 && mode !== 'search' && <div className="orin-ask-selected" aria-label="Selected sources">{selectedSources.map(source => <button type="button" key={source.id} disabled={busy} onClick={() => toggleSource(source)} aria-label={`Remove ${source.title}`}><span>{source.title}</span><X size={13}/></button>)}</div>}
+        <label htmlFor="orin-ask-input" className="sr-only">{isSearching ? 'Search saved sources' : isResearching ? 'Investigation question' : 'Ask your library'}</label>
+        <textarea id="orin-ask-input" ref={composer} rows={2} maxLength={isSearching ? 200 : isResearching ? 1500 : MAX_QUESTION} value={question}
+          placeholder={isSearching ? 'Search a topic, title, model or GPU…' : isResearching ? 'What would you like to investigate?' : 'Ask about anything you have saved…'}
           onChange={event => setQuestion(event.target.value)}
           onKeyDown={event => {
             if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); send(event); }
           }}/>
         <div className="orin-ask-composer-foot">
-          <span><Search size={12}/> Searching saved items and notes</span>
+          <span>{isSearching ? 'Saved source items · up to 100 results' : isResearching ? 'Review scope, depth and budget next' : selectedSources.length ? `${selectedSources.length} selected source${selectedSources.length === 1 ? '' : 's'} only` : 'Saved items and notes · cited answers'}</span>
           <div>
-            {thread.length > 0 && <button type="button" className="orin-ask-secondary" onClick={reset} disabled={busy}>
+            {mode !== 'search' && <button type="button" className="orin-ask-secondary" disabled={busy} onClick={() => setMode('search')}><Paperclip size={14}/> Attach sources</button>}
+            {thread.length > 0 && mode === 'ask' && <button type="button" className="orin-ask-secondary" onClick={reset} disabled={busy}>
               <MessageSquarePlus size={14}/> New
             </button>}
-            <button type="submit" className="orin-ask-send" disabled={busy || !question.trim()}>
+            <button type="submit" className="orin-ask-send" disabled={busy || searchBusy || !question.trim() || (isSearching && question.trim().length < 2)}>
               {busy ? <span className="orin-ask-spinner" aria-hidden="true"/> : <CornerDownLeft size={15}/>}
-              {busy ? 'Answering…' : 'Ask'}
+              {busy ? 'Answering…' : searchBusy ? 'Searching…' : isSearching ? 'Search' : isResearching ? 'Review plan' : 'Ask'}
             </button>
           </div>
         </div>
       </form>
-      <p className="orin-ask-footnote">Answers are generated from your library and can be wrong. Follow the citations before relying on a claim.</p>
+      {isEmpty && mode === 'ask' && <div className="orin-ask-empty">
+          <div className="orin-ask-prompts">
+            {SUGGESTIONS.map(prompt => <button key={prompt} type="button" onClick={() => { setQuestion(prompt); composer.current?.focus(); }}>
+              <span>{prompt}</span><CornerDownLeft size={14}/>
+            </button>)}
+          </div>
+        </div>}
+      {isSearching && <div className="orin-ask-search-results" aria-live="polite">
+        <p className="orin-ask-search-disclosure">Search covers saved source items. Your query may be sent to the embedding provider. Keyword search is used when semantic search is unavailable.</p>
+        {searchBusy && <p role="status">Searching your library…</p>}
+        {selectedSources.length > 0 && <div className="orin-ask-selection-bar"><span>{selectedSources.length}/10 sources selected</span><button type="button" onClick={() => { setMode('ask'); setQuestion(selectedSources.length === 1 ? 'Explain the key ideas and limitations in the selected source.' : 'Compare the selected sources. Where do they agree and disagree?'); }}>Ask about selected</button><button type="button" onClick={() => { setMode('research'); setQuestion('What unresolved question is worth investigating across these sources?'); }}>Research selected</button><button type="button" onClick={() => onWorkspaceChange(current => ({ ...current, sources: [] }))}>Clear</button></div>}
+        {searchResult && <><h3>{searchResult.items.length} results for “{searchedQuery}”</h3><p>{searchResult.method === 'hybrid' ? 'Semantic + keyword matches' : 'Keyword matches'}</p><ul>{searchResult.items.map(item => {
+          const selected = selectedSources.some(source => source.id === item.id);
+          const link = safeUrl(item.resolvedUrl) || safeUrl(item.url);
+          return <li key={item.id}><small>{item.source || 'Saved source'}</small><h4>{link ? <a href={link} target="_blank" rel="noopener noreferrer">{item.title}<ArrowUpRight size={14}/></a> : item.title}</h4><p>{(item.excerpt || '').slice(0,320)}</p><button type="button" aria-pressed={selected} disabled={!selected && selectedSources.length >= 10} onClick={() => toggleSource(item)}>{selected ? 'Selected' : 'Select source'}</button></li>;
+        })}</ul>{!searchResult.items.length && <p>No matching sources. Try a broader topic or a different title.</p>}</>}
+      </div>}
+      {mode === 'ask' && <p className="orin-ask-footnote">Answers can be wrong. Follow the citations before relying on a claim.</p>}
       {notice && <p className="orin-ask-notice" role="status"><Check size={13}/> {notice}</p>}
     </div>
 
     <aside id="orin-ask-history" className="orin-ask-side" hidden={!historyOpen} aria-label="Recent conversations">
       <div className="orin-ask-side-head">
-        <span className="eyebrow">RECENT</span>
+        <span className="eyebrow">RECENT</span><button type="button" aria-label="Close history" onClick={() => setHistoryOpen(false)}><X size={15}/></button>
         {thread.length > 0 && <button type="button" onClick={reset} disabled={busy} aria-label="Start a new conversation"><MessageSquarePlus size={15}/></button>}
       </div>
       {conversations.length === 0

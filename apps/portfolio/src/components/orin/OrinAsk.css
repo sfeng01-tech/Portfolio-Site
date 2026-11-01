@@ -155,24 +155,79 @@
   margin-top:20px; padding:14px 0 12px;
   background:linear-gradient(to bottom, rgb(var(--paper-rgb) / 0), rgb(var(--paper-rgb) / .96) 18%);
 }
-.orin-ask-controls { display:flex; flex-wrap:wrap; align-items:flex-end; gap:9px 14px; margin-bottom:10px; }
-.orin-ask-control { display:flex; flex-direction:column; gap:4px; min-width:0; }
-.orin-ask-control > span {
-  font:8.5px 'SFMono-Regular',Consolas,monospace; letter-spacing:.9px; text-transform:uppercase; color:var(--muted);
-}
-.orin-ask-control select {
-  min-height:36px; max-width:250px; padding:7px 30px 7px 10px;
-  border:1px solid var(--line); border-radius:5px;
+.orin-ask-modelbar { position:relative; display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px; }
+.orin-ask-model-trigger {
+  display:inline-flex; align-items:center; gap:7px; min-height:34px; padding:6px 11px 6px 10px;
+  border:1px solid var(--line); border-radius:99px;
   background:rgb(var(--surface-rgb)); color:var(--ink);
-  font-family:inherit; font-size:12px;
+  font-size:12px; line-height:1;
 }
-.orin-ask-control select:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px #b4482817; }
-.orin-ask-control select:disabled { opacity:.6; cursor:not-allowed; }
-.orin-ask-model-note {
-  flex:1 1 230px; align-self:center;
-  font-size:10.5px; line-height:1.5; color:var(--muted);
+.orin-ask-model-trigger:hover { border-color:var(--accent); }
+.orin-ask-model-trigger[aria-expanded=true] { border-color:var(--accent); box-shadow:0 0 0 3px #b4482812; }
+.orin-ask-model-trigger:disabled { opacity:.55; cursor:not-allowed; }
+.orin-ask-model-trigger > svg:first-child { color:var(--accent); flex-shrink:0; }
+.orin-ask-model-trigger > svg:last-child { color:var(--muted); flex-shrink:0; transition:transform 160ms var(--ease-out); }
+.orin-ask-model-trigger > svg.is-open { transform:rotate(180deg); }
+.orin-ask-model-effort {
+  padding:2px 6px; border-radius:99px; background:rgb(var(--paper-rgb) / .85); color:var(--muted);
+  font:8.5px 'SFMono-Regular',Consolas,monospace; letter-spacing:.5px; text-transform:uppercase;
 }
-.orin-ask-model-note:empty { display:none; }
+.orin-ask-model-caption { font-size:10.5px; color:var(--muted); }
+.orin-ask-model-popover {
+  position:absolute; left:0; z-index:30;
+  width:min(430px, calc(100vw - 40px)); max-height:min(62vh, 560px); overflow-y:auto;
+  padding:12px; border:1px solid var(--line); border-radius:11px;
+  background:var(--paper); box-shadow:0 20px 50px #292b2626;
+  scrollbar-width:thin; scrollbar-color:var(--line) transparent;
+}
+.orin-ask-model-popover.is-up { bottom:calc(100% + 8px); top:auto; }
+.orin-ask-model-popover.is-down { top:calc(100% + 8px); bottom:auto; }
+.orin-ask-model-popover::-webkit-scrollbar { width:6px; }
+.orin-ask-model-popover::-webkit-scrollbar-thumb { background:var(--line); border-radius:99px; }
+.orin-ask-model-popover-head { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:2px 4px 10px; }
+.orin-ask-model-close { display:grid; place-items:center; width:28px; height:28px; border-radius:5px; color:var(--muted); }
+.orin-ask-model-close:hover { background:rgb(var(--surface-rgb)); color:var(--ink); }
+.orin-ask-model-list { display:flex; flex-direction:column; gap:10px; }
+.orin-ask-model-group { display:flex; flex-direction:column; gap:2px; }
+.orin-ask-model-group-label {
+  padding:4px 8px; font:8.5px 'SFMono-Regular',Consolas,monospace;
+  letter-spacing:1px; text-transform:uppercase; color:var(--muted);
+}
+.orin-ask-model-option {
+  display:flex; align-items:center; gap:10px; width:100%; min-height:48px; padding:8px;
+  border:1px solid transparent; border-radius:7px; color:var(--ink); text-align:left;
+}
+.orin-ask-model-option:hover { background:rgb(var(--surface-rgb)); }
+.orin-ask-model-option.is-active {
+  border-color:var(--line); background:rgb(var(--surface-rgb)); box-shadow:inset 2px 0 0 var(--accent);
+}
+.orin-ask-model-option-copy { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+.orin-ask-model-option-copy strong { font-size:13px; font-weight:500; }
+.orin-ask-model-option-copy small {
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  font-size:10.5px; line-height:1.4; color:var(--muted);
+}
+.orin-ask-model-option-price { flex-shrink:0; font:9px 'SFMono-Regular',Consolas,monospace; color:var(--muted); }
+.orin-ask-model-check { flex-shrink:0; color:var(--accent); }
+.orin-ask-model-loading { padding:12px 8px; font-size:12px; color:var(--muted); }
+.orin-ask-reasoning { margin-top:12px; padding-top:10px; border-top:1px solid var(--line); }
+.orin-ask-effort-options { display:flex; flex-wrap:wrap; gap:5px; padding:4px 8px 2px; }
+.orin-ask-effort-options button {
+  min-height:30px; padding:5px 9px; border:1px solid var(--line); border-radius:5px;
+  background:transparent; color:var(--muted); font-size:11px;
+}
+.orin-ask-effort-options button:hover { background:rgb(var(--surface-rgb)); color:var(--ink); }
+.orin-ask-effort-options button[aria-pressed=true] { background:var(--ink); border-color:var(--ink); color:var(--paper); }
+.orin-ask-model-fixed { padding:4px 8px; font-size:11px; color:var(--muted); }
+.orin-ask-model-popover-foot {
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  margin-top:12px; padding-top:10px; border-top:1px solid var(--line);
+}
+.orin-ask-model-popover-foot span { font-size:10px; color:var(--muted); }
+.orin-ask-model-popover-foot button {
+  min-height:32px; padding:6px 12px; border-radius:5px;
+  background:var(--ink); color:var(--paper); font-size:11.5px;
+}
 .orin-ask-composer textarea {
   display:block; width:100%; min-height:58px; max-height:220px; resize:vertical;
   padding:15px 16px; border:1px solid var(--line); border-radius:8px;
@@ -256,10 +311,13 @@
   .orin-ask-turn--answer { padding:16px 15px; }
   .orin-ask-answer { font-size:15px; }
   .orin-ask-sources li { padding:10px; }
-  .orin-ask-controls { gap:8px 10px; }
-  .orin-ask-control { flex:1 1 140px; }
-  .orin-ask-control select { max-width:none; width:100%; }
-  .orin-ask-model-note { flex-basis:100%; }
+  .orin-ask-model-popover { width:calc(100vw - 36px); max-height:min(64vh, 540px); }
+  .orin-ask-model-option { min-height:36px; padding:6px 8px; }
+  .orin-ask-effort-options button { min-height:28px; padding:4px 8px; }
+  .orin-ask-model-option-copy small { display:none; }
+  .orin-ask-model-group { gap:1px; }
+  .orin-ask-model-group-label { padding:3px 8px; }
+  .orin-ask-model-option-price { display:none; }
   .orin-ask-composer-foot > span { display:none; }
   .orin-ask-composer-foot { justify-content:flex-end; }
   .orin-ask-conversations { grid-template-columns:1fr; }
@@ -282,10 +340,9 @@
 .orin-ask-prompts button { align-items:flex-start; min-height:90px; padding:14px; font-size:12.5px; line-height:1.5; }
 .orin-ask-composer { border:1px solid var(--line); border-radius:14px; padding:16px; background:rgb(var(--surface-rgb)); box-shadow:0 8px 28px #00000008; }
 .orin-ask-composer:focus-within { border-color:var(--accent); }
+.orin-ask-composer.has-model-open { z-index:25; }
 .orin-ask-composer textarea { border:0; background:transparent; padding:12px 0; min-height:90px; }
 .orin-ask-composer textarea:focus { box-shadow:none; }
-.orin-ask-settings summary { cursor:pointer; color:var(--muted); font-size:12px; padding:4px 0; }
-.orin-ask-settings .orin-ask-controls { margin-top:12px; }
 .orin-ask-side[hidden] { display:none; }
 .orin-ask :is(button,summary):focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
 .orin-ask-delete { opacity:1; }
@@ -297,3 +354,38 @@
   .orin-ask-intro h2 { font-size:28px; }
   .orin-ask-composer { padding:12px; }
 }
+
+.orin-ask-modes { display:flex; gap:4px; padding-bottom:10px; }
+.orin-ask-modes button { display:flex; align-items:center; gap:6px; padding:8px 12px; border-radius:7px; color:var(--muted); min-height:40px; font-size:13px; }
+.orin-ask-modes button[aria-pressed="true"] { background:var(--ink); color:var(--paper); }
+.orin-ask-thread[hidden] { display:none; }
+.orin-ask-selected { display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; }
+.orin-ask-selected button { display:flex; align-items:center; gap:7px; min-width:0; max-width:100%; padding:7px 9px; border:1px solid var(--line); border-radius:6px; font-size:12px; }
+.orin-ask-selected span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.orin-ask-selected svg { flex-shrink:0; }
+.orin-ask-search-results { order:2; margin:20px 0; min-width:0; }
+.orin-ask-search-results h3 { font-size:18px; overflow-wrap:anywhere; }
+.orin-ask-search-results p,.orin-ask-search-results small { color:var(--muted); font-size:12px; line-height:1.6; }
+.orin-ask-search-results .orin-ask-search-disclosure { margin-bottom:20px; }
+.orin-ask-search-results ul { display:grid; gap:12px; padding:0; margin-top:16px; list-style:none; }
+.orin-ask-search-results li { padding:18px; border:1px solid var(--line); border-radius:9px; background:rgb(var(--surface-rgb)); }
+.orin-ask-search-results h4 { margin:5px 0 7px; font-size:16px; overflow-wrap:anywhere; }
+.orin-ask-search-results h4 a { display:inline-flex; align-items:baseline; gap:6px; }
+.orin-ask-search-results h4 svg { flex-shrink:0; }
+.orin-ask-search-results button { min-height:40px; padding:8px 12px; border:1px solid var(--line); border-radius:6px; font-size:12px; margin-top:10px; }
+.orin-ask-search-results button[aria-pressed="true"] { color:var(--accent); border-color:var(--accent); }
+.orin-ask-selection-bar { display:flex; align-items:center; flex-wrap:wrap; gap:8px; padding:12px; border:1px solid var(--accent); border-radius:8px; margin-bottom:20px; font-size:12px; }
+.orin-ask-selection-bar button { margin:0; }
+.orin-ask :disabled { opacity:.5; cursor:not-allowed; }
+@media(max-width:620px) { .orin-ask-composer-foot { flex-wrap:wrap; } .orin-ask-composer-foot > div { flex-wrap:wrap; justify-content:flex-end; } }
+
+.orin-ask.is-empty .orin-ask-empty { order:2; }
+.orin-ask-selected button { min-height:40px; }
+@media(max-width:620px) { .orin-ask-selected button,.orin-ask-modes button,.orin-ask-search-results button { min-height:44px; } }
+
+@media(max-width:620px) {
+  .orin-ask-composer-foot > span { display:inline-flex; flex-basis:100%; font-size:10px; line-height:1.5; }
+  .orin-ask-composer-foot { justify-content:space-between; }
+  .orin-ask-composer-foot > div { margin-left:auto; }
+}
+@media(prefers-reduced-motion:reduce) { .orin-ask * { animation:none !important; transition:none !important; scroll-behavior:auto !important; } }

@@ -62,9 +62,6 @@
 .orin-rail.is-collapsed .orin-rail-link { position:relative; }
 
 .orin-rail-foot { display:flex; flex-direction:column; gap:2px; padding-top:12px; border-top:1px solid var(--line); flex-shrink:0; }
-.orin-rail-theme { display:flex; align-items:center; min-height:40px; padding:0 10px; }
-.orin-rail-theme .theme-toggle { width:auto; height:auto; padding:0; border:0; background:transparent; }
-.orin-rail.is-collapsed .orin-rail-theme { justify-content:center; padding-inline:0; }
 .orin-rail-hint {
   display:flex; align-items:center; gap:6px; padding:8px 10px 0;
   font:9px 'SFMono-Regular',Consolas,monospace; letter-spacing:.6px; color:var(--muted); opacity:.75;
@@ -134,7 +131,6 @@
 .orin-sheet footer { display:flex; align-items:center; justify-content:space-between; gap:14px; margin-top:16px; padding-top:14px; border-top:1px solid var(--line); }
 .orin-sheet footer a, .orin-sheet footer button { display:flex; align-items:center; gap:7px; min-height:40px; padding:6px 4px; font-size:12px; color:var(--muted); }
 .orin-sheet footer a:hover, .orin-sheet footer button:hover { color:var(--ink); }
-.orin-sheet footer .theme-toggle { width:auto; height:auto; padding:0; border:0; background:transparent; }
 
 .orin-palette {
   width:min(560px, calc(100vw - 32px)); max-height:70vh; overflow-y:auto;

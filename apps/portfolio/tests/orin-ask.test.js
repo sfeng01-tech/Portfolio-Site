@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createAskHandler } from '../../../api/orin/ask.js';
 import {
-  ASK_MODEL_DEFAULT, MAX_QUESTION, askCapabilities, buildBoundedContext, buildContext, citationAudit,
+  ASK_MODEL_DEFAULT, MAX_CONTEXT_CHARS, MAX_QUESTION, askCapabilities, buildBoundedContext, buildContext, citationAudit,
   createLibrarySearch, extractCitations, searchTerms, streamGroundedAnswer,
   validateAsk, validateConversationId
 } from '../server/orin-ask.js';
@@ -422,4 +422,27 @@ test('selected-source answers reload only current selected items and fail closed
   assert.deepEqual(calls[0].values[0], [id]);
   await assert.rejects(createLibrarySearch(async () => [], { env: {} })('Explain', { sourceIds: [id] }), /no longer available/);
   await assert.rejects(createLibrarySearch(async () => [{ text: '' }], { env: {} })('Explain', { sourceIds: [id] }), /no saved text/);
+});
+
+test('selected source evidence keeps every selected item inside the answer context budget', async () => {
+  const sourceIds = Array.from({ length: 10 }, (_, i) => i.toString(16).padStart(64, '0'));
+  const search = createLibrarySearch(async () => sourceIds.map(sourceId => ({ kind: 'item', sourceId, title: 'T'.repeat(900), origin: 'S'.repeat(500), text: 'Evidence. '.repeat(1000) })), { env: {} });
+  const result = await search('Compare these', { sourceIds });
+  const bounded = buildBoundedContext(result.sources);
+  assert.equal(bounded.sources.length, 10);
+  assert.ok(bounded.context.length <= MAX_CONTEXT_CHARS);
+});
+
+test('ask handler forwards selected IDs and emits only the selected source cards', async () => {
+  const id = 'a'.repeat(64);
+  let scope;
+  const res = askResponse();
+  await askFixture({ search: async (_question, options) => {
+    scope = options.sourceIds;
+    return { method: 'selected', sources: [{ kind: 'item', sourceId: id, title: 'Selected evidence', text: 'Evidence.' }] };
+  } }).handler({ method: 'POST', body: { question: 'Explain this', sourceIds: [id] }, query: {} }, res);
+  assert.deepEqual(scope, [id]);
+  const [event] = parseEvents(res.output);
+  assert.equal(event.method, 'selected');
+  assert.deepEqual(event.sources.map(source => source.sourceId), [id]);
 });

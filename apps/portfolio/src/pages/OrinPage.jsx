@@ -68,6 +68,8 @@ export default function OrinPage() {
     return ORIN_TABS.some(entry => entry.value === requested) ? requested : 'digest';
   });
   const [researchSeeds, setResearchSeeds] = useState([]);
+  const [askWorkspace, setAskWorkspace] = useState({ question: '', mode: 'ask', sources: [] });
+  const [researchDraft, setResearchDraft] = useState(null);
   const [showAllFinds, setShowAllFinds] = useState(false);
   const [search, setSearch] = useState('');
   const [relatedSearch, setRelatedSearch] = useState(null);
@@ -110,7 +112,7 @@ export default function OrinPage() {
     window.history.replaceState({}, '', url);
   }, [tab]);
   useEffect(() => {
-    if (!user) { setResearchSeeds([]); setData(null); lastView.current = ''; cache.current.clear(); setBusy(false); return undefined; }
+    if (!user) { setAskWorkspace({ question: '', mode: 'ask', sources: [] }); setResearchDraft(null); setResearchSeeds([]); setData(null); lastView.current = ''; cache.current.clear(); setBusy(false); return undefined; }
     // These private panels fetch their own content when opened.
     if (tab === 'notes' || tab === 'reminders' || tab === 'videos' || tab === 'research' || tab === 'ask') { setBusy(false); return undefined; }
     // The archive opens its own day without touching the digest tab's date,
@@ -371,7 +373,7 @@ export default function OrinPage() {
 
   const activeTab = ORIN_TABS.find(entry => entry.value === tab) || ORIN_TABS[0];
   const showDate = tab === 'digest' || tab === 'brain' || (tab === 'archive' && Boolean(archiveDay));
-  const showRefresh = tab !== 'notes' && tab !== 'reminders' && tab !== 'videos' && tab !== 'ask';
+  const showRefresh = tab !== 'notes' && tab !== 'reminders' && tab !== 'videos' && tab !== 'ask' && tab !== 'research';
 
   return <div className={user ? 'orin-app' : 'orin-shell orin-gate-shell'}>
     <a href="#main-content" className="skip-link">Skip to content</a>
@@ -385,6 +387,7 @@ export default function OrinPage() {
         <div className="orin-context-actions">
           {showDate && <label className="orin-date"><span className="sr-only">Digest date</span><input type="date" value={date || data?.date || localDate()} max={localDate()} onChange={event => {setDate(event.target.value);setShowAllFinds(false);}}/></label>}
           {showRefresh && <button className="orin-icon" disabled={busy} onClick={() => setRevision(v=>v+1)} aria-label="Refresh content"><RefreshCw size={17} className={busy ? 'animate-spin' : ''}/></button>}
+          <ThemeToggle/>
         </div>
       </header> : <header className="orin-public-top">
         <Link to="/" className="orin-public-brand" aria-label="Sahil Faizal portfolio">ORIN<span>.</span></Link>
@@ -402,9 +405,9 @@ export default function OrinPage() {
           <button type="button" onClick={() => setSaveNotice(null)} aria-label="Dismiss save confirmation">Dismiss</button>
         </div>}
         {error && <div role="alert" className="orin-error">{error}</div>}
-        {tab !== 'ask' && <OrinLibrarySearch selectedIds={researchSeeds.map(seed => seed.itemId)} onAddResearch={(item,url) => setResearchSeeds(current => current.some(seed => seed.itemId === item.id) ? current.filter(seed => seed.itemId !== item.id) : [...current, { itemId:item.id, url, title:item.title, excerpt:(item.excerpt || '').slice(0,4000) }])}/>}
-        <OrinResearch active={tab === 'research'} seeds={researchSeeds} onClearSeeds={() => setResearchSeeds([])} revision={revision}/>
-        {tab === 'research' ? null : tab === 'ask' ? <OrinAsk/> : tab === 'notes' ? <OrinNotes/> : tab === 'reminders' ? <OrinReminders/> : tab === 'videos' ? <OrinVideosShelf embedded/> : !data && busy ? <div className="orin-state" role="status">Gathering your reading list…</div> : data && <>
+        {tab !== 'ask' && tab !== 'research' && <OrinLibrarySearch selectedIds={researchSeeds.map(seed => seed.itemId)} onAddResearch={(item,url) => setResearchSeeds(current => current.some(seed => seed.itemId === item.id) ? current.filter(seed => seed.itemId !== item.id) : [...current, { itemId:item.id, url, title:item.title, excerpt:(item.excerpt || '').slice(0,4000) }])}/>}
+        <OrinResearch active={tab === 'research'} seeds={researchSeeds} onClearSeeds={() => setResearchSeeds([])} revision={revision} incomingDraft={researchDraft} onConsumeDraft={() => setResearchDraft(null)} onNewInvestigation={() => { setAskWorkspace(current => ({ ...current, mode: 'research' })); selectTab('ask'); }}/>
+        {tab === 'research' ? null : tab === 'ask' ? <OrinAsk workspace={askWorkspace} onWorkspaceChange={setAskWorkspace} onResearch={value => { setResearchDraft({ ...value, id: crypto.randomUUID() }); selectTab('research'); }}/> : tab === 'notes' ? <OrinNotes/> : tab === 'reminders' ? <OrinReminders/> : tab === 'videos' ? <OrinVideosShelf embedded/> : !data && busy ? <div className="orin-state" role="status">Gathering your reading list…</div> : data && <>
           {busy && <div className="orin-refreshing" role="status">Refreshing…</div>}
           {tab==='archive' && <section className="orin-archive"><div className="eyebrow">DIGEST ARCHIVE</div>{archiveDay ? <>
             <button type="button" className="orin-archive-back" onClick={() => setArchiveDay(null)}>← Back to archive</button>

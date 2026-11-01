@@ -64,3 +64,20 @@
   .orin-research h2 { font-size:27px; }
   .orin-item-actions { flex-wrap:wrap; }
 }
+
+.orin-research { max-width:1000px; margin:0 auto; }
+.orin-research [hidden] { display:none; }
+.orin-research-header { align-items:center; }
+.orin-research-views { display:flex; flex-wrap:wrap; gap:6px; margin:24px 0; border-bottom:1px solid var(--line); padding-bottom:12px; }
+.orin-research-views button { border-color:transparent; }
+.orin-research-views button[aria-pressed="true"] { background:var(--ink); color:var(--paper); }
+.orin-research-read > summary { color:var(--accent); font-weight:500; }
+.orin-research-outcome { margin-top:14px; }
+.orin-research-preview { max-width:70ch; }
+.orin-research fieldset details label { margin:12px 0; }
+.orin-research-confirm { padding:16px; border-left:3px solid var(--accent); background:rgb(var(--surface-rgb)); font-size:14px; }
+.orin-research h3,.orin-research h4 { overflow-wrap:anywhere; }
+@media(max-width:680px) { .orin-research-header { align-items:flex-start; flex-direction:column; } }
+
+.orin-research { scroll-margin-top:100px; }
+.orin-research-views + div > .orin-research-section { border-top:0; padding-top:0; }

@@ -5,7 +5,6 @@ import {
   FileText, FlaskConical, LayoutGrid, LogOut, Menu, PanelLeftClose, PanelLeftOpen,
   Plus, Search, Share2, Sparkles, Video, X
 } from 'lucide-react';
-import ThemeToggle from '../ThemeToggle';
 import './OrinNav.css';
 
 // One source of truth for ORIN destinations. `group` is the rail heading and
@@ -19,7 +18,7 @@ export const ORIN_TABS = [
   { value: 'projects', label: 'Reference Projects', group: 'Library', icon: LayoutGrid },
   { value: 'books', label: 'Books', group: 'Library', icon: BookOpen },
   { value: 'videos', label: 'Videos', group: 'Library', icon: Video },
-  { value: 'research', label: 'Research', short: 'Research', group: 'Research', icon: FlaskConical, primary: true },
+  { value: 'research', label: 'Investigations', short: 'Research', group: 'Research', icon: FlaskConical, primary: true },
   { value: 'notes', label: 'Notes', group: 'Research', icon: FileText },
   { value: 'reminders', label: 'Reminders', group: 'Research', icon: Bell },
   { value: 'brain', label: 'Live brain', short: 'Brain', group: 'Brain', icon: Brain },
@@ -117,7 +116,6 @@ export default function OrinNav({ active, onSelect, onSignOut, researchCount = 0
         <Link to="/" className="orin-rail-link" title="Sahil Faizal portfolio">
           <ArrowUpRight size={17} strokeWidth={1.6}/><span>Portfolio</span>
         </Link>
-        <div className="orin-rail-theme"><ThemeToggle/></div>
         <button type="button" className="orin-rail-link" onClick={onSignOut} title="Sign out">
           <LogOut size={17} strokeWidth={1.6}/><span>Sign out</span>
         </button>
@@ -154,7 +152,6 @@ export default function OrinNav({ active, onSelect, onSignOut, researchCount = 0
         </div>
         <footer>
           <Link to="/" onClick={() => setMoreOpen(false)}><ArrowUpRight size={16}/> Portfolio</Link>
-          <ThemeToggle/>
           <button type="button" onClick={onSignOut}><LogOut size={16}/> Sign out</button>
         </footer>
       </div>
