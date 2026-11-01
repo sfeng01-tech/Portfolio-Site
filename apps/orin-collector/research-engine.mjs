@@ -106,10 +106,10 @@ export async function runResearch(job, {
   const prior = job.result && typeof job.result === 'object' ? job.result : {};
   let evidence = collectEvidence(job.sources, Array.isArray(prior.evidence) ? prior.evidence : []);
   const searchLog = Array.isArray(prior.searchLog) ? [...prior.searchLog] : [];
-  await progress('Planning the investigation', { evidence, searchLog });
+  await progress('Planning the investigation', { ...prior, evidence, searchLog });
   const selectedLibrarySources = await loadSources(job.sources || []);
   evidence = collectEvidence(selectedLibrarySources, evidence);
-  await progress('Checking selected library sources', { evidence, searchLog });
+  await progress('Checking selected library sources', { ...prior, evidence, searchLog });
   await active();
   const catalogResponse = await fetchImpl('https://openrouter.ai/api/v1/models', { redirect: 'error', signal: AbortSignal.timeout(30_000) });
   if (!catalogResponse.ok) throw new Error('Unable to check research model pricing');
@@ -131,7 +131,8 @@ export async function runResearch(job, {
     if (inputBound + maxTokens > model.context_length) throw new Error('Research evidence exceeds configured model context');
     const cost = inputBound * prices[0] + maxTokens * prices[1] + prices[2];
     await charge(cost); // Persist BEFORE request; a crash must not erase paid usage.
-    const response = await fetchImpl(MODEL_ENDPOINT, { method: 'POST', redirect: 'error', signal: AbortSignal.timeout(120_000),
+    // Leave room within the five-minute lease for a slow synthesis request.
+    const response = await fetchImpl(MODEL_ENDPOINT, { method: 'POST', redirect: 'error', signal: AbortSignal.timeout(240_000),
       headers: { Authorization: `Bearer ${env.OPENROUTER_API_KEY}`, 'Content-Type': 'application/json', 'X-Title': 'ORIN contribution research' },
         body: JSON.stringify({ model: modelId, messages, max_tokens: maxTokens, temperature: 0.2, response_format: responseFormat,
         reasoning: model.reasoning?.supported_efforts?.includes(effort) ? { effort, exclude: true } : reasoningOptions(model),
@@ -168,9 +169,14 @@ export async function runResearch(job, {
   const depth = job.options?.depth === 'deep' ? 'deep' : 'standard';
   const requestedPerspectives = Array.isArray(job.options?.perspectives) ? job.options.perspectives.slice(0, 3) : [];
   const perspectiveCount = Math.max(depth === 'deep' ? 3 : 2, requestedPerspectives.length);
-  let perspectives = [];
-  let outline = [];
-  let queries = [];
+  const resumeDraft = prior.depth === depth && Array.isArray(prior.perspectives) && prior.perspectives.length === perspectiveCount
+    && prior.perspectives.every(row => row?.followUpAnswer && row?.followUpStatus)
+    && Array.isArray(prior.outline) && prior.outline.length > 0;
+  let perspectives = resumeDraft ? prior.perspectives : [];
+  let outline = resumeDraft ? prior.outline : [];
+  let queries = resumeDraft && Array.isArray(prior.queries) ? prior.queries : [];
+  const independentWebEvidence = new Set(searchLog.filter(row => row.source === 'web' && Array.isArray(row.evidenceIds))
+    .flatMap(row => row.evidenceIds).filter(id => evidence.some(row => row.id === id && row.provenance === 'web' && !selectedIdentities.has(row.url))));
   const state = () => ({ evidence, searchLog, queries, perspectives, outline, depth });
   const bounded = (value, limit, field) => {
     if (typeof value !== 'string' || !value.trim()) throw new Error(`Invalid research ${field}`);
@@ -193,6 +199,7 @@ export async function runResearch(job, {
     if (!['grounded', 'insufficient_evidence'].includes(value)) throw new Error('Invalid perspective evidence status');
     return value;
   };
+  if (!resumeDraft) {
   await progress('Planning research perspectives', state());
   const planSchema = { type: 'json_schema', json_schema: { name: 'research_perspectives', strict: true, schema: {
     type: 'object', additionalProperties: false, required: ['perspectives'], properties: {
@@ -215,7 +222,6 @@ export async function runResearch(job, {
   if (new Set(perspectives.map(row => row.name.toLowerCase())).size !== perspectives.length || requestedPerspectives.some(name => !perspectives.some(row => row.name.toLowerCase() === name.toLowerCase()))) throw new Error('Research plan omitted or duplicated a requested perspective');
   queries = perspectives.map(row => row.initialQuery);
   await progress('Researching initial perspectives', state());
-  const independentWebEvidence = new Set();
   async function investigate(query, perspectiveId, phase) {
     evidence = collectEvidence(await searchLibrary(query), evidence);
     searchLog.push({ query, perspectiveId, phase, source: 'library', searchedAt: new Date().toISOString() });
@@ -280,6 +286,7 @@ export async function runResearch(job, {
   };
   if (!Array.isArray(structured.outline) || structured.outline.length < 1 || structured.outline.length > 6) throw new Error('Invalid research outline');
   outline = structured.outline.map(row => section(row));
+  }
   await progress('Drafting an evidence-linked contribution brief', state());
   const raw = await ask('Produce a contribution brief JSON with outcome (candidate|insufficient_evidence|already_addressed), title, summary, opportunity, amdBenefit, existingWork, counterevidence, limitations (string array), nextQuestions (string array), claims [{statement,evidenceIds:["E1"],kind:"source_claim"|"interpretation"}], experiment {action,baseline,metrics,requirements,stopCondition} (all strings). Use the research perspectives and outline; cite ONLY provided evidence IDs and include citations to web search results with URLs different from selected seeds when proposing a candidate. A different URL does not itself establish source independence; check for mirrors and related work. Every factual claim must appear in claims with evidence. Do not put URLs in prose. Use insufficient_evidence when source coverage or prior-art checks cannot support a credible candidate; already_addressed when cited existing work addresses it. Distinguish AMD benefit from universal novelty. State hardware and version assumptions. No experiments have been performed. A candidate is provisional, not a verified novel contribution. For insufficient evidence give an evidence-gathering experiment.', { perspectives, outline, evidence, searchLog }, 12000, 'high');
   const result = validateBrief(raw, evidence, scope, [...independentWebEvidence]);

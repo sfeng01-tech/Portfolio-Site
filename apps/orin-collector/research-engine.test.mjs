@@ -11,9 +11,9 @@ const json = value => new Response(JSON.stringify(value), { status: 200, headers
 test('the default research model is DeepSeek V4.1 Flash 1017', () => {
   assert.equal(DEFAULT_RESEARCH_MODEL, 'deepseek/deepseek-v4.1-flash-1017');
 });
-function provider({ queries = ['prior work', 'counterevidence'], report = brief(), prices = '0.000001', overrides = [], reasoning, names = ['Evidence', 'Prior work', 'AMD'], varySearch = false } = {}) {
+function provider({ queries = ['prior work', 'counterevidence'], report = brief(), prices = '0.000001', overrides = [], reasoning, names = ['Evidence', 'Prior work', 'AMD'], varySearch = false, startPhase = 0 } = {}) {
   const calls = [];
-  let completions = 0;
+  let completions = startPhase;
   const fetchImpl = async (url, init) => {
     calls.push({ url, body: init?.body && JSON.parse(init.body) });
     if (url.endsWith('/models')) return json({ data: [{ id: 'test/model', context_length: 200000, pricing: { prompt: prices, completion: prices, overrides }, reasoning }] });
@@ -166,6 +166,20 @@ test('a retry preserves evidence and the original extraction without paying to f
   assert.equal(result.evidence[0].excerpt, 'Previously extracted text.');
   assert.ok(result.reservedUsd > current.spent_usd);
   assert.equal(result.searchLog.filter(row => row.source === 'selected sources').length, 1);
+});
+
+test('a retry resumes a completed outline without repeating model planning or searches', async () => {
+  const initial = provider();
+  let checkpoint;
+  await runResearch(job(), { env, fetchImpl: initial.fetchImpl, checkpoint: async (message, state) => {
+    if (message === 'Drafting an evidence-linked contribution brief') checkpoint = structuredClone(state);
+  } });
+  const resumed = provider({ startPhase: 3 });
+  const result = await runResearch({ ...job(), result: checkpoint, spent_usd: 0.3 }, { env, fetchImpl: resumed.fetchImpl });
+  assert.equal(resumed.calls.filter(call => call.url.endsWith('/completions')).length, 1);
+  assert.equal(resumed.calls.some(call => call.url.endsWith('/search') || call.url.endsWith('/extract')), false);
+  assert.equal(result.outcome, 'candidate');
+  assert.deepEqual(result.outline, checkpoint.outline);
 });
 
 test('diagnostic messages distinguish provider failures without revealing unsafe error content', () => {
