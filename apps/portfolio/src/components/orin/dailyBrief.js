@@ -60,15 +60,17 @@ export function buildDailyBrief({ digest, items = [], sourceStatus = [] } = {}) 
     takeaway: summaryParts(group.summary, 1).lead,
     reason: group.sources.map(source => clean(source.item?.ranking?.reason)).find(Boolean) || '',
   }));
+  const rank = item => (Number(item.ranking?.score) || 0) + (Number.isFinite(item.semanticAffinity) ? Math.min(5, Math.max(0, (item.semanticAffinity - 0.45) * 10)) : 0);
   const ranked = items.filter(item => sourceUrl(item.resolvedUrl) || sourceUrl(item.url))
-    .slice().sort((a, b) => (Number(b.ranking?.score) || 0) - (Number(a.ranking?.score) || 0));
+    .slice().sort((a, b) => rank(b) - rank(a));
   const recommended = [];
   const selected = new Set();
   const add = item => {
     const source = resolveSource(item.url);
     if (source && !selected.has(source.url) && recommended.length < 3) {
       selected.add(source.url);
-      recommended.push({ ...source, reason: clean(item.ranking?.reason) || summaryParts(item.excerpt, 1).lead });
+      const reason = clean(item.ranking?.reason) || summaryParts(item.excerpt, 1).lead;
+      recommended.push({ ...source, reason: item.semanticAffinity ? `${reason}${reason ? ' ' : ''}Similar to a source you marked useful.` : reason });
     }
   };
   // Offer a few different threads before filling remaining slots by relevance.

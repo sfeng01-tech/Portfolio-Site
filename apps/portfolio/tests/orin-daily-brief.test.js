@@ -95,3 +95,15 @@ test('the same reading component renders today, past dates, summary outages and 
     assert.doesNotMatch(empty, /Worth your time|Topic briefs/);
   } finally { await server.close(); }
 });
+
+test('worth-reading order uses a bounded explicit-feedback affinity while retaining source diversity', () => {
+  const example = [
+    {id:'one',title:'First',url:'https://example.org/one',excerpt:'First.',category:'Reading',ranking:{score:80}},
+    {id:'two',title:'Related',url:'https://example.org/two',excerpt:'Second.',category:'Reading',ranking:{score:78},semanticAffinity:0.9},
+    {id:'three',title:'High score',url:'https://example.org/three',excerpt:'Third.',category:'Reading',ranking:{score:95}},
+  ];
+  const brief=buildDailyBrief({items:example});
+  assert.equal(brief.recommended[0].title,'High score');
+  assert.equal(brief.recommended[1].title,'Related');
+  assert.match(brief.recommended[1].reason,/marked useful/);
+});

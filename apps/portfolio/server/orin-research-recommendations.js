@@ -32,11 +32,12 @@ function seed(item) {
   } catch { return null; }
 }
 
-export function recommendInvestigations(items = [], profile = {}, jobs = []) {
+export function recommendInvestigations(items = [], profile = {}, jobs = [], signals = {}) {
   const interests = Array.isArray(profile.interests) ? profile.interests.join(' ') : '';
   const context = `${interests} ${profile.goals || ''}`;
   const unique = new Map();
   for (const raw of items) {
+    if (Number(raw?.feedback) === -1) continue;
     const item = seed(raw);
     if (!item) continue;
     const previous = unique.get(item.url);
@@ -50,7 +51,7 @@ export function recommendInvestigations(items = [], profile = {}, jobs = []) {
   for (const [topic, pattern, researchQuestion] of THEMES) {
     const matched = [...unique.values()].filter(item => pattern.test(`${item.title} ${item.excerpt}`) && !rejectedUrls.has(item.url));
     if (!matched.length) continue;
-    matched.sort((a, b) => Number(LIMITATION.test(b.excerpt)) - Number(LIMITATION.test(a.excerpt)) || Number(AMD.test(`${b.title} ${b.excerpt}`)) - Number(AMD.test(`${a.title} ${a.excerpt}`)) || a.url.localeCompare(b.url));
+    matched.sort((a, b) => Number(LIMITATION.test(b.excerpt)) - Number(LIMITATION.test(a.excerpt)) || Number(AMD.test(`${b.title} ${b.excerpt}`)) - Number(AMD.test(`${a.title} ${a.excerpt}`)) || (signals[b.itemId] || 0) - (signals[a.itemId] || 0) || a.url.localeCompare(b.url));
     const sources = matched.slice(0, 4);
     // A source title is untrusted. Never promote it into the owner question or
     // the research instructions; it travels only as source data.
@@ -63,12 +64,13 @@ export function recommendInvestigations(items = [], profile = {}, jobs = []) {
     const directInterest = pattern.test(context);
     const limitation = LIMITATION.test(text);
     const artifact = ARTIFACT.test(text);
-    const score = (directInterest ? 6 : 0) + (limitation ? 4 : 0) + (artifact ? 1 : 0)
+    const semantic = sources.some(source => Number(signals[source.itemId]) > 0);
+    const score = (directInterest ? 6 : 0) + (limitation ? 4 : 0) + (artifact ? 1 : 0) + (semantic ? 1 : 0)
       + (directAmd && profile.amdFocus !== 'optional' ? 2 : 0) + Math.min(sources.length, 2);
     candidates.push({ id: suggestionId,
-      topic, question, sources, provisional: true, method: 'heuristic', score,
+      topic, question, sources, provisional: true, method: semantic ? 'heuristic+semantic' : 'heuristic', score,
       prompt: 'Check current primary sources, related implementations, issues and PRs. Seek counterevidence and existing solutions. Distinguish capability gaps, shared unresolved problems, and engineering improvements. State search coverage and uncertainty. Assess AMD benefit where concrete; do not infer absence from missing search results. Propose one feasible experiment with baseline, metrics, and stopping conditions.',
-      reason: `${sources.length} saved or recent source${sources.length === 1 ? '' : 's'} discuss this topic. ${limitation ? 'The excerpts mention a limitation to verify.' : 'Whether a worthwhile gap exists needs investigation.'}`,
+      reason: `${sources.length} source${sources.length === 1 ? '' : 's'} discuss this topic. ${semantic ? 'Some relate to your interests or explicit feedback. ' : ''}${limitation ? 'The excerpts mention a limitation to verify.' : 'Whether a worthwhile gap exists needs investigation.'}`,
       dimensions: {
         interest: { label: directInterest ? 'Profile match' : 'Adjacent discovery', reason: directInterest ? 'Matches your stated interests or goals.' : 'An adjacent topic from your library; relevance is provisional.' },
         amdBenefit: { label: directAmd ? 'AMD mentioned' : 'Transfer unverified', reason: directAmd ? 'The source text mentions AMD-related technology; benefit still needs validation.' : 'No direct AMD connection established. Check whether the idea transfers.' },

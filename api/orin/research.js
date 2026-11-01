@@ -6,9 +6,10 @@ import {
   validateResearchPatch, publicResearchJob, researchCapabilities
 } from '../../apps/portfolio/server/orin-research.js';
 import { recommendInvestigations } from '../../apps/portfolio/server/orin-research-recommendations.js';
+import { loadSuggestionSignals } from '../../apps/portfolio/server/orin-suggestion-signals.js';
 
 // Dependency injection supports storage/auth contract tests without live access.
-export function createResearchHandler({ getSql = orinSql, authorize = requireOrinOwner, environment = () => process.env, recommend = recommendInvestigations } = {}) {
+export function createResearchHandler({ getSql = orinSql, authorize = requireOrinOwner, environment = () => process.env, recommend = recommendInvestigations, suggestionSignals = loadSuggestionSignals } = {}) {
   return async function handler(req, res) {
     privateResponse(res);
     if (!['GET', 'POST', 'PATCH'].includes(req.method)) {
@@ -89,7 +90,8 @@ export function createResearchHandler({ getSql = orinSql, authorize = requireOri
       const profile = profiles[0]?.profile ?? DEFAULT_RESEARCH_PROFILE;
       const jobs = rows.map(publicResearchJob);
       const items = candidates.map(row => ({ ...row.item, id: row.id, saved: row.saved }));
-      return res.status(200).json({ profile, jobs, suggestions: recommend(items, profile, jobs), capabilities });
+      const enhanced = await suggestionSignals(sql, profile, items, environment());
+      return res.status(200).json({ profile, jobs, suggestions: recommend(enhanced.items, profile, jobs, enhanced.signals), capabilities });
     } catch (error) { return sendError(res, error); }
   };
 }

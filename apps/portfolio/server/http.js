@@ -18,6 +18,7 @@ import notes from '../../../api/orin/notes.js';
 import reminders from '../../../api/orin/reminders.js';
 import research from '../../../api/orin/research.js';
 import ask from '../../../api/orin/ask.js';
+import search from '../../../api/orin/search.js';
 import { applySecurityHeaders } from './securityHeaders.js';
 
 const handlers = new Map([
@@ -28,7 +29,7 @@ const handlers = new Map([
   ['/api/orin/preflight', preflight],
   ['/api/orin/contributions', contributions], ['/api/orin/categories', categories],
   ['/api/orin/notes', notes], ['/api/orin/reminders', reminders], ['/api/orin/research', research],
-  ['/api/orin/ask', ask]
+  ['/api/orin/ask', ask], ['/api/orin/search', search]
 ]);
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.ico': 'image/x-icon', '.woff': 'font/woff', '.woff2': 'font/woff2', '.pdf': 'application/pdf', '.txt': 'text/plain; charset=utf-8', '.xml': 'application/xml; charset=utf-8' };
 
