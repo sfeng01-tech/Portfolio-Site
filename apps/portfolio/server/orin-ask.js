@@ -228,7 +228,8 @@ export async function* streamGroundedAnswer({ question, sources, env = process.e
       stream: true,
       stream_options: { include_usage: true },
       temperature: 0.2,
-      max_tokens: 900,
+      // Reasoning tokens share this allowance with the visible answer.
+      max_tokens: 2048,
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: userPrompt(question, context) }
