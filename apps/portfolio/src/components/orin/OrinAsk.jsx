@@ -1,17 +1,33 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowUpRight, BookmarkPlus, Check, Copy, CornerDownLeft, MessageSquarePlus,
-  Search, Sparkles, Trash2, AlertTriangle
+  Search, Sparkles, Trash2, AlertTriangle, History
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import './OrinAsk.css';
 
 const MAX_QUESTION = 2000;
+const TIER_ORDER = ['custom', 'value', 'balanced', 'fast', 'premium'];
+const TIER_LABELS = {
+  custom: 'Configured', value: 'Best value', balanced: 'Balanced', fast: 'Fast', premium: 'Premium'
+};
+const EFFORT_LABELS = {
+  auto: 'Auto', none: 'None', minimal: 'Minimal', low: 'Low',
+  medium: 'Medium', high: 'High', xhigh: 'Extra high', max: 'Max'
+};
+const formatPrice = value => Number.isFinite(value) ? `$${value.toFixed(value < 0.1 ? 3 : 2)}` : null;
+const formatContext = value => {
+  if (!Number.isFinite(value)) return null;
+  if (value >= 1_000_000) {
+    const millions = value / 1_000_000;
+    return `${millions < 1.05 ? Math.round(millions) : millions.toFixed(1)}M`;
+  }
+  return `${Math.round(value / 1000)}K`;
+};
 const SUGGESTIONS = [
   'Summarize the key ideas I saved this week.',
   'What have I saved about AI agents?',
   'Compare the arguments across my saved research.',
-  'What open questions keep appearing in my notes?'
 ];
 
 const safeUrl = value => {
@@ -120,10 +136,14 @@ function SourceCards({ message, onCite }) {
 
 export default function OrinAsk() {
   const { expireSession } = useAuth();
+  const [historyOpen, setHistoryOpen] = useState(false);
   const [thread, setThread] = useState([]);
   const [question, setQuestion] = useState('');
   const [conversationId, setConversationId] = useState(null);
   const [conversations, setConversations] = useState([]);
+  const [capabilities, setCapabilities] = useState(null);
+  const [model, setModel] = useState('');
+  const [effort, setEffort] = useState('auto');
   const [migrationRequired, setMigrationRequired] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -145,6 +165,7 @@ export default function OrinAsk() {
       const payload = await json('/api/orin/ask');
       setConversations(payload.conversations || []);
       setMigrationRequired(Boolean(payload.migrationRequired));
+      if (payload.capabilities) setCapabilities(payload.capabilities);
     } catch (err) {
       // History is optional; a missing table must not block asking.
       if (err.status === 401) report(err);
@@ -153,6 +174,57 @@ export default function OrinAsk() {
 
   useEffect(() => { loadConversations(); }, [loadConversations]);
   useEffect(() => () => abort.current?.abort(), []);
+
+  // Restore the last model/effort choice, but only after the server tells us
+  // which models this deployment allows.
+  useEffect(() => {
+    if (!capabilities?.models?.length) return;
+    let savedModel = '';
+    let savedEffort = 'auto';
+    try {
+      savedModel = localStorage.getItem('orin-ask-model') || '';
+      savedEffort = localStorage.getItem('orin-ask-effort') || 'auto';
+    } catch { /* Selection still works without storage. */ }
+    const chosen = capabilities.models.find(entry => entry.id === savedModel)
+      || capabilities.models.find(entry => entry.id === capabilities.defaultModel)
+      || capabilities.models[0];
+    setModel(current => current || chosen.id);
+    setEffort(current => {
+      if (current !== 'auto') return current;
+      return ['auto', ...(chosen.efforts || [])].includes(savedEffort) ? savedEffort : 'auto';
+    });
+  }, [capabilities]);
+
+  useEffect(() => {
+    try { if (model) localStorage.setItem('orin-ask-model', model); } catch { /* Non-fatal. */ }
+  }, [model]);
+  useEffect(() => {
+    try { localStorage.setItem('orin-ask-effort', effort); } catch { /* Non-fatal. */ }
+  }, [effort]);
+
+  const selectedModel = useMemo(
+    () => capabilities?.models?.find(entry => entry.id === model) || capabilities?.models?.[0] || null,
+    [capabilities, model]
+  );
+  const modelsByTier = useMemo(() => TIER_ORDER
+    .map(tier => ({ tier, label: TIER_LABELS[tier], models: (capabilities?.models || []).filter(entry => entry.tier === tier) }))
+    .filter(group => group.models.length), [capabilities]);
+  const effortChoices = selectedModel?.efforts || [];
+  const modelName = useCallback(id => capabilities?.models?.find(entry => entry.id === id)?.label || id, [capabilities]);
+  const effortName = value => EFFORT_LABELS[value] || value;
+  const priceLabel = selectedModel && Number.isFinite(selectedModel.promptPerM)
+    ? `${formatPrice(selectedModel.promptPerM)} in / ${formatPrice(selectedModel.completionPerM)} out per 1M tokens`
+    : null;
+  const contextLabel = formatContext(selectedModel?.context);
+  const modelSummary = selectedModel
+    ? [selectedModel.note, priceLabel, contextLabel ? `${contextLabel} context` : null].filter(Boolean).join(' · ')
+    : '';
+
+  function chooseModel(id) {
+    setModel(id);
+    const next = capabilities?.models?.find(entry => entry.id === id);
+    if (effort !== 'auto' && !next?.efforts?.includes(effort)) setEffort('auto');
+  }
 
   const updateAssistant = useCallback((key, patch) => {
     setThread(current => current.map(message => message.key === key ? { ...message, ...patch } : message));
@@ -185,9 +257,12 @@ export default function OrinAsk() {
           sources: message.sources || [],
           citations: Array.isArray(message.citations) ? message.citations : [],
           invalidCitations: [],
+          model: message.model || '',
+          effort: message.reasoningEffort || '',
           done: true
         });
       }
+      setHistoryOpen(false);
       setThread(messages);
       setConversationId(payload.conversation?.id || id);
       setActiveConversation(payload.conversation?.id || id);
@@ -224,7 +299,7 @@ export default function OrinAsk() {
     setThread(current => [
       ...current,
       { key: userKey, role: 'user', content: prompt },
-      { key: answerKey, role: 'assistant', content: '', sources: [], citations: [], invalidCitations: [], method: '', done: false }
+      { key: answerKey, role: 'assistant', content: '', sources: [], citations: [], invalidCitations: [], method: '', model: selectedModel?.id || '', effort: '', done: false }
     ]);
     setQuestion('');
     setError('');
@@ -241,7 +316,13 @@ export default function OrinAsk() {
         credentials: 'same-origin',
         signal: controller.signal,
         headers: { Accept: 'text/event-stream', 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: prompt, mode: 'library', conversationId })
+        body: JSON.stringify({
+          question: prompt,
+          mode: 'library',
+          conversationId,
+          model: selectedModel?.id || undefined,
+          effort
+        })
       });
       if (!response.ok) {
         const payload = await response.json().catch(() => ({}));
@@ -253,6 +334,8 @@ export default function OrinAsk() {
           updateAssistant(answerKey, {
             sources: event.sources || [],
             method: event.method || '',
+            model: event.model || selectedModel?.id || '',
+            effort: event.effort || '',
             persisted: event.persisted !== false
           });
         } else if (event.type === 'delta') {
@@ -265,6 +348,8 @@ export default function OrinAsk() {
             citations: event.citations || [],
             invalidCitations: event.invalidCitations || [],
             method: event.method || '',
+            model: event.model || selectedModel?.id || '',
+            effort: event.effort || '',
             persisted: event.persisted !== false,
             done: true
           });
@@ -324,11 +409,15 @@ export default function OrinAsk() {
       }).join('');
       const paragraphs = String(message.content || '').split(/\n{2,}/).filter(Boolean)
         .map(block => `<p>${escapeHtml(block).replace(/\n/g, '<br>')}</p>`).join('');
+      const used = [
+        message.model ? `Model: ${modelName(message.model)}` : null,
+        message.effort ? `Reasoning: ${effortName(message.effort)}` : null
+      ].filter(Boolean).join(' · ');
       const content = [
         '<h2>Question</h2>', `<p>${escapeHtml(asked.content)}</p>`,
         '<h2>Answer</h2>', paragraphs || '<p></p>',
         sources ? `<h2>Sources</h2><ol>${sources}</ol>` : '',
-        '<p><em>Saved from Ask ORIN. Answers are grounded in the library at the time of asking.</em></p>'
+        `<p><em>Saved from Ask ORIN.${used ? ` ${escapeHtml(used)}.` : ''} Answers are grounded in the library at the time of asking.</em></p>`
       ].join('');
       await json('/api/orin/notes', {
         method: 'PATCH',
@@ -347,29 +436,23 @@ export default function OrinAsk() {
   const lastAssistant = [...thread].reverse().find(message => message.role === 'assistant');
   const isEmpty = thread.length === 0;
 
-  return <section className="orin-ask" aria-labelledby="orin-ask-heading">
+  return <section className={`orin-ask ${isEmpty ? 'is-empty' : 'has-thread'} ${historyOpen ? 'has-history' : ''}`} aria-labelledby="orin-ask-heading">
     <div className="orin-ask-main">
       <header className={`orin-ask-intro ${isEmpty ? '' : 'is-compact'}`}>
         <div className="eyebrow"><Sparkles size={14}/> ASK YOUR LIBRARY</div>
-        <h2 id="orin-ask-heading" className={isEmpty ? '' : 'sr-only'}>Answers grounded in what you saved.</h2>
-        {isEmpty && <p>ORIN reads your saved items and notes, answers with citations, and shows exactly where each claim came from. Web search is not enabled yet.</p>}
-        <div className="orin-ask-badges">
-          <span><Search size={12}/> Library only</span>
-          <span>Citations required</span>
-          {!migrationRequired && conversations.length > 0 && <span>{conversations.length} recent conversation{conversations.length === 1 ? '' : 's'}</span>}
-        </div>
+        <h2 id="orin-ask-heading" className={isEmpty ? '' : 'sr-only'}>What would you like to explore?</h2>
+        {isEmpty && <p>Explore your library with answers you can trace back to the source.</p>}
+        <button type="button" className="orin-ask-history-toggle" aria-expanded={historyOpen} aria-controls="orin-ask-history" onClick={() => setHistoryOpen(value => !value)}><History size={15}/> History{conversations.length > 0 ? ` · ${conversations.length}` : ''}</button>
       </header>
 
       {migrationRequired && <p className="orin-ask-hint" role="status">Conversation history needs the ask migration. Answers still work and are not saved.</p>}
+      {capabilities && !capabilities.library && <p className="orin-ask-hint" role="status">{capabilities.message}</p>}
       {error && <div className="orin-error" role="alert">{error}</div>}
 
       <div className="orin-ask-thread" role="log" aria-live="polite" aria-relevant="additions text">
         {isEmpty ? <div className="orin-ask-empty">
-          <div className="orin-ask-empty-mark"><Sparkles size={22} strokeWidth={1.4}/></div>
-          <h3>Start with a question about your reading.</h3>
-          <p>Try one of these, or ask in your own words.</p>
           <div className="orin-ask-prompts">
-            {SUGGESTIONS.map(prompt => <button key={prompt} type="button" onClick={event => send(event, prompt)}>
+            {SUGGESTIONS.map(prompt => <button key={prompt} type="button" onClick={() => { setQuestion(prompt); composer.current?.focus(); }}>
               <span>{prompt}</span><CornerDownLeft size={14}/>
             </button>)}
           </div>
@@ -381,6 +464,7 @@ export default function OrinAsk() {
           : <article key={message.key} className="orin-ask-turn orin-ask-turn--answer">
             <div className="orin-ask-answer-head">
               <span className="orin-ask-role"><Sparkles size={13}/> ORIN</span>
+              {message.model && <span className="orin-ask-model">{modelName(message.model)}{message.effort ? ` · ${effortName(message.effort)}` : ''}</span>}
               {message.method && <span className="orin-ask-method">{methodLabel(message.method)}</span>}
               {message.persisted === false && <span className="orin-ask-method">Not saved to history</span>}
             </div>
@@ -407,6 +491,31 @@ export default function OrinAsk() {
       </div>
 
       <form className="orin-ask-composer" onSubmit={event => send(event)}>
+        <details className="orin-ask-settings"><summary>{selectedModel?.label || 'Answer settings'} · {effortName(effort)}</summary><div className="orin-ask-controls">
+          <label className="orin-ask-control">
+            <span>Model</span>
+            <select value={model} onChange={event => chooseModel(event.target.value)}
+              disabled={busy || !modelsByTier.length} aria-label="Answer model" aria-describedby="orin-ask-model-note">
+              {modelsByTier.length
+                ? modelsByTier.map(group => <optgroup key={group.tier} label={group.label}>
+                  {group.models.map(entry => <option key={entry.id} value={entry.id}>{entry.label}</option>)}
+                </optgroup>)
+                : <option value="">Loading models…</option>}
+            </select>
+          </label>
+          <label className="orin-ask-control">
+            <span>Reasoning</span>
+            <select value={effort} onChange={event => setEffort(event.target.value)}
+              disabled={busy || !effortChoices.length} aria-label="Reasoning effort" aria-describedby="orin-ask-model-note">
+              <option value="auto">{effortChoices.length
+                ? `Auto${selectedModel?.defaultEffort ? ` · ${effortName(selectedModel.defaultEffort)}` : ''}`
+                : 'Fixed'}</option>
+              {effortChoices.map(value => <option key={value} value={value}>{effortName(value)}</option>)}
+            </select>
+          </label>
+          <span className="orin-ask-model-note" id="orin-ask-model-note">{modelSummary}</span>
+        </div>
+        </details>
         <label htmlFor="orin-ask-input" className="sr-only">Ask your library</label>
         <textarea id="orin-ask-input" ref={composer} rows={2} maxLength={MAX_QUESTION} value={question}
           placeholder="Ask about anything you have saved…"
@@ -431,7 +540,7 @@ export default function OrinAsk() {
       {notice && <p className="orin-ask-notice" role="status"><Check size={13}/> {notice}</p>}
     </div>
 
-    <aside className="orin-ask-side" aria-label="Recent conversations">
+    <aside id="orin-ask-history" className="orin-ask-side" hidden={!historyOpen} aria-label="Recent conversations">
       <div className="orin-ask-side-head">
         <span className="eyebrow">RECENT</span>
         {thread.length > 0 && <button type="button" onClick={reset} disabled={busy} aria-label="Start a new conversation"><MessageSquarePlus size={15}/></button>}

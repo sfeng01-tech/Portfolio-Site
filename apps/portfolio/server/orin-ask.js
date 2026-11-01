@@ -1,4 +1,61 @@
-export const ASK_MODEL_DEFAULT = 'deepseek/deepseek-v4.1-flash-1017';
+// Curated for library-grounded answers. Prices are USD per million tokens from
+// the OpenRouter catalog checked 2026-11-01; verify them before quoting publicly.
+// Keeping the allowlist in code prevents the owner from accidentally selecting
+// an arbitrary, expensive, or unsuitable model.
+export const ASK_MODELS = [
+  {
+    id: 'deepseek/deepseek-v4.1-flash-1017', label: 'DeepSeek V4.1 Flash', provider: 'DeepSeek',
+    tier: 'value', context: 1048576, promptPerM: 0.15, completionPerM: 0.6,
+    efforts: ['none', 'low', 'high', 'max'], defaultEffort: 'low', mandatoryReasoning: false,
+    note: 'Best value for library Q&A'
+  },
+  {
+    id: 'z-ai/glm-5.3-flash', label: 'GLM 5.3 Flash', provider: 'Z.ai',
+    tier: 'value', context: 1048576, promptPerM: 0.0285, completionPerM: 0.0923,
+    efforts: ['low', 'high', 'max'], defaultEffort: 'low', mandatoryReasoning: true,
+    note: 'Very cheap; reasoning always on'
+  },
+  {
+    id: 'qwen/qwen3.7-flash', label: 'Qwen 3.7 Flash', provider: 'Qwen',
+    tier: 'value', context: 1000000, promptPerM: 0.03, completionPerM: 0.13,
+    efforts: [], defaultEffort: null, mandatoryReasoning: false,
+    note: 'Lowest cost; no reasoning control'
+  },
+  {
+    id: 'openai/gpt-6.1-terra', label: 'GPT-6.1 Terra', provider: 'OpenAI',
+    tier: 'balanced', context: 1050000, promptPerM: 1, completionPerM: 5,
+    efforts: ['none', 'low', 'medium', 'high', 'xhigh', 'max'], defaultEffort: 'medium', mandatoryReasoning: false,
+    note: 'Balanced; strong instruction following'
+  },
+  {
+    id: 'google/gemini-3.1-flash-lite', label: 'Gemini 3.1 Flash Lite', provider: 'Google',
+    tier: 'fast', context: 1048576, promptPerM: 0.25, completionPerM: 1.5,
+    efforts: ['none', 'minimal', 'low', 'medium', 'high'], defaultEffort: 'low', mandatoryReasoning: false,
+    note: 'Fast and inexpensive for everyday questions'
+  },
+  {
+    id: 'anthropic/claude-sonnet-5.5', label: 'Claude Sonnet 5.5', provider: 'Anthropic',
+    tier: 'premium', context: 1000000, promptPerM: 2, completionPerM: 10,
+    efforts: ['low', 'medium', 'high', 'xhigh', 'max'], defaultEffort: 'medium', mandatoryReasoning: true,
+    note: 'Careful long-context synthesis'
+  },
+  {
+    id: 'openai/gpt-6.1-sol', label: 'GPT-6.1 Sol', provider: 'OpenAI',
+    tier: 'premium', context: 1050000, promptPerM: 2, completionPerM: 10,
+    efforts: ['low', 'medium', 'high', 'xhigh', 'max'], defaultEffort: 'high', mandatoryReasoning: true,
+    note: 'Premium reasoning for hard questions'
+  },
+  {
+    id: 'google/gemini-3.1-pro-preview', label: 'Gemini 3.1 Pro', provider: 'Google',
+    tier: 'premium', context: 1048576, promptPerM: 2, completionPerM: 12,
+    efforts: ['low', 'medium', 'high'], defaultEffort: 'medium', mandatoryReasoning: true,
+    note: 'Large-context synthesis; preview model'
+  }
+];
+export const ASK_MODEL_DEFAULT = ASK_MODELS[0].id;
+export const ASK_EFFORT_ORDER = ['none', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max'];
+const ASK_MODEL_IDS = new Set(ASK_MODELS.map(model => model.id));
+
 export const MAX_QUESTION = 2000;
 export const MAX_SOURCES = 10;
 export const MAX_CONTEXT_CHARS = 18000;
@@ -7,14 +64,36 @@ export const MAX_CONTEXT_CHARS = 18000;
 const EMBEDDING_MODEL = 'openai/text-embedding-3-small';
 const EMBEDDING_DIMENSIONS = 1536;
 
+// Reasoning tokens count against max_tokens. Give higher efforts room to think
+// without turning every answer into a long one.
+const EFFORT_MAX_TOKENS = { none: 1000, minimal: 1000, low: 1400, medium: 1800, high: 2600, xhigh: 3000, max: 3400 };
+
+export function askModelCatalog(env = process.env) {
+  const configured = env.ORIN_ASK_MODEL?.trim();
+  if (!configured || ASK_MODEL_IDS.has(configured)) return ASK_MODELS;
+  return [{
+    id: configured, label: configured, provider: 'Configured', tier: 'custom',
+    context: null, promptPerM: null, completionPerM: null,
+    efforts: [], defaultEffort: null, mandatoryReasoning: false,
+    note: 'Configured by ORIN_ASK_MODEL'
+  }, ...ASK_MODELS];
+}
+
 const STOP_WORDS = new Set(['the', 'and', 'for', 'with', 'what', 'which', 'does', 'did', 'do', 'how', 'why', 'are', 'was', 'were', 'from', 'that', 'this', 'have', 'has', 'can', 'about', 'into', 'over', 'when', 'where', 'who', 'will', 'would', 'should', 'could', 'there', 'their', 'them', 'they', 'you', 'your', 'our', 'its', 'not', 'but', 'all', 'any', 'some', 'more', 'most', 'than', 'then', 'also', 'been', 'being', 'between', 'under', 'using', 'used', 'of', 'to', 'in', 'on', 'at', 'by', 'is', 'it', 'as', 'or', 'if', 'so', 'up', 'no', 'my', 'me', 'we', 'us', 'an', 'be']);
 
 export function askCapabilities(env = process.env) {
   const library = Boolean(env.OPENROUTER_API_KEY?.trim());
-  const model = env.ORIN_ASK_MODEL?.trim() || ASK_MODEL_DEFAULT;
+  const catalog = askModelCatalog(env);
+  const configured = env.ORIN_ASK_MODEL?.trim();
+  const defaultModel = configured && catalog.some(model => model.id === configured)
+    ? configured
+    : ASK_MODEL_DEFAULT;
   return {
     library,
-    model: library ? model : null,
+    model: library ? defaultModel : null,
+    defaultModel,
+    defaultEffort: 'auto',
+    models: catalog,
     message: library
       ? 'Library answers are configured. Add the ORIN ask migration and run the ask indexer for semantic search.'
       : 'Ask needs OPENROUTER_API_KEY on the ORIN web service.'
@@ -26,7 +105,7 @@ export function validateConversationId(value) {
   return value;
 }
 
-export function validateAsk(body) {
+export function validateAsk(body, env = process.env) {
   if (!body || typeof body !== 'object' || Array.isArray(body)) throw fail('Invalid ask request');
   const question = typeof body.question === 'string' ? body.question.trim() : '';
   if (!question) throw fail('Ask a question first');
@@ -35,7 +114,28 @@ export function validateAsk(body) {
   const mode = body.mode ?? 'library';
   if (mode !== 'library') throw fail('Web answers are not enabled yet. Ask from your library for now.', 400);
   const conversationId = body.conversationId === undefined || body.conversationId === null ? null : validateConversationId(body.conversationId);
-  return { question, mode, conversationId };
+
+  const catalog = askModelCatalog(env);
+  const configured = env.ORIN_ASK_MODEL?.trim();
+  const fallbackModel = configured && catalog.some(model => model.id === configured) ? configured : ASK_MODEL_DEFAULT;
+  const requestedModel = body.model === undefined || body.model === null || body.model === '' ? fallbackModel : body.model;
+  if (typeof requestedModel !== 'string' || requestedModel.length > 200) throw fail('Invalid model');
+  const model = catalog.find(entry => entry.id === requestedModel);
+  if (!model) throw fail('Choose a supported model');
+
+  const requestedEffort = body.effort === undefined || body.effort === null || body.effort === '' ? 'auto' : body.effort;
+  if (typeof requestedEffort !== 'string' || !['auto', ...model.efforts].includes(requestedEffort)) {
+    throw fail('That reasoning effort is not available for this model');
+  }
+  const effort = requestedEffort === 'auto' ? (model.defaultEffort || null) : requestedEffort;
+
+  const sourceIds = body.sourceIds;
+  if (sourceIds !== undefined && (!Array.isArray(sourceIds) || !sourceIds.length || sourceIds.length > MAX_SOURCES || sourceIds.some(id => typeof id !== 'string' || !/^[a-f0-9]{64}$/.test(id)))) {
+    throw fail(`Select between 1 and ${MAX_SOURCES} valid library sources`);
+  }
+  return { question, mode, conversationId, model: model.id, effort,
+    ...(sourceIds ? { sourceIds: [...new Set(sourceIds)] } : {}) };
+
 }
 
 function fail(message, status = 400) {
@@ -136,7 +236,22 @@ async function embedQuery(query, apiKey, fetchImpl) {
 // migration and embeddings exist; otherwise a lexical pass over items and notes
 // keeps Ask useful immediately after deploy.
 export function createLibrarySearch(sql, { env = process.env, fetchImpl = fetch } = {}) {
-  return async function search(query, { limit = MAX_SOURCES } = {}) {
+  return async function search(query, { limit = MAX_SOURCES, sourceIds } = {}) {
+    // Selected evidence is reloaded from storage, never accepted from client excerpts.
+    // Use each selected item's current excerpt so generic questions (e.g. "compare
+    // these") do not accidentally retrieve unrelated whole-library passages.
+    if (sourceIds?.length) {
+      const rows = await sql`SELECT 'item' AS kind, i.id AS "sourceId", 0 AS ordinal,
+        coalesce(i.item->>'title', '') AS title, coalesce(i.item->>'excerpt', '') AS text,
+        coalesce(i.item->>'resolvedUrl', i.item->>'url') AS url,
+        i.item->>'source' AS origin, i.item->>'category' AS category
+        FROM orin_items i WHERE i.id = ANY(${sourceIds}::text[])
+          AND NOT coalesce((i.item->>'deleted')::boolean, false)
+        ORDER BY array_position(${sourceIds}::text[], i.id) LIMIT ${limit}`;
+      if (rows.length !== sourceIds.length) throw fail('Some selected sources are no longer available. Remove them and try again.', 409);
+      if (rows.some(row => !row.text?.trim())) throw fail('A selected source has no saved text. Remove it or save its content before asking.', 409);
+      return { sources: rows, method: 'selected' };
+    }
     const terms = searchTerms(query);
     if (!terms) return { sources: [], method: 'empty', reason: 'empty_query' };
 
@@ -211,12 +326,14 @@ export function createLibrarySearch(sql, { env = process.env, fetchImpl = fetch 
 
 // Stream a grounded answer as small events so the API layer can forward them as
 // server-sent events without buffering the whole answer.
-export async function* streamGroundedAnswer({ question, sources, env = process.env, fetchImpl = fetch, signal } = {}) {
+export async function* streamGroundedAnswer({ question, sources, model, effort, env = process.env, fetchImpl = fetch, signal } = {}) {
   const apiKey = env.OPENROUTER_API_KEY?.trim();
   if (!apiKey) throw fail('Ask needs OPENROUTER_API_KEY on the ORIN web service.', 503);
-  const model = env.ORIN_ASK_MODEL?.trim() || ASK_MODEL_DEFAULT;
+  const selectedModel = (typeof model === 'string' && model.trim()) || env.ORIN_ASK_MODEL?.trim() || ASK_MODEL_DEFAULT;
   const bounded = sources.slice(0, MAX_SOURCES);
   const { context } = buildBoundedContext(bounded);
+  const maxTokens = EFFORT_MAX_TOKENS[effort] || 1400;
+  const reasoning = effort ? { effort, exclude: true } : undefined;
 
   const response = await fetchImpl('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
@@ -224,12 +341,13 @@ export async function* streamGroundedAnswer({ question, sources, env = process.e
     signal,
     headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json', 'X-Title': 'ORIN Ask' },
     body: JSON.stringify({
-      model,
+      model: selectedModel,
       stream: true,
       stream_options: { include_usage: true },
       temperature: 0.2,
       // Reasoning tokens share this allowance with the visible answer.
-      max_tokens: 2048,
+      max_tokens: maxTokens,
+      ...(reasoning ? { reasoning } : {}),
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: userPrompt(question, context) }
@@ -261,5 +379,5 @@ export async function* streamGroundedAnswer({ question, sources, env = process.e
       if (delta) yield { type: 'delta', text: delta };
     }
   }
-  yield { type: 'end', usage, model };
+  yield { type: 'end', usage, model: selectedModel, effort: effort || null };
 }

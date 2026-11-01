@@ -41,11 +41,11 @@ async function startTurn(sql, input) {
   return conversationId;
 }
 
-async function finishTurn(sql, { conversationId, answer, sources, audit, model, usage, latencyMs }) {
+async function finishTurn(sql, { conversationId, answer, sources, audit, model, effort, usage, latencyMs }) {
   const [message] = await sql`INSERT INTO orin_messages
-    (conversation_id, role, content, citations, model, prompt_tokens, completion_tokens, latency_ms)
+    (conversation_id, role, content, citations, model, reasoning_effort, prompt_tokens, completion_tokens, latency_ms)
     VALUES (${conversationId}, 'assistant', ${answer}, ${JSON.stringify(audit.cited)}::jsonb,
-      ${model}, ${usage?.prompt_tokens ?? null}, ${usage?.completion_tokens ?? null}, ${latencyMs})
+      ${model}, ${effort ?? null}, ${usage?.prompt_tokens ?? null}, ${usage?.completion_tokens ?? null}, ${latencyMs})
     RETURNING id`;
   if (sources.length) {
     const payload = JSON.stringify(sources.map((source, index) => ({
@@ -84,16 +84,17 @@ export function createAskHandler({
     try {
       await authorize(req, req.method !== 'GET');
       const sql = await getSql();
+      const capabilities = getCapabilities();
 
       if (req.method === 'GET') {
         const [state] = await sql`SELECT to_regclass('public.orin_conversations') IS NOT NULL AS present`;
-        if (!state?.present) return res.status(200).json({ conversations: [], migrationRequired: true });
+        if (!state?.present) return res.status(200).json({ conversations: [], migrationRequired: true, capabilities });
         if (req.query?.conversationId) {
           const id = validateConversationId(req.query.conversationId);
           const [conversation] = await sql`SELECT id, title, mode, created_at AS "createdAt", updated_at AS "updatedAt"
             FROM orin_conversations WHERE id = ${id}`;
           if (!conversation) return res.status(404).json({ error: 'Conversation not found' });
-          const messages = await sql`SELECT id, role, content, citations, model, created_at AS "createdAt"
+          const messages = await sql`SELECT id, role, content, citations, model, reasoning_effort AS "reasoningEffort", created_at AS "createdAt"
             FROM orin_messages WHERE conversation_id = ${id} ORDER BY created_at, id`;
           const ids = messages.map(message => message.id);
           const sources = ids.length
@@ -111,13 +112,14 @@ export function createAskHandler({
           }
           return res.status(200).json({
             conversation,
-            messages: messages.map(message => ({ ...message, sources: byMessage.get(message.id) || [] }))
+            messages: messages.map(message => ({ ...message, sources: byMessage.get(message.id) || [] })),
+            capabilities
           });
         }
         const conversations = await sql`SELECT c.id, c.title, c.mode, c.updated_at AS "updatedAt",
             (SELECT count(*)::int FROM orin_messages m WHERE m.conversation_id = c.id) AS "messageCount"
           FROM orin_conversations c ORDER BY c.updated_at DESC LIMIT 30`;
-        return res.status(200).json({ conversations });
+        return res.status(200).json({ conversations, capabilities });
       }
 
       if (req.method === 'DELETE') {
@@ -128,8 +130,7 @@ export function createAskHandler({
       }
 
       const input = validateAsk(req.body);
-      const ready = getCapabilities();
-      if (!ready.library) throw fail(ready.message, 503);
+      if (!capabilities.library) throw fail(capabilities.message, 503);
 
       res.statusCode = 200;
       res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
@@ -151,9 +152,9 @@ export function createAskHandler({
       const search = makeSearch(sql);
       let found;
       try {
-        found = await search(input.question, { limit: MAX_SOURCES });
+        found = await search(input.question, { limit: MAX_SOURCES, ...(input.sourceIds ? { sourceIds: input.sourceIds } : {}) });
       } catch (error) {
-        sse(res, { type: 'error', message: 'Your library could not be searched. Check the ORIN database.' });
+        sse(res, { type: 'error', message: error.status ? error.message : 'Your library could not be searched. Check the ORIN database.' });
         return res.end();
       }
       const sources = buildBoundedContext(found.sources.slice(0, MAX_SOURCES)).sources;
@@ -162,10 +163,12 @@ export function createAskHandler({
         conversationId,
         persisted,
         method: found.method,
+        model: input.model,
+        effort: input.effort,
         sources: sources.map(publicSource)
       });
 
-      const model = ready.model;
+      const model = input.model;
       let answer = '';
       let usage = null;
       let audit = { cited: [], invalid: [] };
@@ -180,7 +183,7 @@ export function createAskHandler({
         const abort = () => { if (!res.writableEnded) controller.abort(); };
         res.on('close', abort);
         try {
-          for await (const event of streamAnswer({ question: input.question, sources, signal: controller.signal })) {
+          for await (const event of streamAnswer({ question: input.question, sources, model, effort: input.effort, signal: controller.signal })) {
             if (event.type === 'delta') {
               answer += event.text;
               sse(res, { type: 'delta', text: event.text });
@@ -205,7 +208,7 @@ export function createAskHandler({
       if (persisted && conversationId) {
         try {
           messageId = await finishTurn(sql, {
-            conversationId, answer, sources, audit, model, usage, latencyMs: Date.now() - started
+            conversationId, answer, sources, audit, model, effort: input.effort, usage, latencyMs: Date.now() - started
           });
         } catch {
           persisted = false;
@@ -219,6 +222,7 @@ export function createAskHandler({
         persisted,
         method: found.method,
         model,
+        effort: input.effort,
         citations: audit.cited,
         invalidCitations: audit.invalid,
         usage,

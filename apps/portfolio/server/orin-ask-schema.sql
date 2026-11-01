@@ -47,11 +47,13 @@ CREATE TABLE IF NOT EXISTS orin_messages (
   content text NOT NULL,
   citations jsonb NOT NULL DEFAULT '[]',
   model text,
+  reasoning_effort text,
   prompt_tokens integer,
   completion_tokens integer,
   latency_ms integer,
   created_at timestamptz NOT NULL DEFAULT now()
 );
+ALTER TABLE orin_messages ADD COLUMN IF NOT EXISTS reasoning_effort text;
 CREATE INDEX IF NOT EXISTS orin_messages_by_conversation ON orin_messages (conversation_id, created_at);
 
 -- The exact passages an answer cited. source_id is intentionally not a foreign

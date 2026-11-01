@@ -402,7 +402,7 @@ export default function OrinPage() {
           <button type="button" onClick={() => setSaveNotice(null)} aria-label="Dismiss save confirmation">Dismiss</button>
         </div>}
         {error && <div role="alert" className="orin-error">{error}</div>}
-        <OrinLibrarySearch selectedIds={researchSeeds.map(seed => seed.itemId)} onAddResearch={(item,url) => setResearchSeeds(current => current.some(seed => seed.itemId === item.id) ? current.filter(seed => seed.itemId !== item.id) : [...current, { itemId:item.id, url, title:item.title, excerpt:(item.excerpt || '').slice(0,4000) }])}/>
+        {tab !== 'ask' && <OrinLibrarySearch selectedIds={researchSeeds.map(seed => seed.itemId)} onAddResearch={(item,url) => setResearchSeeds(current => current.some(seed => seed.itemId === item.id) ? current.filter(seed => seed.itemId !== item.id) : [...current, { itemId:item.id, url, title:item.title, excerpt:(item.excerpt || '').slice(0,4000) }])}/>}
         <OrinResearch active={tab === 'research'} seeds={researchSeeds} onClearSeeds={() => setResearchSeeds([])} revision={revision}/>
         {tab === 'research' ? null : tab === 'ask' ? <OrinAsk/> : tab === 'notes' ? <OrinNotes/> : tab === 'reminders' ? <OrinReminders/> : tab === 'videos' ? <OrinVideosShelf embedded/> : !data && busy ? <div className="orin-state" role="status">Gathering your reading list…</div> : data && <>
           {busy && <div className="orin-refreshing" role="status">Refreshing…</div>}

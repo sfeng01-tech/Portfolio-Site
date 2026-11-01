@@ -24,7 +24,7 @@ Responses from the Node adapter set a Content Security Policy plus `X-Content-Ty
 
 The **Ask ORIN** tab answers questions from saved items and notes only. Phase 1 does not search the web. Answers stream into the page, carry inline citation badges such as `[2]`, and list the exact passages used beneath each answer. Citations that the model invents are flagged rather than silently accepted. Answers can be copied or saved as a normal ORIN note, and recent conversations appear beside the thread.
 
-`apps/portfolio/server/orin-ask-schema.sql` is a separate, additive migration. It creates the passage index (`orin_chunks`, including a pgvector column), conversations, messages, and per-answer sources. Apply it to an isolated database branch first; creating the `vector` extension may require a role that is allowed to install extensions. The core `orin-schema.sql` is unchanged, so an unavailable pgvector extension cannot break the existing digest.
+`apps/portfolio/server/orin-ask-schema.sql` is a separate, additive migration. It creates the passage index (`orin_chunks`, including a pgvector column), conversations, messages, and per-answer sources. Apply it to an isolated database branch first; creating the `vector` extension may require a role that is allowed to install extensions. The core `orin-schema.sql` is unchanged, so an unavailable pgvector extension cannot break the existing digest. Re-run this migration after upgrading; it adds `orin_messages.reasoning_effort` for conversations created before model choice existed.
 
 Ask works without the migration: it falls back to a lexical scan of `orin_items` and `orin_notes`, and answers are not persisted. With the migration applied, build the passage index:
 
@@ -33,12 +33,33 @@ npm run ask:index --workspace=@portfolio/orin-collector -- --dry-run
 npm run ask:index --workspace=@portfolio/orin-collector
 ```
 
-The indexer uses `ORIN_DATABASE_URL` and optionally `OPENROUTER_API_KEY` for `openai/text-embedding-3-small` vectors. Without a key it still writes passages for keyword search. On macOS, `--keychain-openrouter` reads the existing Keychain entry. Set `ORIN_ASK_MODEL` on the ORIN web service to override the default `deepseek/deepseek-v4.1-flash-1017`; `OPENROUTER_API_KEY` is required to generate answers. Provider requests contain the question, retrieved passages, and conversation history.
+The indexer uses `ORIN_DATABASE_URL` and optionally `OPENROUTER_API_KEY` for `openai/text-embedding-3-small` vectors. Without a key it still writes passages for keyword search. On macOS, `--keychain-openrouter` reads the existing Keychain entry. `ORIN_ASK_MODEL` sets the default model; the UI can switch between a curated allowlist and choose a reasoning effort, and arbitrary model IDs are rejected. `OPENROUTER_API_KEY` is required to generate answers. Provider requests contain the question, retrieved passages, and conversation history.
 
 GitHub Actions refreshes the Ask index every six hours at minute 37 UTC using `.github/workflows/orin-ask-index.yml`. The workflow can also be run manually and requires the `ORIN_ASK_DATABASE_URL` and `OPENROUTER_API_KEY` repository secrets; it fails if either is missing. It indexes up to the 2,000 most recently updated items and 500 notes. Each run has a conservative $0.80 embedding allowance; if it reaches that limit, subsequent runs continue with passages still needing work. Scheduled runs may be delayed by GitHub Actions.
 
-- `GET /api/orin/ask`: `{conversations}` for the 30 most recent threads, or `?conversationId=<uuid>` for one conversation with its messages and sources. Returns `{conversations: [], migrationRequired: true}` before the migration.
-- `POST /api/orin/ask`: `{question, mode: "library", conversationId?}`. Streams server-sent events: `sources` (retrieval method, public source cards, conversation id), `delta` (answer text), `done` (cited and invalid citation numbers, model, usage, latency), and `error`. `mode` values other than `library` return 400 until web answers exist.
+### Model choice and reasoning effort
+
+Ask exposes a curated allowlist rather than every OpenRouter model. The list favors citation discipline, long context, and predictable cost. Prices are USD per million tokens from the OpenRouter catalog checked 2026-11-01; verify them before relying on the numbers.
+
+| Model | Tier | Input / output | Context | Reasoning | Suggested use |
+| --- | --- | --- | --- | --- | --- |
+| `deepseek/deepseek-v4.1-flash-1017` | Best value (default) | $0.15 / $0.60 | 1M | none, low, high, max | Everyday library Q&A; cheapest good citation behavior |
+| `z-ai/glm-5.3-flash` | Ultra-cheap | $0.029 / $0.092 | 1M | low, high, max (required) | High-volume questions where cost dominates |
+| `qwen/qwen3.7-flash` | Lowest cost | $0.03 / $0.13 | 1M | fixed | Simple lookups; no reasoning control |
+| `openai/gpt-6.1-terra` | Balanced | $1 / $5 | 1.1M | none through max | Better synthesis when the value model is not enough |
+| `google/gemini-3.1-flash-lite` | Fast | $0.25 / $1.50 | 1M | none through high | Low-latency everyday questions |
+| `anthropic/claude-sonnet-5.5` | Premium | $2 / $10 | 1M | low through max (required) | Careful long-context synthesis and source reconciliation |
+| `openai/gpt-6.1-sol` | Premium reasoning | $2 / $10 | 1.1M | low through max (required) | Hard or ambiguous questions that need more reasoning |
+| `google/gemini-3.1-pro-preview` | Premium / preview | $2 / $12 | 1M | low through high (required) | Large-context synthesis; preview model stability is not guaranteed |
+
+**Recommendation:** keep DeepSeek V4.1 Flash as the default. Offer GPT-6.1 Terra as the balanced upgrade and Claude Sonnet 5.5 or GPT-6.1 Sol for hard synthesis. Use the ultra-cheap models for simple lookups, not for nuanced source reconciliation. Higher reasoning efforts consume output tokens and latency; they are not automatically better for factual retrieval.
+
+The server resolves `effort: "auto"` to each model's default (`low` for the value models, `medium` for the balanced/premium models). Because reasoning tokens share the output budget, higher efforts raise `max_tokens` automatically. The selected model and effort are stored on assistant messages and shown in the answer header.
+
+Evaluate the shortlist on 10–20 real ORIN questions before changing the default. Score citation validity, whether the answer admits missing evidence, source reconciliation, latency, and cost. Benchmarks are not a substitute for your own library.
+
+- `GET /api/orin/ask`: `{conversations, capabilities}` for the 30 most recent threads, or `?conversationId=<uuid>` for one conversation with its messages and sources. `capabilities` includes the curated `models`, `defaultModel`, and `defaultEffort`. Returns `{conversations: [], migrationRequired: true, capabilities}` before the migration.
+- `POST /api/orin/ask`: `{question, mode: "library", conversationId?, model?, effort?}`. Streams server-sent events: `sources` (retrieval method, model, effort, public source cards, conversation id), `delta` (answer text), `done` (cited and invalid citation numbers, model, effort, usage, latency), and `error`. `mode` values other than `library` return 400 until web answers exist. Invalid models or unsupported efforts return 400.
 - `DELETE /api/orin/ask?conversationId=<uuid>`: deletes one conversation and its messages.
 
 Retrieval uses the chunk index with reciprocal-rank fusion of keyword and embedding results when available. A partially applied migration or a failed embedding request falls back to keyword search, then to the item/note scan. Answer text is treated as untrusted; the UI renders it as text and only turns validated HTTPS source URLs into links.

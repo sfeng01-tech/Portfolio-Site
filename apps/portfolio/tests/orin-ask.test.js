@@ -54,25 +54,41 @@ test('item and note chunk text place the title ahead of the body once', () => {
 });
 
 test('ask validation accepts only a bounded library question and a valid conversation id', () => {
-  assert.deepEqual(validateAsk({ question: '  What did I save?  ' }), { question: 'What did I save?', mode: 'library', conversationId: null });
+  assert.deepEqual(validateAsk({ question: '  What did I save?  ' }), {
+    question: 'What did I save?', mode: 'library', conversationId: null,
+    model: ASK_MODEL_DEFAULT, effort: 'low'
+  });
   assert.equal(validateAsk({ question: 'Follow up', conversationId }).conversationId, conversationId);
+  assert.deepEqual(validateAsk({ question: 'Q', model: 'qwen/qwen3.7-flash' }), {
+    question: 'Q', mode: 'library', conversationId: null, model: 'qwen/qwen3.7-flash', effort: null
+  });
+  assert.equal(validateAsk({ question: 'Q', model: 'openai/gpt-6.1-terra', effort: 'high' }).effort, 'high');
+  assert.equal(validateAsk({ question: 'Q', model: 'openai/gpt-6.1-terra', effort: 'auto' }).effort, 'medium');
   for (const broken of [
     null, [], {}, { question: '' }, { question: '   ' }, { question: 42 },
     { question: 'x'.repeat(MAX_QUESTION + 1) }, { question: 'bad\u0007question' },
     { question: 'Q', mode: 'web' }, { question: 'Q', conversationId: 'not-a-uuid' }
   ]) assert.throws(() => validateAsk(broken), /Invalid|Ask a question|limited|Web answers/);
   assert.throws(() => validateAsk({ question: 'Q', mode: 'web' }), /Web answers are not enabled/);
+  assert.throws(() => validateAsk({ question: 'Q', model: 'not/a-model' }), /supported model/);
+  assert.throws(() => validateAsk({ question: 'Q', model: 'qwen/qwen3.7-flash', effort: 'high' }), /reasoning effort/);
   assert.equal(validateConversationId(conversationId), conversationId);
   assert.throws(() => validateConversationId('bad'), /Invalid conversation id/);
 });
 
-test('ask capabilities report configuration without leaking the key', () => {
-  assert.deepEqual(askCapabilities({}), {
-    library: false, model: null, message: 'Ask needs OPENROUTER_API_KEY on the ORIN web service.'
-  });
+test('ask capabilities expose the curated catalog without leaking the key', () => {
+  const off = askCapabilities({});
+  assert.equal(off.library, false);
+  assert.equal(off.model, null);
+  assert.equal(off.defaultModel, ASK_MODEL_DEFAULT);
+  assert.equal(off.defaultEffort, 'auto');
+  assert.ok(off.models.length >= 6);
+  assert.ok(off.models.some(model => model.id === ASK_MODEL_DEFAULT));
   const ready = askCapabilities({ OPENROUTER_API_KEY: 'secret', ORIN_ASK_MODEL: 'example/model' });
   assert.equal(ready.library, true);
   assert.equal(ready.model, 'example/model');
+  assert.equal(ready.models.find(model => model.id === 'example/model').tier, 'custom');
+  assert.equal(ready.models.find(model => model.id === 'example/model').efforts.length, 0);
   assert.equal(JSON.stringify(ready).includes('secret'), false);
   assert.equal(askCapabilities({ OPENROUTER_API_KEY: 'secret' }).model, ASK_MODEL_DEFAULT);
 });
@@ -195,14 +211,21 @@ test('streamGroundedAnswer forwards deltas, usage, and the model', async () => {
   for await (const event of streamGroundedAnswer({
     question: 'Do agents matter?',
     sources: [{ kind: 'item', title: 'Agents', text: 'Yes.' }],
+    model: 'example/model',
+    effort: 'high',
     env: { OPENROUTER_API_KEY: 'key', ORIN_ASK_MODEL: 'example/model' },
     fetchImpl
   })) events.push(event);
 
   assert.equal(request.url, 'https://openrouter.ai/api/v1/chat/completions');
-  assert.equal(JSON.parse(request.options.body).model, 'example/model');
+  const body = JSON.parse(request.options.body);
+  assert.equal(body.model, 'example/model');
+  assert.deepEqual(body.reasoning, { effort: 'high', exclude: true });
+  assert.equal(body.max_tokens, 2600);
   assert.deepEqual(events.filter(event => event.type === 'delta').map(event => event.text), ['Agents ', 'matter [1].']);
-  assert.deepEqual(events.at(-1), { type: 'end', usage: { prompt_tokens: 12, completion_tokens: 4 }, model: 'example/model' });
+  assert.deepEqual(events.at(-1), {
+    type: 'end', usage: { prompt_tokens: 12, completion_tokens: 4 }, model: 'example/model', effort: 'high'
+  });
 });
 
 test('streamGroundedAnswer refuses to call a provider without a key', async () => {
@@ -242,7 +265,7 @@ function askFixture({ search, streamAnswer, capabilities, sql, authorize } = {})
   const handler = createAskHandler({
     getSql: async () => database,
     authorize: authorize || (async () => {}),
-    getCapabilities: capabilities || (() => ({ library: true, model: 'example/model', message: '' })),
+    getCapabilities: capabilities || (() => askCapabilities({ OPENROUTER_API_KEY: 'key' })),
     makeSearch: () => search || (async () => ({
       method: 'lexical',
       sources: [{ kind: 'item', sourceId: 'item-1', title: 'Agents', text: 'Evidence about agents.', url: 'https://example.org/a', origin: 'arxiv', score: 0.5 }]
@@ -270,7 +293,34 @@ test('ask handler streams sources, deltas, and a persisted done event', async ()
   assert.equal(events[2].messageId, 'message-1');
   assert.deepEqual(events[2].citations, [1]);
   assert.deepEqual(events[2].invalidCitations, []);
+  assert.equal(events[0].model, ASK_MODEL_DEFAULT);
+  assert.equal(events[0].effort, 'low');
+  assert.equal(events[2].effort, 'low');
   assert.ok(calls.some(call => call.query.includes('INSERT INTO orin_message_sources')));
+});
+
+test('ask handler forwards the selected model and reasoning effort', async () => {
+  const seen = [];
+  const { handler } = askFixture({
+    streamAnswer: async function* (input) {
+      seen.push(input);
+      yield { type: 'delta', text: 'Grounded answer.' };
+      yield { type: 'end', usage: {}, model: input.model, effort: input.effort };
+    }
+  });
+  const res = askResponse();
+  await handler({
+    method: 'POST',
+    body: { question: 'Q', model: 'openai/gpt-6.1-terra', effort: 'high' },
+    query: {}
+  }, res);
+  const events = parseEvents(res.output);
+  assert.equal(seen[0].model, 'openai/gpt-6.1-terra');
+  assert.equal(seen[0].effort, 'high');
+  assert.equal(events[0].model, 'openai/gpt-6.1-terra');
+  assert.equal(events[0].effort, 'high');
+  assert.equal(events.at(-1).model, 'openai/gpt-6.1-terra');
+  assert.equal(events.at(-1).effort, 'high');
 });
 
 test('ask handler rejects web mode and missing provider configuration as JSON', async () => {
@@ -295,7 +345,9 @@ test('ask handler reports a missing migration without blocking answers', async (
   };
   await askFixture({ sql }).handler({ method: 'GET', query: {} }, res);
   assert.equal(res.statusCode, 200);
-  assert.deepEqual(res.body, { conversations: [], migrationRequired: true });
+  assert.deepEqual(res.body.conversations, []);
+  assert.equal(res.body.migrationRequired, true);
+  assert.ok(res.body.capabilities.models.length >= 6);
 
   const post = askResponse();
   await askFixture({ sql }).handler({ method: 'POST', body: { question: 'What about agents?' }, query: {} }, post);
@@ -343,4 +395,31 @@ test('ask handler deletes a conversation only after a write-authorized check', a
   assert.equal(write, true);
   assert.equal(res.statusCode, 200);
   assert.deepEqual(res.body, { deleted: conversationId });
+});
+
+test('selected-source validation rejects malformed and excessive scopes', () => {
+  const id = 'a'.repeat(64);
+  assert.deepEqual(validateAsk({ question: 'Compare these', sourceIds: [id, id] }).sourceIds, [id]);
+  for (const sourceIds of [[], 'all', ['bad'], Array(11).fill(id)]) {
+    assert.throws(() => validateAsk({ question: 'Compare these', sourceIds }), /valid library sources/);
+  }
+});
+
+test('selected-source answers reload only current selected items and fail closed when missing', async () => {
+  const id = 'a'.repeat(64);
+  const calls = [];
+  const sql = async (strings, ...values) => {
+    calls.push({ query: strings.join('?'), values });
+    return [{ kind: 'item', sourceId: id, title: 'Selected', text: 'Current saved evidence' }];
+  };
+  const search = createLibrarySearch(sql, { env: {} });
+  const result = await search('Compare these', { sourceIds: [id] });
+  assert.equal(result.method, 'selected');
+  assert.equal(result.sources[0].sourceId, id);
+  assert.equal(calls.length, 1);
+  assert.match(calls[0].query, /i.id = ANY/);
+  assert.match(calls[0].query, /deleted/);
+  assert.deepEqual(calls[0].values[0], [id]);
+  await assert.rejects(createLibrarySearch(async () => [], { env: {} })('Explain', { sourceIds: [id] }), /no longer available/);
+  await assert.rejects(createLibrarySearch(async () => [{ text: '' }], { env: {} })('Explain', { sourceIds: [id] }), /no saved text/);
 });
